@@ -1,0 +1,188 @@
+@keyframes infiniteRotate {  
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.infinite-rotate{
+    animation: infiniteRotate 1500ms linear infinite;
+}
+
+#start-coworker-csv-template{
+    text-decoration: none;
+    font-style: italic;
+    font-weight: bold;
+
+    &:hover{
+        text-decoration: underline;
+    }
+}
+
+.task-list-body-cell{
+    cursor: pointer;
+}
+
+.tinymce-mention-avatar{
+    width:40px !important;
+    height:40px !important;
+    border-radius:50%;
+    margin-right:8px !important;
+}
+
+.highlight {
+    font-weight: bold;
+    color:#90caf9;
+}
+
+#qwerty {
+    margin-top:50px;
+    border:1px solid white;
+    max-height:100px;
+    overflow:scroll;
+    & > p{
+        margin:0;
+    }
+}
+
+#chat-input {
+    max-height:113px;
+    margin:5px 0px;
+    padding:0px 0.25rem;
+    word-break: break-word;
+    overflow:scroll;
+    & *{
+        font-size: 1rem;
+    }
+    &:focus-visible{
+        outline:none;
+    }
+    & > :first-child{
+        margin-top: 0px;
+    }
+    & > :last-child{
+        margin-bottom: 0px;
+    }
+}
+
+.tox .tox-editor-header{
+    z-index: 2 !important;
+}
+
+// .tox.tox-tinymce-inline .tox-toolbar__group:first-child{
+//     display:none;
+// }
+
+.tox.tox-tinymce-inline .tox-editor-container{
+    display:none;
+}
+
+.body-dark .tox .tox-pop.tox-pop--align-left::before{
+    border-color: #fff transparent transparent transparent;
+}
+.body-dark .tox .tox-pop.tox-pop--bottom::after{
+    border-color: #000 transparent transparent transparent;
+}
+
+.body-dark{
+    .tox .tox-pop__dialog{
+        background-color: #000;
+        .tox-tbtn{
+            &:hover, &:active, &:focus{
+                background-color: #1565c0;
+            }
+        }
+        .tox-tbtn--enabled{
+            background-color: #1565c0;
+        }
+    }
+    .tox.tox-tinymce-inline .tox-editor-header{
+        border:2px solid #616161;
+
+        .tox-toolbar__primary{
+            background-color: #000;
+            .tox-tbtn {
+                svg {
+                    fill:#fff;
+                }
+                &:hover, &:active, &:focus{
+                    background-color: #1565c0;
+                    svg{
+                        fill:#fff;
+                    }
+                }
+            }
+            .tox-tbtn--enabled{
+                background-color: #1565c0;
+                svg{
+                    fill:#fff;
+                }
+            }
+        }
+    }
+    .tox .tox-menu{
+        background-color: #000;
+        .tox-collection__item--active:not(.tox-collection__item--state-disabled){
+            background-color: #1565c0;
+            color:#fff;
+        }
+        .tox-collection__item-accessory{
+            color:#fff;
+        }
+    }
+    .tox .tox-dialog-wrap{
+        .tox-dialog-wrap__backdrop{
+            background-color: rgba(0,0,0,.75);
+        }
+        .tox-dialog{
+            background-color: #000;
+            border-width: 1px;
+            border-color:#9e9e9e;
+            .tox-dialog__header,.tox-dialog__footer,.tox-textfield,.tox-listbox--select{
+                background-color: #000;
+                color:#fff;
+            }
+            .tox-label,.tox-dialog__body-nav-item{
+                color:#fff;
+            }
+            .tox-dialog__body-nav-item--active{
+                color:#90caf9;
+                border-bottom: 2px solid #90caf9;
+                font-weight: bold;
+            }
+            .tox-listbox__select-chevron > svg{
+                fill:#fff;
+            }
+            .tox-textarea{
+                background-color: #000;
+                color:#fff;
+            }
+            .tox-collection__item--active{
+                background-color: #1565c0;
+            }
+        }
+    }
+    .tox .tox-collection__item, .tox .tox-collection--list .tox-collection__item--enabled, .tox .tox-collection--list .tox-collection__item--active{
+        background-color: #000;
+        color:#fff;
+    }
+    .tox .tox-button--secondary{
+        background-color: #000;
+        color:#9e9e9e;
+        border-color:#9e9e9e;
+        &:hover:not(:disabled){
+            background-color: #000;
+            color:#fff;
+            border-color:#fff;
+        }
+    }
+    .tox .tox-icon > svg{
+        fill:#fff !important;
+    }
+    #chat-input{
+        a{
+            color:#fff;
+            &[data-mce-selected="inline-boundary"]{
+                background-color: #1565c0;
+            }
+        }
+    }
+}
