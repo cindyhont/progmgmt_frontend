@@ -37,6 +37,7 @@ jobs:
       run: npm install
     - run: npm run build
       env:
+        NODE_OPTIONS: "--max_old_space_size=4096"
         API_URL: ${{ secrets.API_URL }}
         SSR_API_URL: ${{ secrets.SSR_API_URL }}
         NEXT_PUBLIC_WS_URL: ${{ secrets.NEXT_PUBLIC_WS_URL }}
