@@ -93,8 +93,14 @@ const
                             body: JSON.stringify({username,password}),
                             headers: { 'Content-Type': 'application/json' },
                             credentials:'include',
-                        }),
+                        })
+
+                    console.log(res)
+
+                    const
                         json = await res.json()
+
+                    console.log(json)
 
                     if (json.data.success) dispatch(isSignedIn())
                     else if (!json.data.local) {
