@@ -26,12 +26,6 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
-      env:
-        API_URL: ${{ secrets.API_URL }}
-        SSR_API_URL: ${{ secrets.SSR_API_URL }}
-        NEXT_PUBLIC_WS_URL: ${{ secrets.NEXT_PUBLIC_WS_URL }}
-        NEXT_PUBLIC_CLOUDINARY_UNSIGNED_UPLOAD_PRESET: ${{ secrets.NEXT_PUBLIC_CLOUDINARY_UNSIGNED_UPLOAD_PRESET }}
-        NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME: ${{ secrets.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME }}
     - name: Cache Node Modules
       id: cache-node-modules
       uses: actions/cache@v3
