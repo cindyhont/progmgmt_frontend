@@ -102,11 +102,13 @@ const
 
                     console.log(json)
 
-                    if (json.data.success) dispatch(isSignedIn())
-                    else if (!json.data.local) {
-                        setAlertText(`Wrong username or password. You have ${json.data.chancesLeft} chance${json.data.chancesLeft > 1 && 's'} to try again.`)
-                        loginFailed()
-                    }
+                    loginFailed()
+
+                    // if (json.data.success) dispatch(isSignedIn())
+                    // else if (!json.data.local) {
+                    //     setAlertText(`Wrong username or password. You have ${json.data.chancesLeft} chance${json.data.chancesLeft > 1 && 's'} to try again.`)
+                    //     loginFailed()
+                    // }
                 } catch (error) {
                     setAlertText('Connection or server error. Please try again later.')
                     loginFailed()
