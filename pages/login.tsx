@@ -93,22 +93,14 @@ const
                             body: JSON.stringify({username,password}),
                             headers: { 'Content-Type': 'application/json' },
                             credentials:'include',
-                        })
-
-                    console.log(res)
-
-                    const
+                        }),
                         json = await res.json()
 
-                    console.log(json)
-
-                    loginFailed()
-
-                    // if (json.data.success) dispatch(isSignedIn())
-                    // else if (!json.data.local) {
-                    //     setAlertText(`Wrong username or password. You have ${json.data.chancesLeft} chance${json.data.chancesLeft > 1 && 's'} to try again.`)
-                    //     loginFailed()
-                    // }
+                    if (json.data.success) dispatch(isSignedIn())
+                    else if (!json.data.local) {
+                        setAlertText(`Wrong username or password. You have ${json.data.chancesLeft} chance${json.data.chancesLeft > 1 && 's'} to try again.`)
+                        loginFailed()
+                    }
                 } catch (error) {
                     setAlertText('Connection or server error. Please try again later.')
                     loginFailed()
