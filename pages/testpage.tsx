@@ -20,8 +20,8 @@ export const getServerSideProps: GetServerSideProps = async () => {
 }
 
 const Testpage = ({result}:{result:any}) => {
-    useEffect(()=>console.log(result),[])
-    
+    useEffect(()=>console.log(result),[result])
+
     return <pre>{result}</pre>
 }
 
