@@ -1,0 +1,403 @@
+import React, { createContext, Dispatch, memo, useContext, useMemo, useReducer, useEffect, useRef, useCallback } from "react";
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import Stack from '@mui/material/Stack';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import Grid from '@mui/material/Grid'
+import Box from '@mui/material/Box'
+import Paper from '@mui/material/Paper'
+import { createSelector, EntityId } from "@reduxjs/toolkit";
+import { ReduxState, useAppDispatch, useAppSelector } from "@reducers";
+import { taskFieldSelector, taskSelector } from "../reducers/slice";
+import { shallowEqual, useStore } from "react-redux";
+import { useTheme } from "@mui/material";
+import AddRoundedIcon from '@mui/icons-material/AddRounded';
+import { addTaskAction } from "../reducers/dialog-ctxmenu-status";
+import { columnStartMoving, Iaction, init, initialState, moving, reducer, taskStartMoving } from "./reducer";
+import taskApi, { useTaskMovedInBoardMutation } from "../reducers/api";
+import { DialogCtxMenuDispatchContext } from "../contexts";
+import { useRouter } from "next/router";
+import useMediaQuery from '@mui/material/useMediaQuery'
+import { updateSession } from "@components/functions";
+import { updateRouterHistory } from "@reducers/misc";
+import TaskItem from "./task-item";
+
+export interface Ioption {
+    id:EntityId;
+    name:string;
+    order:number;
+}
+
+const 
+    BoardViewDispatchContext = createContext<{boardViewDispatch:Dispatch<Iaction>}>({boardViewDispatch:()=>{}}),
+    BoardView = () => {
+        const
+            boardColumnFieldID = useAppSelector(state=>taskFieldSelector.selectAll(state).find(e=>e.fieldType==='board_column').id),
+            boardColumnOrderFieldID = useAppSelector(state=>taskFieldSelector.selectAll(state).find(e=>e.fieldType==='order_in_board_column').id),
+            boardColumnIDsSelector = useMemo(()=>createSelector(
+                (state:ReduxState)=>taskFieldSelector.selectAll(state).find(e=>e.fieldType==='board_column').details.options as Ioption[],
+                (options:Ioption[])=>{
+                    const len = options.length
+                    if (!len) return []
+                    else if (len===1) return [options[0].id]
+                    else return Array.from(options).sort((a,b)=>a.order - b.order).map(({id})=>id)
+                }
+            ),[]),
+            boardColumnIDs = useAppSelector(state => boardColumnIDsSelector(state)),
+            columnTaskIdSelector = useMemo(()=>createSelector(
+                (state:ReduxState)=>state,
+                (state:ReduxState)=>{
+                    if (!boardColumnIDs.length) return JSON.stringify({})
+                    const 
+                        tasks = taskSelector.selectAll(state),
+                        uid = state.misc.uid,
+                        objs = boardColumnIDs.map(e=>{
+                            const 
+                                tasksOfThisColumn = tasks.filter(t=>{
+                                    const {isGroupTask} = t
+                                    return t[boardColumnFieldID]===e && (isGroupTask ? [...t.supervisors,...t.participants,...t.viewers,t.owner,t.assignee].includes(uid) : t.owner===uid)
+                                }),
+                                len = tasksOfThisColumn.length,
+                                value = !len ? [] : len===1 ? [tasksOfThisColumn[0].id] : tasksOfThisColumn.sort((a,b)=>a[boardColumnOrderFieldID] - b[boardColumnOrderFieldID]).map(({id})=>id)
+                            return {[e]:value}
+                        })
+                    return boardColumnIDs.length===1 ? JSON.stringify(objs[0]) : JSON.stringify(objs.reduce((a,b)=>({...a,...b})))
+                }
+            ),[boardColumnFieldID,boardColumnIDs,boardColumnOrderFieldID]),
+            columnTaskIDs = useAppSelector(state => columnTaskIdSelector(state)),
+            [state,boardViewDispatch] = useReducer(reducer,initialState),
+            store = useStore(),
+            dispatch = useAppDispatch(),
+            columnMoveTimeout = useRef<NodeJS.Timeout>(),
+            [taskMovedInBoard] = useTaskMovedInBoardMutation(),
+            taskMovedTimeout = useRef<NodeJS.Timeout>(),
+            dispatchTaskMovedInBoard = (taskID:EntityId,newColumnID:EntityId,newIdxInColumn:number) => {
+                taskMovedInBoard({taskID,newColumnID,newIdxInColumn,active:true})
+            },
+            taskJustMoved = () => {
+                if (!!taskMovedTimeout.current) clearTimeout(taskMovedTimeout.current)
+                taskMovedTimeout.current = setTimeout(
+                    dispatchTaskMovedInBoard,
+                    1000,
+                    state.taskMoving,
+                    state.columnIDs[state.columnIdx],
+                    state.taskIdx
+                )
+            },
+            dispatchColumnIDs = () => {
+                const 
+                    s = store.getState() as ReduxState,
+                    fieldType = 'board_column',
+                    boardColumnFieldObj = taskFieldSelector.selectAll(s).find(e=>e.fieldType===fieldType),
+                    details = boardColumnFieldObj.details,
+                    options = details.options as Ioption[],
+                    len = options.length,
+                    originalIDs = !len ? [] : len===1 ? [options[0].id] : Array.from(options).sort((a,b)=>a.order - b.order).map(({id})=>id)
+
+                if (state.columnIDs.length === len && state.columnIDs.every((e,i)=>originalIDs.indexOf(e)===i)) return
+
+                const newOptions:Ioption[] = state.columnIDs.map((columnID,i)=>({
+                    id:columnID,
+                    name:options.find(opt=>opt.id===columnID).name,
+                    order:i
+                }))
+
+                dispatch(taskApi.endpoints.editCustomField.initiate({
+                    id:boardColumnFieldID,
+                    f:{
+                        name:boardColumnFieldObj.fieldName,
+                        fieldType,
+                        defaultValues:{[fieldType]:details.default},
+                        options:{[fieldType]:newOptions}
+                    }
+                }))
+            },
+            columnJustChanged = () => {
+                if (!!columnMoveTimeout.current) clearTimeout(columnMoveTimeout.current)
+                columnMoveTimeout.current = setTimeout(dispatchColumnIDs,500)
+            },
+            checkSameOrderFromState = () => {
+                const 
+                    s = store.getState() as ReduxState,
+                    uid = s.misc.uid,
+                    columns = taskFieldSelector.selectAll(s).find(e=>e.fieldType==='board_column').details.options as Ioption[]
+                if (columns.length !== state.columnIDs.length) return false
+                const sameColumnOrder = columns.every((e,i)=>state.columnIDs.indexOf(e.id)==i)
+                if (!sameColumnOrder) return false
+
+                const 
+                    len = columns.length,
+                    tasks = taskSelector.selectAll(s)
+                for (let i=0; i<len; i++){
+                    const 
+                        thisColumnID = columns[i].id,
+                        tasksOfThisColumn = tasks.filter(t=>{
+                            const {isGroupTask} = t
+                            return t[boardColumnFieldID]===thisColumnID && (isGroupTask ? [...t.supervisors,...t.participants,...t.viewers,t.owner,t.assignee].includes(uid) : t.owner===uid)
+                        }),
+                        l = tasksOfThisColumn.length
+                    if (l !== state.itemsEachColumn[thisColumnID].length) return false
+                    const
+                        sortedTaskIDs = !l ? [] : l===1 ? [tasksOfThisColumn[0].id] : Array.from(tasksOfThisColumn).sort((a,b)=>a[boardColumnOrderFieldID] - b[boardColumnOrderFieldID]).map(({id})=>id),
+                        allTasksSameOrder = sortedTaskIDs.every((e,j)=>state.itemsEachColumn[thisColumnID].indexOf(e)===j)
+                    if (!allTasksSameOrder) return false
+                }
+                return true
+            }
+
+        useEffect(()=>{
+            if (!!state.columnIDs.length) columnJustChanged()
+        },[state.columnIDs])
+        
+        useEffect(()=>{
+            const sameAsPrev = checkSameOrderFromState()
+            if (!sameAsPrev){
+                boardViewDispatch(init({
+                    columnIDs:boardColumnIDs,
+                    taskMoving:state.taskMoving,
+                    columnMoving:state.columnMoving,
+                    itemsEachColumn:JSON.parse(columnTaskIDs),
+                    columnIdx:state.columnIdx,
+                    taskIdx:state.taskIdx
+                }))
+            }
+        },[
+            columnTaskIDs,
+            boardColumnIDs
+        ])
+
+        useEffect(()=>{
+            if (!!state.taskMoving && state.columnIdx !== -1 && state.taskIdx !== -1) taskJustMoved()
+        },[
+            state.taskMoving,
+            state.columnIdx,
+            state.taskIdx
+        ])
+
+        return (
+            <BoardViewDispatchContext.Provider value={{boardViewDispatch}}>
+                <Table stickyHeader size="small">
+                    <TableHead>
+                        <TableRow>
+                            {state.columnIDs.map((id,i)=>(
+                                <ColumnName key={id} {...{
+                                    id,
+                                    columnCount:state.columnIDs.length,
+                                    columnIdx:i,
+                                    // itemOnDragEnter:()=>setUpdateTaskColumnTimeout(i),
+                                }} />
+                            ))}
+                        </TableRow>
+                        <TableRow>
+                            {state.columnIDs.map((id,i)=>(
+                                <ColumnAddItem key={id} {...{
+                                    id,
+                                    boardColumnFieldID,
+                                    columnIdx:i,
+                                    // itemOnDragEnter:()=>setUpdateTaskColumnTimeout(i),
+                                }} />
+                            ))}
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        <TableRow>
+                            {state.columnIDs.map((columnID,i)=>(
+                                <TableBodyColumn key={columnID} {...{
+                                    taskIDs:state.itemsEachColumn[columnID],
+                                    columnIdx:i,
+                                    columnID,
+                                    taskMoving:state.taskMoving,
+                                    blankAreaVisible:!!state.columnMoving || !!state.taskMoving,
+                                    // itemOnDragEnter:()=>setUpdateTaskColumnTimeout(i),
+                                }} />
+                            ))}
+                        </TableRow>
+                    </TableBody>
+                </Table>
+            </BoardViewDispatchContext.Provider>
+        )
+    },
+    ColumnName = memo((
+        {
+            id,
+            columnCount,
+            columnIdx,
+            // itemOnDragEnter,
+        }:{
+            id:EntityId;
+            columnCount:number;
+            columnIdx:number;
+            // itemOnDragEnter:()=>void;
+        }
+    )=>{
+        const 
+            columnNameSelector = useMemo(()=>createSelector(
+                (state:ReduxState)=>(taskFieldSelector.selectAll(state).find(e=>e.fieldType==='board_column').details.options as Ioption[]).find(c=>c.id===id),
+                (option:Ioption)=> !!option ? option.name : null
+            ),[id]),
+            columnName = useAppSelector(state => columnNameSelector(state)),
+            {palette:{mode,grey,background},breakpoints:{up}} = useTheme(),
+            sidebarOpen = useAppSelector(state => state.misc.sidebarOpen),
+            matchesMD = useMediaQuery(up('md')),
+            matchesSM = useMediaQuery(up('sm')),
+            {boardViewDispatch} = useContext(BoardViewDispatchContext),
+            onDragStart = () => boardViewDispatch(columnStartMoving(id)),
+            onDragEnter = () => {
+                boardViewDispatch(moving({columnIdx,taskIdx:0}))
+                // itemOnDragEnter()
+            }
+
+        return (
+            <>
+            {!!columnName && (matchesMD || matchesSM && !sidebarOpen) && <TableCell 
+                sx={{
+                    backgroundColor:'transparent',
+                    width:`${100/columnCount}%`,
+                    border:'none',
+                    p:'3px',
+                }}
+                draggable
+                onDragStart={onDragStart}
+                onDragEnter={onDragEnter}
+                data-boardcolumnid={id}
+            >
+                <Box
+                    sx={{
+                        textTransform:'uppercase',
+                        fontSize:'0.8rem',
+                        fontWeight:'bold',
+                        color:grey[mode==='light' ? 700 : 300],
+                        textAlign:'center',
+                        backgroundColor:background.paper,
+                        py:0.5
+                    }}
+                >{columnName}</Box>
+            </TableCell>}
+            </>
+        )
+    }),
+    ColumnAddItem = memo((
+        {
+            id,
+            boardColumnFieldID,
+            columnIdx,
+            // itemOnDragEnter,
+        }:{
+            id:EntityId;
+            boardColumnFieldID:EntityId;
+            columnIdx:number;
+            // itemOnDragEnter:()=>void;
+        }
+    ) => {
+        const 
+            theme = useTheme(),
+            {dialogCtxMenuStatusDispatch} = useContext(DialogCtxMenuDispatchContext),
+            onClick = () => {
+                dialogCtxMenuStatusDispatch(addTaskAction({[boardColumnFieldID]:id}))
+            },
+            {boardViewDispatch} = useContext(BoardViewDispatchContext),
+            onDragEnter = () => {
+                boardViewDispatch(moving({columnIdx,taskIdx:0}))
+                // itemOnDragEnter()
+            },
+            {breakpoints:{up}} = useTheme(),
+            sidebarOpen = useAppSelector(state => state.misc.sidebarOpen),
+            matchesMD = useMediaQuery(up('md')),
+            matchesSM = useMediaQuery(up('sm'))
+
+        return (
+            <>
+            {(matchesMD || matchesSM && !sidebarOpen) && <TableCell
+                sx={{
+                    padding:'3px',
+                    backgroundColor:'transparent',
+                    border:'none',
+                }}
+                onDragEnter={onDragEnter}
+            >
+                <Grid
+                    container
+                    direction='row'
+                    sx={{
+                        justifyContent:'center',
+                        border:`3px dashed ${theme.palette.grey[theme.palette.mode==='light' ? 300 : 700]}`,
+                        cursor:'pointer',
+                        '&:hover':{
+                            borderColor:theme.palette.grey[500],
+                            '.MuiSvgIcon-root':{fill:theme.palette.grey[500]}
+                        }
+                    }}
+                    onClick={onClick}
+                >
+                    <AddRoundedIcon htmlColor={theme.palette.grey[theme.palette.mode==='light' ? 400 : 600]} sx={{width:'1.8rem',height:'1.8rem',transition:'none'}} />
+                </Grid>
+            </TableCell>}
+            </>
+        )
+    }),
+    TableBodyColumn = memo((
+        {
+            taskIDs,
+            taskMoving,
+            columnIdx,
+            columnID,
+            blankAreaVisible,
+            // itemOnDragEnter,
+        }:{
+            taskIDs:EntityId[];
+            taskMoving:EntityId;
+            columnIdx:number;
+            columnID:EntityId;
+            blankAreaVisible:boolean;
+            // itemOnDragEnter:()=>void;
+        }
+    )=>{
+        const
+            {boardViewDispatch} = useContext(BoardViewDispatchContext),
+            onDragEnter = () => {
+                boardViewDispatch(moving({columnIdx,taskIdx:taskIDs.includes(taskMoving) ? taskIDs.length - 1 : taskIDs.length}))
+                // itemOnDragEnter()
+            },
+            smallScreenColumnID = useAppSelector(state => state.taskMgmt.boardViewSmallScreenColumn),
+            {breakpoints:{up}} = useTheme(),
+            sidebarOpen = useAppSelector(state => state.misc.sidebarOpen),
+            matchesMD = useMediaQuery(up('md')),
+            matchesSM = useMediaQuery(up('sm'))
+
+        return (
+            <>
+            {(matchesMD || matchesSM && !sidebarOpen || smallScreenColumnID===columnID) && <TableCell
+                sx={{
+                    border:'none',
+                    p:'3px',
+                    verticalAlign:'top',
+                }}
+            >
+                    <Stack direction='column' spacing={1}>
+                        {taskIDs.map((taskID,i)=>(
+                            <TaskItem key={taskID} {...{
+                                taskID,
+                                columnIdx,
+                                taskIdx:i,
+                            }} />
+                        ))}
+                    </Stack>
+                <Box
+                    sx={{
+                        height:blankAreaVisible ? '100vh' : '0px',
+                    }}
+                    onDragEnter={onDragEnter}
+                ></Box>
+            </TableCell>}
+            </>
+        )
+    })
+    
+
+ColumnName.displayName = 'ColumnName'
+ColumnAddItem.displayName = 'ColumnAddItem'
+TableBodyColumn.displayName = 'TableBodyColumn'
+export default BoardView
+export { BoardViewDispatchContext }
