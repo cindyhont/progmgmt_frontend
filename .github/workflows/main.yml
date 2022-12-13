@@ -68,7 +68,7 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json', '**/yarn.lock') }}-
     - name: Install Dependencies
-      if: steps.cache.outputs.cache-hit != 'true'
+      # if: steps.cache.outputs.cache-hit != 'true'
       run: npm install
     - run: export NODE_OPTIONS="--max_old_space_size=4096" && npm run build
       env:
