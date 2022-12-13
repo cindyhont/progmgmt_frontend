@@ -20,14 +20,14 @@ export const getServerSideProps: GetServerSideProps = async ({res,req:{cookies,u
                 json = await response.json()
 
             if (!json.session){
-                res.setHeader('Set-Cookie', [`sid=${cookies.sid}; expires=${new Date(Date.now() - 100000).toUTCString()}; path=/; httponly`]);
+                res.setHeader('Set-Cookie', [`sid=${cookies.sid}; expires=${new Date(Date.now() - 100000).toUTCString()}; path=/; httponly; secure; samesite=strict`]);
                 return {redirect:{destination:ssrToLogin(url),permanent:false}}
             } else {
-                res.setHeader('Set-Cookie', [`sid=${json.session.sid}; expires=${new Date(json.session.expires).toUTCString()}; path=/; httponly`]);
+                res.setHeader('Set-Cookie', [`sid=${json.session.sid}; expires=${new Date(json.session.expires).toUTCString()}; path=/; httponly; secure; samesite=strict`]);
                 if (json.data.systemStarted) return {redirect:{destination:'/',permanent:false}}
             }
         } catch (error) {
-            res.setHeader('Set-Cookie', [`sid=${cookies.sid}; expires=${new Date(Date.now() - 100000).toUTCString()}; path=/; httponly`]);
+            res.setHeader('Set-Cookie', [`sid=${cookies.sid}; expires=${new Date(Date.now() - 100000).toUTCString()}; path=/; httponly; secure; samesite=strict`]);
             return {redirect:{destination:ssrToLogin(url),permanent:false}}
         }
     } else {
