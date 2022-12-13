@@ -4,7 +4,7 @@ import { GetServerSideProps } from 'next'
 export const getServerSideProps: GetServerSideProps = async () => {
     let 
         // result:any = null, 
-        link = process.env.NEXT_PUBLIC_WS_URL;
+        link = process.env.NEXT_PUBLIC_SSR_API_URL;
     // try {
     //     const 
     //         response = await fetch(`${link}/`, {
