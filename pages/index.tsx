@@ -302,6 +302,23 @@ const
                 }
 
                 wsService.current = dispatch(websocketApi.endpoints.launchWS.initiate())
+            },
+            testCookies = async () => {
+                try {
+                    const res = await fetch('/api/test-cookies', {
+                        method: 'GET',
+                        headers: { 
+                            'Content-Type': 'application/json',
+                            sMethod:'ck',
+                            credentials:'include',
+                        },
+                    })
+                    console.log('res: ',res)
+                    const json = await res.json()
+                    console.log('json: ',json)
+                } catch (error) {
+                    console.log('error: ',error)
+                }
             }
 
         useEffect(()=>{
@@ -313,6 +330,7 @@ const
         },[fileTransmitting])
             
         useEffect(()=>{
+            testCookies()
             dispatch(googleUploadApi.endpoints.initGoogleUpload.initiate())
             dispatch(googleDownloadApi.endpoints.initGoogleDownload.initiate())
 
