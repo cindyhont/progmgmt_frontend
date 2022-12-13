@@ -3,11 +3,12 @@ import { GetServerSideProps } from 'next'
 
 export const getServerSideProps: GetServerSideProps = async () => {
     let 
-        result:any = null, 
-        link = process.env.NEXT_PUBLIC_SSR_API_URL;
+        result:any = null
+        // link = process.env.SSR_API_URL;
+        // link = process.env.NEXT_PUBLIC_SSR_API_URL;
     try {
         const 
-            response = await fetch(`${link}/`, {
+            response = await fetch(`${process.env.SSR_API_URL}/`, {
                 method: 'GET',
                 headers: { 
                     'Content-Type': 'application/json',
@@ -17,32 +18,32 @@ export const getServerSideProps: GetServerSideProps = async () => {
     } catch (error) {
         return {props:{
             result,
-            link
+            // link
         }}
     }
 
     return {props:{
         result,
-        link
+        // link
     }}
 }
 
 const Testpage = (
     {
         result,
-        link
+        // link
     }:{
         result:any;
-        link:string;
+        // link:string;
     }
 ) => {
     useEffect(()=>console.log('result:',result),[result])
-    useEffect(()=>console.log('link:',link),[link])
+    // useEffect(()=>console.log('link:',link),[link])
 
     return (
         <>
         <pre>{JSON.stringify(result)}</pre>
-        <pre>{link}</pre>
+        
         </>
     )
 }
