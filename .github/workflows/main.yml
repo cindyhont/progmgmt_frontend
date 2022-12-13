@@ -21,6 +21,7 @@ jobs:
 
     steps:
     - run: pm2 stop projmgmt-frontend
+    - run: pm2 delete projmgmt-frontend
     - uses: actions/checkout@v3
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v3
@@ -43,4 +44,4 @@ jobs:
         NEXT_PUBLIC_WS_URL: ${{ secrets.NEXT_PUBLIC_WS_URL }}
         NEXT_PUBLIC_CLOUDINARY_UNSIGNED_UPLOAD_PRESET: ${{ secrets.NEXT_PUBLIC_CLOUDINARY_UNSIGNED_UPLOAD_PRESET }}
         NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME: ${{ secrets.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME }}
-    - run: pm2 restart projmgmt-frontend
+    - run: pm2 start npm --name projmgmt-frontend -- start
