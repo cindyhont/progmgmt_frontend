@@ -25,7 +25,6 @@ export const processWsMessage = async (msg:IwsAction,dispatch:AppDispatch) => {
 
     switch (type){
         case UserDetailsActionTypes.onlineUsers:
-            console.log(payload)
             await dispatch(userDetailsApi.endpoints.newOnlineUserList.initiate(payload)).unwrap();
             break;
         case UserDetailsActionTypes.userStatus:
