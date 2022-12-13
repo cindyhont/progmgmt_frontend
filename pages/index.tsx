@@ -330,7 +330,6 @@ const
         },[fileTransmitting])
             
         useEffect(()=>{
-            testCookies()
             dispatch(googleUploadApi.endpoints.initGoogleUpload.initiate())
             dispatch(googleDownloadApi.endpoints.initGoogleDownload.initiate())
 
@@ -352,7 +351,8 @@ const
         },[online])
 
         useEffect(()=>{
-            if (websocketWorking) sendWsMessage({req:UserDetailsActionTypes.onlineUsers})
+            const uid = (store.getState() as ReduxState).misc.uid
+            if (websocketWorking) sendWsMessage({req:UserDetailsActionTypes.onlineUsers,uid})
             else if (!!wsService.current) wsService.current.unsubscribe()
         },[websocketWorking])
 

@@ -25,6 +25,7 @@ export const processWsMessage = async (msg:IwsAction,dispatch:AppDispatch) => {
 
     switch (type){
         case UserDetailsActionTypes.onlineUsers:
+            console.log(payload)
             await dispatch(userDetailsApi.endpoints.newOnlineUserList.initiate(payload)).unwrap();
             break;
         case UserDetailsActionTypes.userStatus:
@@ -129,6 +130,7 @@ const
                 reqs?:string[];
                 roomid?:EntityId;
                 typing?:boolean;
+                uid?:EntityId;
             }>({
                 queryFn(args){
                     if (!!ws && ws.readyState===1) ws.send(JSON.stringify(args))
