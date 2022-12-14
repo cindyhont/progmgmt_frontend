@@ -23,17 +23,6 @@ jobs:
     - run: pm2 stop projmgmt-frontend --silent
     - run: pm2 delete projmgmt-frontend --silent
     - uses: actions/checkout@v3
-    # - name: Use Node.js ${{ matrix.node-version }}
-    #   uses: actions/setup-node@v3
-    #   with:
-    #     node-version: ${{ matrix.node-version }}
-    #     cache: 'npm'
-    # - name: Cache Node Modules
-    #   id: cache-node-modules
-    #   uses: actions/cache@v3
-    #   with:
-    #     path: node_modules
-    #     key: node-modules-${{ hashFiles('package-lock.json') }}
     - name: Detect package manager
       id: detect-package-manager
       run: |
