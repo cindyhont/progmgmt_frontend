@@ -1,4 +1,5 @@
 import React, { createContext, Dispatch, memo, useEffect, useMemo, useReducer, useRef, useState } from 'react'
+import Head from 'next/head';
 import { GetServerSideProps } from 'next'
 import { loadMiscReduxState, ssrToLogin, updateSession } from '../components/functions';
 import Layout from '@components/layout';
@@ -348,6 +349,11 @@ const
         },[online,pageVisibility])
 
         return (
+            <>
+            <Head>
+                <title>Project Management Tool</title>
+                <meta name="description" content="Project Management Tool"></meta>
+            </Head>
             <DialogCtxMenuDispatchContext.Provider value={{dialogCtxMenuStatusDispatch}}>
                 <DialogCtxMenuStateContext.Provider value={dialogCtxMenuState}>
                     <LayoutOrderDispatchContext.Provider value={{layoutOrderDispatch}}>
@@ -357,6 +363,7 @@ const
                     </LayoutOrderDispatchContext.Provider>
                 </DialogCtxMenuStateContext.Provider>
             </DialogCtxMenuDispatchContext.Provider>
+            </>
         )
     },
     IndexPageComponents = memo(({page}:{page:string}) => (

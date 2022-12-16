@@ -1,4 +1,5 @@
 import React, { FormEvent, memo, useMemo, useRef, useState } from 'react';
+import Head from 'next/head';
 import { GetServerSideProps } from 'next'
 import { useRouter } from 'next/router'
 import { createTheme, ThemeProvider } from '@mui/material/styles';
@@ -35,6 +36,11 @@ const
             theme = useMemo(()=>createTheme({palette: {mode: userMode === 'system' ? (systemDark ? 'dark' : 'light') : userMode}}),[systemDark,userMode])
 
         return (
+            <>
+            <Head>
+                <title>First User - Project Management Tool</title>
+                <meta name="description" content="First User - Project Management Tool"></meta>
+            </Head>
             <ThemeProvider theme={theme}>
                 <CssBaseline />
                 <Container component="main" maxWidth="xl">
@@ -44,6 +50,7 @@ const
                     </Container>
                 </Container>
             </ThemeProvider>
+            </>
         )
     },
     Form = memo(() => {
