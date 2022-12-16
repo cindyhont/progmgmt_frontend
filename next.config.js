@@ -1,6 +1,6 @@
 module.exports = {
   // ...(process.env.NEXT_PUBLIC_NODE_ENV === 'production' && {assetPrefix:'https://cdn.cindyhodev.com'}),
-  assetPrefix:'https://cdn.cindyhodev.com',
+  // assetPrefix:'https://cdn.cindyhodev.com',
   async rewrites() {
     return [
       {source: '/api/:slug*',destination: `${process.env.API_URL}/:slug*`},
