@@ -52,10 +52,10 @@ const
             userMode = useAppSelector(state => state.misc.userMode),
             theme = useMemo(()=>createTheme({palette: {mode: userMode === 'system' ? (systemDark ? 'dark' : 'light') : userMode}}),[systemDark,userMode])
 
-        useEffect(()=>{
-            console.log('NEXT_PUBLIC_NODE_ENV: ',process.env.NEXT_PUBLIC_NODE_ENV)
-            console.log(process.env.NEXT_PUBLIC_NODE_ENV === 'production')
-        },[])
+        // useEffect(()=>{
+        //     console.log('NEXT_PUBLIC_NODE_ENV: ',process.env.NEXT_PUBLIC_NODE_ENV)
+        //     console.log(process.env.NEXT_PUBLIC_NODE_ENV === 'production')
+        // },[])
 
         return (
             <ThemeProvider theme={theme}>
