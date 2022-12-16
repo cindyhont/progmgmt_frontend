@@ -17,5 +17,5 @@ module.exports = {
       {source:'/chat/u/:userid',destination:'/?page=chat&userid=:userid'}
     ]
   },
-  ...(process.env.NODE_ENV === 'production' && {assetPrefix:'http://cdn.cindyhodev.com'})
+  ...(process.env.NEXT_PUBLIC_NODE_ENV === 'production' && {assetPrefix:'http://cdn.cindyhodev.com'})
 }
