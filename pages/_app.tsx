@@ -14,8 +14,6 @@ const
             router = useRouter(),
             store = useMemo(()=>configureAppStore(pageProps?.preloadedState as IpreloadedState),[router.pathname])
 
-        // useEffect(()=>console.log(pageProps),[])
-            
         return (
             <Provider store={store}>
                 <Wrapper>

@@ -1,4 +1,5 @@
 import React, { FormEvent, memo, useEffect, useMemo, useRef, useState } from 'react';
+import Head from 'next/head';
 import { GetServerSideProps } from 'next'
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import Container from '@mui/material/Container';
@@ -52,12 +53,12 @@ const
             userMode = useAppSelector(state => state.misc.userMode),
             theme = useMemo(()=>createTheme({palette: {mode: userMode === 'system' ? (systemDark ? 'dark' : 'light') : userMode}}),[systemDark,userMode])
 
-        // useEffect(()=>{
-        //     console.log('NEXT_PUBLIC_NODE_ENV: ',process.env.NEXT_PUBLIC_NODE_ENV)
-        //     console.log(process.env.NEXT_PUBLIC_NODE_ENV === 'production')
-        // },[])
-
         return (
+            <>
+            <Head>
+                <title>Login - Project Management Tool</title>
+                <meta name="description" content="Login - Project Management Tool"></meta>
+            </Head>
             <ThemeProvider theme={theme}>
                 <CssBaseline />
                 <Container component="main" maxWidth="xl">
@@ -67,6 +68,7 @@ const
                     </Container>
                 </Container>
             </ThemeProvider>
+            </>
         )
     },
     Form = memo(() => {
