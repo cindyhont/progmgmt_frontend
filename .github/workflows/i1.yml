@@ -12,7 +12,7 @@ on:
 jobs:
   build:
 
-    runs-on: self-hosted
+    runs-on: [self-hosted,instance1]
 
     strategy:
       matrix:
@@ -20,8 +20,8 @@ jobs:
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
     steps:
-    - run: pm2 stop projmgmt-frontend --silent
-    - run: pm2 delete projmgmt-frontend --silent
+    # - run: pm2 stop projmgmt-frontend --silent
+    # - run: pm2 delete projmgmt-frontend --silent
     - uses: actions/checkout@v3
     - name: Detect package manager
       id: detect-package-manager
@@ -71,4 +71,4 @@ jobs:
         NEXT_PUBLIC_WS_URL: ${{ secrets.NEXT_PUBLIC_WS_URL }}
         NEXT_PUBLIC_CLOUDINARY_UNSIGNED_UPLOAD_PRESET: ${{ secrets.NEXT_PUBLIC_CLOUDINARY_UNSIGNED_UPLOAD_PRESET }}
         NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME: ${{ secrets.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME }}
-    - run: pm2 start npm --name projmgmt-frontend -- start
+    # - run: pm2 start npm --name projmgmt-frontend -- start
