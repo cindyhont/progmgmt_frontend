@@ -60,15 +60,15 @@ jobs:
     - name: Install Dependencies
       if: steps.cache.outputs.cache-hit != 'true'
       run: npm install
-    - name: Run
+    - name: Build
       run: |
         export NODE_OPTIONS="--max_old_space_size=4096"
         npm run build
-    #   env:
-    #     API_URL: ${{ secrets.API_URL }}
-    #     NODE_ENV: ${{ secrets.NEXT_PUBLIC_NODE_ENV }}
-    #     NEXT_PUBLIC_SSR_API_URL: ${{ secrets.NEXT_PUBLIC_SSR_API_URL }}
-    #     NEXT_PUBLIC_WS_URL: ${{ secrets.NEXT_PUBLIC_WS_URL }}
-    #     NEXT_PUBLIC_CLOUDINARY_UNSIGNED_UPLOAD_PRESET: ${{ secrets.NEXT_PUBLIC_CLOUDINARY_UNSIGNED_UPLOAD_PRESET }}
-    #     NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME: ${{ secrets.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME }}
+      env:
+        API_URL: ${{ secrets.API_URL }}
+        NODE_ENV: ${{ secrets.NEXT_PUBLIC_NODE_ENV }}
+        NEXT_PUBLIC_SSR_API_URL: ${{ secrets.NEXT_PUBLIC_SSR_API_URL }}
+        NEXT_PUBLIC_WS_URL: ${{ secrets.NEXT_PUBLIC_WS_URL }}
+        NEXT_PUBLIC_CLOUDINARY_UNSIGNED_UPLOAD_PRESET: ${{ secrets.NEXT_PUBLIC_CLOUDINARY_UNSIGNED_UPLOAD_PRESET }}
+        NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME: ${{ secrets.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME }}
     # - run: pm2 start npm --name projmgmt-frontend -- start
