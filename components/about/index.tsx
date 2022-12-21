@@ -67,7 +67,7 @@ const About = () => {
                     sx={{fontWeight:'bold'}}
                     variant='contained'
                     endIcon={<DoubleArrowRoundedIcon />}
-                    href='#'
+                    href='https://cindyhodev.com'
                     target='_blank'
                 >To My Portfolio</Button>
             </Stack>
