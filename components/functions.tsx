@@ -5,7 +5,7 @@ import { initialState as miscInitialState, sessionRenewTime } from '../reducers/
 import { FileDraft } from './interfaces';
 
 const 
-    capitalizeSingleWord = (e:string) => `${e[0].toUpperCase()}${e.slice(1)}`,
+    capitalizeSingleWord = (e:string) => !!e ? `${e[0].toUpperCase()}${e.slice(1)}` : '',
     pushToLogin = (router:NextRouter) => router.push(`/login?redirect=${router.asPath}`),
     getSession = () => new Promise<boolean>((resolve,reject)=>fetch(
         '/api/update-session',{

@@ -133,7 +133,7 @@ const
         }
     )=>{
         const 
-            {palette:{mode,text,grey}} = useTheme(),
+            {palette:{mode,text}} = useTheme(),
             {replyMsg,replyMsgSender} = useAppSelector(state => taskCommentSelector.selectById(state,id)),
             {firstName,lastName} = useAppSelector(state => userDetailsSelector.selectById(state,replyMsgSender)),
             containerRef = useRef<HTMLDivElement>(),
@@ -141,7 +141,7 @@ const
             [showCover,setShowCover] = useState(false)
 
         useEffect(()=>{
-            if (containerRef.current.offsetHeight > maxHeight) setShowCover(true)
+            if (containerRef.current.getBoundingClientRect().height > maxHeight) setShowCover(true)
         },[])
 
         return (

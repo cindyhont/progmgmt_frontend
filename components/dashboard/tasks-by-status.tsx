@@ -76,7 +76,7 @@ const TasksByStatus = () => {
             const
                 data = google.visualization.arrayToDataTable(chartData),
                 view = new google.visualization.DataView(data),
-                containerWidth = container.current?.offsetWidth || 0
+                containerWidth = container.current?.getBoundingClientRect()?.width || 0
 
             chart.current.draw(view,{
                 width:containerWidth,

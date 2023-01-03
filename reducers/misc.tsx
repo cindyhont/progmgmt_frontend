@@ -2,7 +2,6 @@ import { createSlice, EntityId } from '@reduxjs/toolkit'
 import type { PayloadAction } from '@reduxjs/toolkit'
 
 export interface Imisc {
-    online:boolean;
     systemDark:boolean;
     userMode:'dark'|'light'|'system';
     sidebarOpen:boolean|null;
@@ -28,9 +27,8 @@ export interface Imisc {
 const
     sliceName = 'misc',
     initialState:Imisc = {
-        online:true,
-        systemDark:false,
-        userMode:'system',
+        systemDark:null,
+        userMode:null,
         sidebarOpen:null,
         authRequired:false,
         signedIn:false,
@@ -54,9 +52,6 @@ const
         name:sliceName,
         initialState,
         reducers:{
-            updateConnection(state:Imisc, {payload}: PayloadAction<boolean>){
-                state.online = payload
-            },
             systemIsDark(state:Imisc,{payload}:PayloadAction<boolean>){
                 state.systemDark = payload
             },
@@ -117,7 +112,6 @@ const
     })
 
 export const { 
-    updateConnection, 
     systemIsDark,
     updateUserMode,
     openSidebar,

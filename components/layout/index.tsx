@@ -119,13 +119,17 @@ const
         const 
             systemDark = useAppSelector(state => state.misc.systemDark,shallowEqual),
             userMode = useAppSelector(state => state.misc.userMode,shallowEqual),
-            theme = useMemo(()=>createTheme({palette: {mode: userMode === 'system' ? (systemDark ? 'dark' : 'light') : userMode}}),[systemDark,userMode])
+            theme = useMemo(()=>createTheme(
+                !!userMode && systemDark !== null ? {palette: {mode: userMode === 'system' ? (systemDark ? 'dark' : 'light') : userMode}} : {}
+            ),[systemDark,userMode])
 
         return (
-            <ThemeProvider theme={theme}>
+            <>
+            {!!userMode && systemDark !== null && <ThemeProvider theme={theme}>
                 <CssBaseline />
                 <LayoutWrapper {...{userRight}}>{children}</LayoutWrapper>
-            </ThemeProvider>
+            </ThemeProvider>}
+            </>
         )
     }),
     LayoutWrapper = memo((

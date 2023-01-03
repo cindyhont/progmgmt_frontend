@@ -16,7 +16,6 @@ import { loadMiscReduxState } from '../components/functions';
 import { NonIndexPageThemeToggle } from '@components/common-components';
 
 export const getServerSideProps: GetServerSideProps = async ({req:{cookies}}) => {
-    let json = null
     if (cookies.hasOwnProperty('sid')){
         try {
             const 
@@ -27,8 +26,8 @@ export const getServerSideProps: GetServerSideProps = async ({req:{cookies}}) =>
                         sMethod:'body',
                         sid:cookies.sid
                     },
-                })
-            json = await response.json()
+                }),
+                json = await response.json()
 
             if (json.data.sidValid) return {redirect:{destination:'/',permanent:false}}
         } catch (error) {
@@ -41,7 +40,6 @@ export const getServerSideProps: GetServerSideProps = async ({req:{cookies}}) =>
             preloadedState:{
                 misc:{...loadMiscReduxState(false,'')}
             },
-            json
         }
     }
 }
@@ -51,7 +49,9 @@ const
         const
             systemDark = useAppSelector(state => state.misc.systemDark),
             userMode = useAppSelector(state => state.misc.userMode),
-            theme = useMemo(()=>createTheme({palette: {mode: userMode === 'system' ? (systemDark ? 'dark' : 'light') : userMode}}),[systemDark,userMode])
+            theme = useMemo(()=>createTheme(!!userMode && systemDark !== null ? {palette: {
+                mode: userMode === 'system' ? (systemDark ? 'dark' : 'light') : userMode
+            }} : {}),[systemDark,userMode])
 
         return (
             <>
@@ -59,7 +59,7 @@ const
                 <title>Login - Project Management Tool</title>
                 <meta name="description" content="Login - Project Management Tool"></meta>
             </Head>
-            <ThemeProvider theme={theme}>
+            {!!userMode && systemDark !== null && <ThemeProvider theme={theme}>
                 <CssBaseline />
                 <Container component="main" maxWidth="xl">
                     <NonIndexPageThemeToggle />
@@ -67,7 +67,7 @@ const
                         <Form />
                     </Container>
                 </Container>
-            </ThemeProvider>
+            </ThemeProvider>}
             </>
         )
     },

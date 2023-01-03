@@ -3,7 +3,7 @@ import '../styles.scss'
 import { useEffect, useMemo, useRef } from 'react';
 import { Provider, shallowEqual } from "react-redux";
 import configureAppStore, { IpreloadedState, useAppDispatch, useAppSelector } from '@reducers'
-import { updateConnection, systemIsDark, updateUserMode, updateTouchScreen, updatePageVisibility } from '@reducers/misc'
+import { systemIsDark, updateUserMode, updateTouchScreen, updatePageVisibility } from '@reducers/misc'
 import { useRouter } from 'next/router';
 import { pushToLogin } from '@components/functions';
 import Head from 'next/head'
@@ -37,9 +37,6 @@ const
 
             authRequired = useAppSelector(state => state.misc.authRequired,shallowEqual),
             signedIn = useAppSelector(state => state.misc.signedIn,shallowEqual),
-
-            onOnline = ()=> dispatch(updateConnection(true)),
-            onOffline = ()=> dispatch(updateConnection(false)),
             systemThemeOnChange = (e:MediaQueryListEvent) => {
                 sessionStorage.setItem('systemDark',e.matches.toString())
                 dispatch(systemIsDark(e.matches))
@@ -78,13 +75,9 @@ const
             sessionStorage.setItem('systemDark',isDark.toString())
 
             window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', systemThemeOnChange);
-            window.addEventListener('online',onOnline)
-            window.addEventListener('offline',onOffline)
             document.addEventListener('visibilitychange',onVisibilityChange)
             return () => {
                 window.matchMedia('(prefers-color-scheme: dark)').removeEventListener('change', systemThemeOnChange);
-                window.removeEventListener('online',onOnline)
-                window.removeEventListener('offline',onOffline)
                 document.removeEventListener('visibilitychange',onVisibilityChange)
             }
         },[router.pathname])

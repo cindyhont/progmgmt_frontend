@@ -1,4 +1,4 @@
-import React, { ChangeEvent, memo, SyntheticEvent, useCallback, useEffect, useRef, useState } from "react";
+import React, { ChangeEvent, memo, useCallback, useRef, useState } from "react";
 import Table from '@mui/material/Table'
 import TableBody from '@mui/material/TableBody'
 import TableRow from '@mui/material/TableRow'

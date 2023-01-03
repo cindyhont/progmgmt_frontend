@@ -46,7 +46,7 @@ const Resizer = memo((
                 headerCell = cells[0]
 
             if (!!headerCell.style.width) intialWidth.current = +headerCell.style.width.replace('px','')
-            else intialWidth.current = headerCell.offsetWidth
+            else intialWidth.current = headerCell.getBoundingClientRect().width
 
             cursorX.current = e.pageX
             resizerOn.current = true

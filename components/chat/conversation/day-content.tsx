@@ -31,6 +31,7 @@ const ChatDayContent = memo(({date}:{date:number})=>{
         ),[roomID]),
         convoIDs = useAppSelector(state=>convoIDsSelector(state)),
         dateRef = useRef<HTMLDivElement>(),
+        dayContainer = useRef<HTMLDivElement>(),
         timeoutRef = useRef<NodeJS.Timeout>(),
         dismissDate = () => {
             if (!!dateRef.current) dateRef.current.style.opacity = '0'
@@ -39,14 +40,17 @@ const ChatDayContent = memo(({date}:{date:number})=>{
             if (!dateRef.current) return
             clearTimeout(timeoutRef.current)
             dateRef.current.style.opacity = '1'
-            const t = e.currentTarget;
-            if (dateRef.current.offsetTop > 8 && t.scrollHeight - (t.offsetHeight - t.scrollTop) > 5){
-                timeoutRef.current = setTimeout(dismissDate,300)
-            }
+            const t = e.currentTarget as HTMLElement;
+
+            const
+                {top:dateContainerTop} = dayContainer.current.getBoundingClientRect(),
+                {top:containerTop} = t.getBoundingClientRect()
+
+            if (dateContainerTop < containerTop - 20) timeoutRef.current = setTimeout(dismissDate,300)
         }
 
     useEffect(()=>{
-        dateRef.current.style.opacity = dateRef.current.offsetTop > 8 ? '0' : '1'
+        dateRef.current.style.opacity = dateRef.current.getBoundingClientRect().top > 8 ? '0' : '1'
     },[])
 
     useEffect(()=>{
@@ -57,6 +61,7 @@ const ChatDayContent = memo(({date}:{date:number})=>{
 
     return (
         <Grid 
+            ref={dayContainer}
             container 
             direction='column' 
             sx={{

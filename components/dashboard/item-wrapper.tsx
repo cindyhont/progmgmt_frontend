@@ -12,11 +12,9 @@ import IconButton from "@mui/material/IconButton";
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 
 export const sideBarHeadStyle = {
-    // textTransform:'capitalize',
     fontSize:'0.9rem',
     fontWeight:'bold',
     color:grey[500],
-    // letterSpacing:'0.05rem',
     verticalAlign:'bottom',
 }
 

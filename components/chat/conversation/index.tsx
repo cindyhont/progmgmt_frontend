@@ -64,12 +64,12 @@ const
             containerRef = useRef<HTMLDivElement>(),
             headerRef = useRef<HTMLDivElement>(),
             bodyRef = useRef<HTMLDivElement>(),
-            scrollCheckRef = useRef<HTMLDivElement>(),
+            chatConvoContainer = useRef<HTMLDivElement>(),
             editorRef = useRef<HTMLDivElement>(),
             submitBtnRef = useRef<HTMLButtonElement>(),
             [editorLoaded,setEditorLoaded] = useState(false),
             editorIsLoaded = useCallback(()=>setEditorLoaded(true),[]),
-            toBottom = useCallback(()=>scrollCheckRef.current.scrollIntoView({behavior:'smooth',block:'end'}),[]),
+            toBottom = useCallback(()=>chatConvoContainer.current.scrollIntoView({behavior:'smooth',block:'end'}),[]),
             bottomBtnContainerRef = useRef<HTMLDivElement>(),
             bottomBtnRef = useRef<HTMLButtonElement>(),
             replyRef = useRef<HTMLDivElement>(),
@@ -91,9 +91,9 @@ const
             [fetchRepliedConvos] = useFetchRepliedConvosMutation(),
             onScroll = () => {
                 const 
-                    convoListRect = scrollCheckRef.current.getBoundingClientRect(),
+                    convoListRect = chatConvoContainer.current.getBoundingClientRect(),
                     atBottom = convoListRect.bottom - bodyRef.current.getBoundingClientRect().bottom < 200,
-                    newHeight = editorRef.current.offsetHeight + (replyStatus || editStatus ? tabBarHeightRef.current : 0) + 50
+                    newHeight = editorRef.current.getBoundingClientRect().height + (replyStatus || editStatus ? tabBarHeightRef.current : 0) + 50
                     
                 bottomBtnContainerRef.current.style.bottom = `${newHeight}px`
                 bottomBtnContainerRef.current.style.transform = atBottom ? `translateY(${newHeight}px)` : 'none'
@@ -138,9 +138,10 @@ const
             editorTimeoutRef = useRef<NodeJS.Timeout>(),
             editorOnChange = () => {
                 clearTimeout(editorTimeoutRef.current)
-                if (inputH.current !== editorRef.current.offsetHeight) {
-                    bodyRef.current.scrollBy(0,editorRef.current.offsetHeight - inputH.current)
-                    inputH.current = editorRef.current.offsetHeight
+                const editorHeight = editorRef.current.getBoundingClientRect().height
+                if (inputH.current !== editorHeight) {
+                    bodyRef.current.scrollBy(0,editorHeight - inputH.current)
+                    inputH.current = editorHeight
                 }
             },
             setEditorTimeout = () => editorTimeoutRef.current = setTimeout(editorOnChange,10),
@@ -200,7 +201,7 @@ const
                 if (!editorRef.current) {
                     editorRef.current = document.getElementById('chat-input') as HTMLDivElement
                     submitBtnRef.current = document.getElementById('chat-submit-btn') as HTMLButtonElement
-                    inputH.current = editorRef.current.offsetHeight
+                    inputH.current = editorRef.current.getBoundingClientRect().height
                     tabBarHeightRef.current = replyRef.current.scrollHeight
                 }
                 editorRef.current.addEventListener('keydown',onInputEvent)
@@ -238,9 +239,7 @@ const
         },[editorLoaded,roomID,userID])
 
         useEffect(()=>{
-            if (editorLoaded){
-                if (!!bodyRef.current) bodyRef.current.addEventListener('scroll',onScroll)
-            }
+            if (editorLoaded && !!bodyRef.current) bodyRef.current.addEventListener('scroll',onScroll)
             return () => {
                 if (!!bodyRef.current) bodyRef.current.removeEventListener('scroll',onScroll)
             }
@@ -274,7 +273,7 @@ const
                         height:'100%',
                     }}
                 >
-                    <ChatContent ref={scrollCheckRef} />
+                    <ChatContent ref={chatConvoContainer} />
                     <ScrollToBottomBtnContainer ref={bottomBtnContainerRef}>
                         <ScrollToBottomBtn ref={bottomBtnRef} scrollToBottom={toBottom} />
                     </ScrollToBottomBtnContainer>
