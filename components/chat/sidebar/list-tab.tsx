@@ -19,6 +19,7 @@ import { Convo, Room, RoomUser } from '../interfaces';
 import { useUpdateChatLastSeenMutation } from '../reducers/api';
 import { userDetailsSelector } from '@reducers/user-details/slice';
 import { useRouter } from 'next/router';
+import useEllipsis from 'hooks/counter/ellipsis';
 
 const 
     ListTab = memo(({roomID}:{roomID:EntityId}) => {
@@ -271,20 +272,8 @@ const
     }),
     IsTyping = memo(({text}:{text:string})=>{
         const 
-            theme = useTheme(),
-            spanRef = useRef<HTMLSpanElement>(),
-            timeout = useRef<NodeJS.Timeout>(),
-            count = useRef(0),
-            animate = () => {
-                count.current = (count.current + 1) % 4
-                if (!!spanRef.current) spanRef.current.innerText = '.'.repeat(count.current)
-                timeout.current = setTimeout(animate,800)
-            }
-
-        useEffect(()=>{
-            timeout.current = setTimeout(animate,800)
-            return () => clearTimeout(timeout.current)
-        },[])
+            ellipsis = useEllipsis(),
+            theme = useTheme()
 
         return (
             <Grid item sx={{display:'grid'}}>
@@ -298,9 +287,7 @@ const
                         color:theme.palette.mode === 'light' ? theme.palette.grey[600] : theme.palette.grey[500],
                         fontStyle:'italic'
                     }}
-                >
-                    {text} <span ref={spanRef}></span>
-                </Typography>
+                >{text} {ellipsis}</Typography>
             </Grid>
         )
     }),

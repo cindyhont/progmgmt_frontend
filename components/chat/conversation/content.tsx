@@ -10,6 +10,7 @@ import { chatConvoSelector, chatRoomSelector, chatRoomUserSelector } from '../re
 import { Room } from '../interfaces';
 import { userDetailsSelector } from '@reducers/user-details/slice';
 import { useRouter } from 'next/router';
+import useEllipsis from 'hooks/counter/ellipsis';
 
 const 
     ChatContent = memo(forwardRef((_,ref:ForwardedRef<HTMLDivElement>)=>{
@@ -87,7 +88,7 @@ const
         const 
             {query} = useRouter(),
             roomID = query.roomid as string,
-            pageVisibility = useAppSelector(state => state.misc.pageVisibility),
+            ellipsis = useEllipsis(),
             selector = useMemo(()=>createSelector(
                 (state:ReduxState)=>state,
                 (state:ReduxState)=>chatRoomSelector.selectById(state,roomID),
@@ -97,20 +98,7 @@ const
                 })
             ),[userID,roomID]),
             {name,typing} = useAppSelector(state=>selector(state)),
-            theme = useTheme(),
-            spanRef = useRef<HTMLSpanElement>(),
-            count = useRef(0),
-            timeout = useRef<NodeJS.Timeout>(),
-            animate = () => {
-                count.current = (count.current + 1) % 4
-                if (!!spanRef.current) spanRef.current.innerText = '.'.repeat(count.current)
-                timeout.current = setTimeout(animate,800)
-            }
-
-        useEffect(()=>{
-            if (pageVisibility) timeout.current = setTimeout(animate,800)
-            return () => clearTimeout(timeout.current)
-        },[pageVisibility])
+            theme = useTheme()
 
         return (
             <Typography
@@ -123,7 +111,7 @@ const
                     height:typing ? '1rem':'0rem',
                     transition:'all 0.3s'
                 }}
-            >{name} is typing <span ref={spanRef} /></Typography>
+            >{name} is typing {ellipsis}</Typography>
         )
     })
 
