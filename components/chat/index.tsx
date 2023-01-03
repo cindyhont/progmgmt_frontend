@@ -1,7 +1,6 @@
 import React, { createContext, Dispatch, MouseEvent, useEffect, useReducer, useRef } from 'react'
 import Grid from '@mui/material/Grid';
 import { useTheme } from '@mui/material/styles';
-import useMediaQuery from '@mui/material/useMediaQuery';
 import { useAppDispatch, useAppSelector } from '@reducers';
 import { shallowEqual } from 'react-redux'
 import SideBar from './sidebar';
@@ -13,19 +12,18 @@ import ForwardDialog from './dialogs-menus/forward-dialog';
 import { Iactions, initialState, openContextMenuAction, reducer } from './reducers/toggle-context-menu-dialog';
 import { updateContextMenuID } from './reducers/slice';
 import { useRouter } from 'next/router';
+import useNarrowBody from 'hooks/theme/narrow-body';
 
 const 
     ToggleMenuDialogContext = createContext<{toggleMenuDialogDispatch:Dispatch<Iactions>}>({toggleMenuDialogDispatch:()=>{}}),
     ChatPanel = () => {
         const 
             convoRef = useRef<HTMLDivElement>(),
-            theme = useTheme(),
-            {palette:{grey,mode}} = theme,
+            {palette:{grey,mode}} = useTheme(),
             dispatch = useAppDispatch(),
             [menuDialogState,toggleMenuDialogDispatch] = useReducer(reducer,initialState),
-            matchesSM = useMediaQuery(theme.breakpoints.up('sm')),
-            matchesMD = useMediaQuery(theme.breakpoints.up('md')),
             sidebarOpen = useAppSelector(state => state.misc.sidebarOpen,shallowEqual),
+            narrowBody = useNarrowBody(),
             onContextMenu = (e:MouseEvent<HTMLDivElement>) => {
                 const 
                     paths = e.nativeEvent.composedPath() as HTMLElement[],
@@ -66,9 +64,9 @@ const
             userID = query.userid as string
 
         useEffect(()=>{
-            if (matchesMD || matchesSM && !sidebarOpen) convoRef.current.style.left = null
-            else convoRef.current.style.left = (!!roomID || !!userID) ? '0%' : '100%'
-        },[userID,roomID,(matchesMD || matchesSM && !sidebarOpen)])
+            if (narrowBody) convoRef.current.style.left = (!!roomID || !!userID) ? '0%' : '100%'
+            else convoRef.current.style.left = null
+        },[userID,roomID,narrowBody])
         
         return (
             <>
@@ -109,8 +107,7 @@ const
                     xs={12} 
                     sx={{
                         height:'calc(100vh - 79px)',
-                        // transform:matchesMD ? 'none' : matchesSM ? sidebarOpen ? 'translate(110%,-100%)' : 'none' : 'translate(110%,-100%)'
-                        ...((!matchesSM || !matchesMD && sidebarOpen) && {
+                        ...(narrowBody ? {
                             position:'absolute',
                             zIndex:2,
                             top:0,
@@ -118,7 +115,7 @@ const
                             width:'100%',
                             backgroundColor:grey[mode==='light' ? 100 : 900],
                             transition:'left 0.3s'
-                        })
+                        } : {})
                     }}
                 ><Conversation /></Grid>
             </Grid>

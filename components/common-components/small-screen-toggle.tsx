@@ -1,9 +1,8 @@
 import React, { DragEvent, ForwardedRef, forwardRef, memo, TouchEvent, useEffect, useRef } from "react";
-import { useAppSelector } from "@reducers";
 import { useTheme } from "@mui/material";
-import useMediaQuery from '@mui/material/useMediaQuery';
 import IconButton from '@mui/material/IconButton'
 import { v4 as uuidv4 } from 'uuid'
+import useNarrowBody from "hooks/theme/narrow-body";
 
 const SmallScreenToggle = memo(forwardRef((
     {
@@ -20,16 +19,14 @@ const SmallScreenToggle = memo(forwardRef((
         {palette:{mode,primary}} = theme,
         m = useRef(20).current,
         buttonID = useRef(uuidv4()).current,
-        matchesSM = useMediaQuery(theme.breakpoints.up('sm')),
-        matchesMD = useMediaQuery(theme.breakpoints.up('md')),
-        sidebarOpen = useAppSelector(state => state.misc.sidebarOpen),
+        narrowBody = useNarrowBody(),
         localStorageLeftKey = useRef('small-screen-toggle-left').current,
         localStorageTopKey = useRef('small-screen-toggle-top').current,
         updateTogglePosition = () => {
             const 
                 {innerHeight,innerWidth} = window,
                 button = document.getElementById(buttonID)
-            if (matchesMD || matchesSM && !sidebarOpen) {
+            if (!narrowBody) {
                 button.style.display = 'none'
                 button.style.top = null
                 button.style.left = null
@@ -135,7 +132,7 @@ const SmallScreenToggle = memo(forwardRef((
         return () => {
             window.removeEventListener('resize',updateTogglePosition)
         }
-    },[matchesMD || matchesSM && !sidebarOpen])
+    },[narrowBody])
 
     return (
         <IconButton

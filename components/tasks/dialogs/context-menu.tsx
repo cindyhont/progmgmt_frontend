@@ -17,7 +17,7 @@ import { getSortedFieldIDs } from "@indexeddb/functions";
 import { Task, TaskField } from "../interfaces";
 import { LayoutOrderDispatchContext } from "@pages";
 import { useRouter } from "next/router";
-import useMediaQuery from '@mui/material/useMediaQuery';
+import useNarrowBody from "hooks/theme/narrow-body";
 
 const 
     ContextMenu = memo((
@@ -96,19 +96,17 @@ const
     HideColumn = memo(()=>{
         const
             idb = useRef<IndexedDB>(),
-            {breakpoints:{up}} = useTheme(),
-            matchesSM = useMediaQuery(up('sm')),
-            matchesMD = useMediaQuery(up('md')),
+            narrowBody = useNarrowBody(),
             visibilitySelector = useMemo(()=>createSelector(
                 (state:ReduxState)=>state.taskMgmt.ctxMenuFieldID,
-                (state:ReduxState)=>matchesMD || matchesSM && !state.misc.sidebarOpen ? 'listWideScreenOrder' : 'listNarrowScreenOrder',
                 (state:ReduxState)=>state,
-                (field:EntityId,key:'listWideScreenOrder'|'listNarrowScreenOrder',state:ReduxState)=>{
+                (field:EntityId,state:ReduxState)=>{
+                    const key = narrowBody ? 'listNarrowScreenOrder' : 'listWideScreenOrder'
                     if (!field || field==='name') return false
                     const f = taskFieldSelector.selectById(state,field)
                     return !!f && f[key] !== -1
                 }
-            ),[matchesSM,matchesMD]),
+            ),[narrowBody]),
             display = useAppSelector(state => visibilitySelector(state)),
             dispatch = useAppDispatch(),
             {dialogCtxMenuStatusDispatch} = useContext(DialogCtxMenuDispatchContext),
@@ -121,9 +119,7 @@ const
                 const 
                     state = store.getState() as ReduxState,
                     ctxMenuFieldID = state.taskMgmt.ctxMenuFieldID,
-                    sidebarOpen = state.misc.sidebarOpen,
-                    wideScreen = matchesMD || matchesSM && !sidebarOpen,
-                    key = wideScreen ? 'listWideScreenOrder' : 'listNarrowScreenOrder',
+                    key = narrowBody ? 'listNarrowScreenOrder' : 'listWideScreenOrder',
                     fields = taskFieldSelector.selectAll(state),
                     fieldCount = fields.length,
                     filteredFields = fields.filter(e=>e.id!==ctxMenuFieldID),
@@ -155,8 +151,8 @@ const
                         }
                     )=>({
                         id,
-                        listWideScreenOrder:wideScreen ? filteredFieldIDs.indexOf(id): listWideScreenOrder,
-                        listNarrowScreenOrder:wideScreen ? listNarrowScreenOrder : filteredFieldIDs.indexOf(id),
+                        listWideScreenOrder:narrowBody ? listWideScreenOrder : filteredFieldIDs.indexOf(id),
+                        listNarrowScreenOrder:narrowBody ? filteredFieldIDs.indexOf(id) : listNarrowScreenOrder,
                         detailsSidebarOrder,
                         detailsSidebarExpand,
                     }))

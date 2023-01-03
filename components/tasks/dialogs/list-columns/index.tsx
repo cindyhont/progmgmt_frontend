@@ -18,18 +18,14 @@ import IndexedDB from "@indexeddb";
 import { getSortedFieldIDs } from "@indexeddb/functions";
 import { LayoutOrderDispatchContext } from "@pages";
 import { TaskField } from "@components/tasks/interfaces";
-import { useTheme } from "@mui/material";
-import useMediaQuery from '@mui/material/useMediaQuery';
+import useNarrowBody from "hooks/theme/narrow-body";
 
 const
     ListColumnDialog = memo(({open}:{open:boolean}) => {
         const
             {dialogCtxMenuStatusDispatch} = useContext(DialogCtxMenuDispatchContext),
             idb = useRef<IndexedDB>(),
-            theme = useTheme(),
-            matchesSM = useMediaQuery(theme.breakpoints.up('sm')),
-            matchesMD = useMediaQuery(theme.breakpoints.up('md')),
-            sidebarOpen = useAppSelector(state => state.misc.sidebarOpen),
+            narrowBody = useNarrowBody(),
             fieldsSelector = useMemo(()=>createSelector(
                 (state:ReduxState)=>taskFieldSelector.selectAll(state),
                 (state:ReduxState)=>state,
@@ -60,8 +56,7 @@ const
                     s = store.getState() as ReduxState,
                     fields = taskFieldSelector.selectAll(s),
                     fieldCount = fields.length,
-                    wideScreen = matchesMD || matchesSM && !sidebarOpen,
-                    key = wideScreen ? 'listWideScreenOrder' : 'listNarrowScreenOrder',
+                    key = narrowBody ? 'listNarrowScreenOrder' : 'listWideScreenOrder',
                     initialFieldIDs = getSortedFieldIDs(fields,key),
                     newFieldIDs = [
                         ...initialFieldIDs.filter(e=>state.fields.includes(e)),
@@ -93,8 +88,8 @@ const
                         }
                     )=>({
                         id,
-                        listWideScreenOrder:wideScreen ? newFieldIDs.indexOf(id): listWideScreenOrder,
-                        listNarrowScreenOrder:wideScreen ? listNarrowScreenOrder : newFieldIDs.indexOf(id),
+                        listWideScreenOrder:narrowBody ? listWideScreenOrder : newFieldIDs.indexOf(id),
+                        listNarrowScreenOrder:narrowBody ? newFieldIDs.indexOf(id) : listNarrowScreenOrder,
                         detailsSidebarOrder,
                         detailsSidebarExpand,
                     }))
@@ -108,12 +103,10 @@ const
 
         useEffect(()=>{
             if (open) {
-                const 
-                    s = store.getState() as ReduxState,
-                    wideScreen = matchesMD || matchesSM && !sidebarOpen
-                listColumnDispatch(setAllAction(taskFieldSelector.selectAll(s).filter(e=>e[wideScreen ? 'listWideScreenOrder' : 'listNarrowScreenOrder']!==-1).map(({id})=>id)))
+                const s = store.getState() as ReduxState
+                listColumnDispatch(setAllAction(taskFieldSelector.selectAll(s).filter(e=>e[narrowBody ? 'listNarrowScreenOrder' : 'listWideScreenOrder']!==-1).map(({id})=>id)))
             }
-        },[open,(matchesMD || matchesSM && !sidebarOpen)])
+        },[open,narrowBody])
 
         return (
             <Dialog open={open} onClose={onClose} keepMounted>

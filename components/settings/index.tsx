@@ -10,7 +10,6 @@ import IconButton from '@mui/material/IconButton'
 import { useAppSelector } from "@reducers";
 import EditRoundedIcon from '@mui/icons-material/EditRounded';
 import { useTheme } from "@mui/material";
-import useMediaQuery from "@mui/material/useMediaQuery";
 import UsernameDialog from "./dialogs/username";
 import PasswordDialog from "./dialogs/password";
 import { userDetailsSelector } from "@reducers/user-details/slice";
@@ -23,6 +22,7 @@ import Select, { SelectChangeEvent } from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import { useUpdateMaxChildTaskLvlMutation } from "./reducers/api";
+import useNarrowBody from "hooks/theme/narrow-body";
 
 const 
     SettingsPage  = () => {
@@ -116,23 +116,24 @@ const
     UserName = memo(({onOpen}:{onOpen:()=>void}) => {
         const
             username = useAppSelector(state => state.misc.username),
-            {breakpoints:{up},palette:{mode,grey}} = useTheme(),
-            matchesSM = useMediaQuery(up('sm')),
-            matchesMD = useMediaQuery(up('md')),
-            sidebarOpen = useAppSelector(state => state.misc.sidebarOpen)
+            narrowBody = useNarrowBody(),
+            {breakpoints:{up},palette:{mode,grey}} = useTheme()
+            // matchesSM = useMediaQuery(up('sm')),
+            // matchesMD = useMediaQuery(up('md')),
+            // sidebarOpen = useAppSelector(state => state.misc.sidebarOpen)
 
         return (
             <TableRow>
                 <TableCell>
                     <Typography fontWeight='bold'>Username</Typography>
-                    {(!matchesSM || !matchesMD && sidebarOpen) && <Typography variant='body2' color={grey[mode==='light' ? 600 : 400]}>{username}</Typography>}
+                    {narrowBody && <Typography variant='body2' color={grey[mode==='light' ? 600 : 400]}>{username}</Typography>}
                 </TableCell>
                 <TableCell>
                     <Stack direction='row-reverse'>
                         <IconButton sx={{ml:1}} onClick={onOpen}>
                             <EditRoundedIcon />
                         </IconButton>
-                        {(matchesMD || matchesSM && !sidebarOpen) && <Typography sx={{alignSelf:'center'}}>{username}</Typography>}
+                        {!narrowBody && <Typography sx={{alignSelf:'center'}}>{username}</Typography>}
                     </Stack>
                 </TableCell>
             </TableRow>
@@ -157,10 +158,7 @@ const
     MaxChildTaskLvl = memo(()=>{
         const 
             maxChildTaskLvl = useAppSelector(state => state.misc.maxChildTaskLvl),
-            {breakpoints:{up}} = useTheme(),
-            matchesSM = useMediaQuery(up('sm')),
-            matchesMD = useMediaQuery(up('md')),
-            sidebarOpen = useAppSelector(state => state.misc.sidebarOpen),
+            narrowBody = useNarrowBody(),
             [updateMaxChildTaskLvl] = useUpdateMaxChildTaskLvlMutation(),
             selectOnChange = (e:SelectChangeEvent) => updateMaxChildTaskLvl({maxChildTaskLvl:+e.target.value,fromWS:false}),
             plusOnClick = () => {
@@ -177,17 +175,7 @@ const
                 </TableCell>
                 <TableCell>
                     <Stack direction='row-reverse'>
-                        {(matchesMD || matchesSM && !sidebarOpen) ? <>
-                            <IconButton onClick={plusOnClick}>
-                                <AddRoundedIcon />
-                            </IconButton>
-                            <Typography sx={{verticalAlign:'center',lineHeight:'40px',px:1}}>{maxChildTaskLvl}</Typography>
-                            <IconButton onClick={minusOnClick}>
-                                <RemoveRoundedIcon />
-                            </IconButton>
-                        </> 
-                        : 
-                        <FormControl size='small'>
+                        {narrowBody ? <FormControl size='small'>
                             <Select
                                 value={maxChildTaskLvl.toString()}
                                 onChange={selectOnChange}
@@ -196,7 +184,17 @@ const
                                     <MenuItem value={i+1} key={i}>{i+1}</MenuItem>
                                 ))}
                             </Select>
-                        </FormControl>}
+                        </FormControl>
+                        :
+                        <>
+                            <IconButton onClick={plusOnClick}>
+                                <AddRoundedIcon />
+                            </IconButton>
+                            <Typography sx={{verticalAlign:'center',lineHeight:'40px',px:1}}>{maxChildTaskLvl}</Typography>
+                            <IconButton onClick={minusOnClick}>
+                                <RemoveRoundedIcon />
+                            </IconButton>
+                        </> }
                     </Stack>
                     
                 </TableCell>

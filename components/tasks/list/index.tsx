@@ -32,12 +32,12 @@ import { Iaction, initialState, movingAction, reducer, setAllAction, startMoving
 import { LayoutOrderDispatchContext } from "@pages";
 import TableCell from "@mui/material/TableCell";
 import { useTheme } from "@mui/material";
-import useMediaQuery from '@mui/material/useMediaQuery';
 import { updateSession } from "@components/functions";
 import ChildTasksStatus from "./child-tasks-status";
 import { updateRouterHistory } from "@reducers/misc";
 import TimeAccumulated from "./timer";
 import Parent from "./parent";
+import useNarrowBody from "hooks/theme/narrow-body";
 
 const 
     createColumnListSelector = (wideScreen:boolean)=>createSelector(
@@ -55,9 +55,7 @@ const
             dispatch = useAppDispatch(),
             theme = useTheme(),
             {palette:{grey}} = theme,
-            matchesSM = useMediaQuery(theme.breakpoints.up('sm')),
-            matchesMD = useMediaQuery(theme.breakpoints.up('md')),
-            sidebarOpen = useAppSelector(state => state.misc.sidebarOpen),
+            narrowBody = useNarrowBody(),
             idb = useRef<IndexedDB>(),
             store = useStore(),
             [resizerDragging,setResizerDragging] = useState(false),
@@ -96,9 +94,8 @@ const
             },
             updateReduxIDB = () => {
                 const
-                    wideScreen = matchesMD || matchesSM && !sidebarOpen,
                     state = store.getState() as ReduxState,
-                    key = wideScreen ? 'listWideScreenOrder' : 'listNarrowScreenOrder',
+                    key = narrowBody ? 'listNarrowScreenOrder' : 'listWideScreenOrder',
                     fieldsInRedux = taskFieldSelector.selectAll(state).filter(e=>e.fieldType!=='order_in_board_column'),
                     fieldCount = fieldsInRedux.length
 
@@ -125,8 +122,8 @@ const
                             id
                         }
                     )=>({
-                        listWideScreenOrder: wideScreen ? columnState.fields.indexOf(id) : listWideScreenOrder,
-                        listNarrowScreenOrder: wideScreen ? listNarrowScreenOrder : columnState.fields.indexOf(id),
+                        listWideScreenOrder: narrowBody ? listWideScreenOrder : columnState.fields.indexOf(id),
+                        listNarrowScreenOrder: narrowBody ? columnState.fields.indexOf(id) : listNarrowScreenOrder,
                         detailsSidebarOrder,
                         detailsSidebarExpand,
                         id
@@ -152,18 +149,15 @@ const
         },[])
 
         useEffect(()=>{
-            const 
-                wideScreen = matchesMD || matchesSM && !sidebarOpen,
-                arr = wideScreen ? listColumnsWideScreen : listColumnsNarrowScreen
-            setFromRedux(arr)
-        },[matchesMD || matchesSM && !sidebarOpen])
+            setFromRedux([...(narrowBody ? listColumnsNarrowScreen : listColumnsWideScreen)])
+        },[narrowBody])
 
         useEffect(()=>{
-            if (matchesMD || matchesSM && !sidebarOpen) setFromRedux(listColumnsWideScreen)
+            if (!narrowBody) setFromRedux(listColumnsWideScreen)
         },[listColumnsWideScreen])
 
         useEffect(()=>{
-            if (!matchesSM || !matchesMD && sidebarOpen) setFromRedux(listColumnsNarrowScreen)
+            if (narrowBody) setFromRedux(listColumnsNarrowScreen)
         },[listColumnsNarrowScreen])
 
         useEffect(()=>{
@@ -172,11 +166,11 @@ const
 
         return (
             <Grid
-                sx={{margin:'auto',...((matchesMD || matchesSM && !sidebarOpen) && {mx:2.5,mt:2})}}
+                sx={{margin:'auto',...(!narrowBody && {mx:2.5,mt:2})}}
             >
                 <TableContainer
                     sx={{
-                        maxHeight: `calc(100vh - ${(matchesMD || matchesSM && !sidebarOpen) ? 80 : 56}px)`,
+                        maxHeight: `calc(100vh - ${!narrowBody ? 80 : 56}px)`,
                         '& .MuiTableCell-head':{
                             // py:0.3
                         },

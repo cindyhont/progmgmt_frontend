@@ -1,4 +1,4 @@
-import React, { createContext, Dispatch, memo, useContext, useMemo, useReducer, useEffect, useRef, useCallback } from "react";
+import React, { createContext, Dispatch, memo, useContext, useMemo, useReducer, useEffect, useRef } from "react";
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -7,22 +7,18 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Grid from '@mui/material/Grid'
 import Box from '@mui/material/Box'
-import Paper from '@mui/material/Paper'
 import { createSelector, EntityId } from "@reduxjs/toolkit";
 import { ReduxState, useAppDispatch, useAppSelector } from "@reducers";
 import { taskFieldSelector, taskSelector } from "../reducers/slice";
-import { shallowEqual, useStore } from "react-redux";
+import { useStore } from "react-redux";
 import { useTheme } from "@mui/material";
 import AddRoundedIcon from '@mui/icons-material/AddRounded';
 import { addTaskAction } from "../reducers/dialog-ctxmenu-status";
-import { columnStartMoving, Iaction, init, initialState, moving, reducer, taskStartMoving } from "./reducer";
+import { columnStartMoving, Iaction, init, initialState, moving, reducer } from "./reducer";
 import taskApi, { useTaskMovedInBoardMutation } from "../reducers/api";
 import { DialogCtxMenuDispatchContext } from "../contexts";
-import { useRouter } from "next/router";
-import useMediaQuery from '@mui/material/useMediaQuery'
-import { updateSession } from "@components/functions";
-import { updateRouterHistory } from "@reducers/misc";
 import TaskItem from "./task-item";
+import useNarrowBody from "hooks/theme/narrow-body";
 
 export interface Ioption {
     id:EntityId;
@@ -238,10 +234,8 @@ const
                 (option:Ioption)=> !!option ? option.name : null
             ),[id]),
             columnName = useAppSelector(state => columnNameSelector(state)),
-            {palette:{mode,grey,background},breakpoints:{up}} = useTheme(),
-            sidebarOpen = useAppSelector(state => state.misc.sidebarOpen),
-            matchesMD = useMediaQuery(up('md')),
-            matchesSM = useMediaQuery(up('sm')),
+            {palette:{mode,grey,background}} = useTheme(),
+            narrowBody = useNarrowBody(),
             {boardViewDispatch} = useContext(BoardViewDispatchContext),
             onDragStart = () => boardViewDispatch(columnStartMoving(id)),
             onDragEnter = () => {
@@ -251,7 +245,7 @@ const
 
         return (
             <>
-            {!!columnName && (matchesMD || matchesSM && !sidebarOpen) && <TableCell 
+            {!!columnName && !narrowBody && <TableCell 
                 sx={{
                     backgroundColor:'transparent',
                     width:`${100/columnCount}%`,
@@ -302,14 +296,11 @@ const
                 boardViewDispatch(moving({columnIdx,taskIdx:0}))
                 // itemOnDragEnter()
             },
-            {breakpoints:{up}} = useTheme(),
-            sidebarOpen = useAppSelector(state => state.misc.sidebarOpen),
-            matchesMD = useMediaQuery(up('md')),
-            matchesSM = useMediaQuery(up('sm'))
+            narrowBody = useNarrowBody()
 
         return (
             <>
-            {(matchesMD || matchesSM && !sidebarOpen) && <TableCell
+            {!narrowBody && <TableCell
                 sx={{
                     padding:'3px',
                     backgroundColor:'transparent',
@@ -361,14 +352,11 @@ const
                 // itemOnDragEnter()
             },
             smallScreenColumnID = useAppSelector(state => state.taskMgmt.boardViewSmallScreenColumn),
-            {breakpoints:{up}} = useTheme(),
-            sidebarOpen = useAppSelector(state => state.misc.sidebarOpen),
-            matchesMD = useMediaQuery(up('md')),
-            matchesSM = useMediaQuery(up('sm'))
+            narrowBody = useNarrowBody()
 
         return (
             <>
-            {(matchesMD || matchesSM && !sidebarOpen || smallScreenColumnID===columnID) && <TableCell
+            {(!narrowBody || smallScreenColumnID===columnID) && <TableCell
                 sx={{
                     border:'none',
                     p:'3px',

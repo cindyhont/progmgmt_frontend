@@ -12,11 +12,10 @@ import { createSelector } from "@reduxjs/toolkit";
 import { Room } from "../interfaces";
 import { chatConvoSelector, chatRoomSelector, chatRoomUserSelector, chatUserSelector, updateChatRoomStatus } from "../reducers/slice";
 import { useDispatch } from "react-redux";
-import useMediaQuery from '@mui/material/useMediaQuery';
-import { useTheme } from "@mui/material";
 import { useRouter } from "next/router";
 import { enterIsPressed } from "@components/functions";
 import { useFetchMoreConvosMutation, useFetchRepliedConvosAtInitMutation, useFetchRepliedConvosMutation } from "../reducers/api";
+import useNarrowBody from "hooks/theme/narrow-body";
 
 const 
     Conversation = () => {
@@ -129,10 +128,7 @@ const
                 editRef.current.style.transition = transition
                 bodyRef.current.style.transition = transition
             },
-            {breakpoints:{up}} = useTheme(),
-            matchesSM = useMediaQuery(up('sm')),
-            matchesMD = useMediaQuery(up('md')),
-            sidebarOpen = useAppSelector(state => state.misc.sidebarOpen),
+            narrowBody = useNarrowBody(),
             timestamp = useRef(0),
             inputH = useRef(0),
             editorTimeoutRef = useRef<NodeJS.Timeout>(),
@@ -269,7 +265,7 @@ const
                         overflowY:'auto',
                         mb:1,
                         transition:'height 0.2s',
-                        ...((!matchesSM || !matchesMD && sidebarOpen) && {px:1}),
+                        ...(narrowBody && {px:1}),
                         height:'100%',
                     }}
                 >

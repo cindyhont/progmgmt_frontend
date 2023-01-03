@@ -1,24 +1,20 @@
 import React, { useEffect } from "react";
 import Grid from '@mui/material/Grid'
 import Stack from '@mui/material/Stack'
-import { ReduxState, useAppDispatch, useAppSelector } from "@reducers";
-import { useTheme } from "@mui/material";
-import useMediaQuery from '@mui/material/useMediaQuery'
+import { ReduxState, useAppDispatch } from "@reducers";
 import TasksByStatus from "./tasks-by-status";
 import { useStore } from "react-redux";
 import { googleChartIsLoaded } from "@reducers/misc";
 import AssignedToMe from "./assigned-to-me";
+import useNarrowBody from "hooks/theme/narrow-body";
 
 
 const 
     Dashboard = () => {
         const
-            sidebarOpen = useAppSelector(state => state.misc.sidebarOpen),
-            {breakpoints:{up}} = useTheme(),
-            matchesSM = useMediaQuery(up('sm')),
-            matchesMD = useMediaQuery(up('md')),
             store = useStore(),
             dispatch = useAppDispatch(),
+            narrowBody = useNarrowBody(),
             updateChartLoaded = () => dispatch(googleChartIsLoaded())
 
         useEffect(()=>{
@@ -29,7 +25,7 @@ const
             }
         },[])
 
-        if (matchesMD || matchesSM && !sidebarOpen) return (
+        if (!narrowBody) return (
             <Stack direction='row' spacing={2} p={2}>
                 <DashboardColumn>
                     <>

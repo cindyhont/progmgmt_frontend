@@ -8,15 +8,13 @@ import TableRow from '@mui/material/TableRow';
 import TableCell from '@mui/material/TableCell';
 import Box from '@mui/material/Box'
 import { useAppSelector } from "@reducers";
-import { shallowEqual } from "react-redux";
 import { chatRoomSelector } from "../reducers/slice";
 import { EntityId } from "@reduxjs/toolkit";
-import useMediaQuery from '@mui/material/useMediaQuery';
-import { useTheme } from "@mui/material";
 import IconButton from '@mui/material/IconButton'
 import ArrowBackIosNewRoundedIcon from '@mui/icons-material/ArrowBackIosNewRounded';
 import { userDetailsSelector } from "@reducers/user-details/slice";
 import { useRouter } from "next/router";
+import useNarrowBody from "hooks/theme/narrow-body";
 
 const 
     Header = memo(forwardRef((_,ref:ForwardedRef<HTMLDivElement>)=>{
@@ -54,12 +52,8 @@ const
         }
     ) => {
         const
-            theme = useTheme(),
-            {breakpoints:{up}} = theme,
-            matchesSM = useMediaQuery(up('sm')),
-            matchesMD = useMediaQuery(up('md')),
-            sidebarOpen = useAppSelector(state => state.misc.sidebarOpen,shallowEqual),
             router = useRouter(),
+            narrowBody = useNarrowBody(),
             backOnClick = () => router.push('/?page=chat','/chat',{shallow:true})
 
         return (
@@ -69,12 +63,12 @@ const
                         borderBottom:'none',
                         pb:1
                     },
-                    ...((!matchesSM || !matchesMD && sidebarOpen) && {ml:1}),
+                    ...(narrowBody && {ml:1}),
                 }}
             >
                 <TableBody>
                     <TableRow>
-                        {(!matchesSM || !matchesMD && sidebarOpen) && <TableCell sx={{textAlign:'left',p:0,width:0}}>
+                        {narrowBody && <TableCell sx={{textAlign:'left',p:0,width:0}}>
                             <IconButton 
                                 sx={{ml:-1}} 
                                 onClick={backOnClick}

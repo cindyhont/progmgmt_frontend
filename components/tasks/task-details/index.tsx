@@ -7,18 +7,17 @@ import { openCtxMenuAction } from "../reducers/dialog-ctxmenu-status";
 import Sidebar from "./sidebar";
 import Body from "./body";
 import { useTheme } from '@mui/material/styles';
-import useMediaQuery from '@mui/material/useMediaQuery';
 import WidgetsRoundedIcon from '@mui/icons-material/WidgetsRounded';
 import ClearRoundedIcon from '@mui/icons-material/ClearRounded';
 import SmallScreenToggle from "@components/common-components/small-screen-toggle";
+import useNarrowBody from "hooks/theme/narrow-body";
 
 const 
     TaskDetails = () => {
         const 
             theme = useTheme(),
             {palette:{mode,grey}} = theme,
-            matchesSM = useMediaQuery(theme.breakpoints.up('sm')),
-            matchesMD = useMediaQuery(theme.breakpoints.up('md')),
+            narrowBody = useNarrowBody(),
             sidebarOpen = useAppSelector(state => state.misc.sidebarOpen),
             dispatch = useAppDispatch(),
             {dialogCtxMenuStatusDispatch} = useContext(DialogCtxMenuDispatchContext),
@@ -49,19 +48,19 @@ const
 
         useEffect(()=>{
             const sidebar = document.getElementById('task-details-sidebar')
-            if (matchesMD || matchesSM && !sidebarOpen){
-                setRightSidebarOpen(false)
-                sidebar.style.left = null
-            } else {
+            if (narrowBody){
                 if (rightSidebarOpen) sidebar.style.left = '0%'
                 else sidebar.style.left = '100%'
+            } else {
+                setRightSidebarOpen(false)
+                sidebar.style.left = null
             }
-        },[rightSidebarOpen,matchesMD || matchesSM && !sidebarOpen])
+        },[rightSidebarOpen,narrowBody])
 
         return (
             <Grid
                 {...{
-                    ...((matchesMD || matchesSM && !sidebarOpen) ? {
+                    ...(!narrowBody ? {
                         container:true,
                         direction:'row',
                         spacing:2,
@@ -78,7 +77,7 @@ const
             >
                 <Grid
                     {...{
-                        ...((!matchesSM || !matchesMD && sidebarOpen) ? {
+                        ...(narrowBody ? {
                             item:true,
                             sx:{
                                 ml:2,
@@ -109,7 +108,7 @@ const
                 <Grid
                     id='task-details-sidebar'
                     {...{
-                        ...((!matchesSM || !matchesMD && sidebarOpen) ? {
+                        ...(narrowBody ? {
                             item:true,
                             px:2,
                             sx:{

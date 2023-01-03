@@ -31,7 +31,7 @@ import taskApi from '@components/tasks/reducers/api';
 import { useStore } from 'react-redux';
 import { DialogCtxMenuDispatchContext } from '@components/tasks/contexts';
 import IndexedDB from '@indexeddb';
-import useMediaQuery from '@mui/material/useMediaQuery';
+import useNarrowBody from 'hooks/theme/narrow-body';
 
 const 
     Context = createContext<{customFieldDispatch:Dispatch<Iaction>}>({customFieldDispatch:()=>{}}),
@@ -47,9 +47,7 @@ const
                 onClose()
                 setTimeout(()=>customFieldDispatch(resetAction(initialState)),200)
             },
-            {breakpoints:{up}} = useTheme(),
-            matchesSM = useMediaQuery(up('sm')),
-            matchesMD = useMediaQuery(up('md')),
+            narrowBody = useNarrowBody(),
             onSubmit = (e:FormEvent) => {
                 e.preventDefault()
                 closeOnClick()
@@ -57,16 +55,15 @@ const
                 const 
                     fieldID = uuidv4(),
                     s = store.getState() as ReduxState,
-                    sidebarOpen = s.misc.sidebarOpen,
                     existingFields = taskFieldSelector.selectAll(s)
-                dispatch(taskApi.endpoints.taskAddCustomField.initiate({f:JSON.parse(JSON.stringify(state)),fieldID,wideScreen:matchesMD || matchesSM && !sidebarOpen}))
+                dispatch(taskApi.endpoints.taskAddCustomField.initiate({f:JSON.parse(JSON.stringify(state)),fieldID,wideScreen:!narrowBody}))
 
                 idb.current.addMulitpleEntries(
                     idb.current.storeNames.taskFields,
                     [{
                         id:fieldID,
                         listWideScreenOrder:Math.max(...existingFields.map(e=>e.listWideScreenOrder))+1,
-                        listNarrowScreenOrder:!matchesSM || !matchesMD && sidebarOpen ? Math.max(...existingFields.map(e=>e.listNarrowScreenOrder))+1 : -1,
+                        listNarrowScreenOrder:narrowBody ? Math.max(...existingFields.map(e=>e.listNarrowScreenOrder))+1 : -1,
                         detailsSidebarOrder:Math.max(...existingFields.map(e=>e.detailsSidebarOrder))+1,
                         detailsSidebarExpand:true,
                     }]
