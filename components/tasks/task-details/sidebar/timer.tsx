@@ -17,7 +17,7 @@ import useTaskStopwatch from "hooks/counter/task-stopwatch";
 const 
     Timer = memo(()=>{
         const
-            theme = useTheme(),
+            {palette} = useTheme(),
             router = useRouter(),
             taskID = router.query.taskid as string,
             timerOnSelector = useMemo(()=>createSelector(
@@ -41,9 +41,9 @@ const
                 <Grid container direction='row' sx={{justifyContent:'center'}}>
                     <IconButton 
                         sx={{
-                            backgroundColor:theme.palette[timerOn ? 'secondary' : 'primary'][theme.palette.mode],
+                            backgroundColor:palette[timerOn ? 'secondary' : 'primary'][palette.mode],
                             '&:hover':{
-                                backgroundColor:theme.palette[timerOn ? 'secondary' : 'primary'].main
+                                backgroundColor:palette[timerOn ? 'secondary' : 'primary'].main
                             }
                         }}
                         onClick={onClick}

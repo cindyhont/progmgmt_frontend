@@ -45,7 +45,7 @@ const
             columnTaskIdSelector = useMemo(()=>createSelector(
                 (state:ReduxState)=>state,
                 (state:ReduxState)=>{
-                    if (!boardColumnIDs.length) return JSON.stringify({})
+                    if (!boardColumnIDs.length) return '{}'
                     const 
                         tasks = taskSelector.selectAll(state),
                         uid = state.misc.uid,
@@ -182,7 +182,6 @@ const
                                     id,
                                     columnCount:state.columnIDs.length,
                                     columnIdx:i,
-                                    // itemOnDragEnter:()=>setUpdateTaskColumnTimeout(i),
                                 }} />
                             ))}
                         </TableRow>
@@ -192,7 +191,6 @@ const
                                     id,
                                     boardColumnFieldID,
                                     columnIdx:i,
-                                    // itemOnDragEnter:()=>setUpdateTaskColumnTimeout(i),
                                 }} />
                             ))}
                         </TableRow>
@@ -206,7 +204,6 @@ const
                                     columnID,
                                     taskMoving:state.taskMoving,
                                     blankAreaVisible:!!state.columnMoving || !!state.taskMoving,
-                                    // itemOnDragEnter:()=>setUpdateTaskColumnTimeout(i),
                                 }} />
                             ))}
                         </TableRow>
@@ -220,12 +217,10 @@ const
             id,
             columnCount,
             columnIdx,
-            // itemOnDragEnter,
         }:{
             id:EntityId;
             columnCount:number;
             columnIdx:number;
-            // itemOnDragEnter:()=>void;
         }
     )=>{
         const 
@@ -238,10 +233,7 @@ const
             narrowBody = useNarrowBody(),
             {boardViewDispatch} = useContext(BoardViewDispatchContext),
             onDragStart = () => boardViewDispatch(columnStartMoving(id)),
-            onDragEnter = () => {
-                boardViewDispatch(moving({columnIdx,taskIdx:0}))
-                // itemOnDragEnter()
-            }
+            onDragEnter = () => boardViewDispatch(moving({columnIdx,taskIdx:0}))
 
         return (
             <>
@@ -277,25 +269,18 @@ const
             id,
             boardColumnFieldID,
             columnIdx,
-            // itemOnDragEnter,
         }:{
             id:EntityId;
             boardColumnFieldID:EntityId;
             columnIdx:number;
-            // itemOnDragEnter:()=>void;
         }
     ) => {
         const 
             theme = useTheme(),
             {dialogCtxMenuStatusDispatch} = useContext(DialogCtxMenuDispatchContext),
-            onClick = () => {
-                dialogCtxMenuStatusDispatch(addTaskAction({[boardColumnFieldID]:id}))
-            },
+            onClick = () => dialogCtxMenuStatusDispatch(addTaskAction({[boardColumnFieldID]:id})),
             {boardViewDispatch} = useContext(BoardViewDispatchContext),
-            onDragEnter = () => {
-                boardViewDispatch(moving({columnIdx,taskIdx:0}))
-                // itemOnDragEnter()
-            },
+            onDragEnter = () => boardViewDispatch(moving({columnIdx,taskIdx:0})),
             narrowBody = useNarrowBody()
 
         return (
@@ -335,22 +320,17 @@ const
             columnIdx,
             columnID,
             blankAreaVisible,
-            // itemOnDragEnter,
         }:{
             taskIDs:EntityId[];
             taskMoving:EntityId;
             columnIdx:number;
             columnID:EntityId;
             blankAreaVisible:boolean;
-            // itemOnDragEnter:()=>void;
         }
     )=>{
         const
             {boardViewDispatch} = useContext(BoardViewDispatchContext),
-            onDragEnter = () => {
-                boardViewDispatch(moving({columnIdx,taskIdx:taskIDs.includes(taskMoving) ? taskIDs.length - 1 : taskIDs.length}))
-                // itemOnDragEnter()
-            },
+            onDragEnter = () => boardViewDispatch(moving({columnIdx,taskIdx:taskIDs.includes(taskMoving) ? taskIDs.length - 1 : taskIDs.length})),
             smallScreenColumnID = useAppSelector(state => state.taskMgmt.boardViewSmallScreenColumn),
             narrowBody = useNarrowBody()
 

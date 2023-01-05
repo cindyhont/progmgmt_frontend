@@ -24,7 +24,7 @@ const
         }
     )=>{
         const
-            theme = useTheme(),
+            {palette:{grey,mode}} = useTheme(),
             {addEditTaskDispatch} = useContext(Context),
             onChange = (_:SyntheticEvent,value:boolean) => addEditTaskDispatch(toggleAccordionAction({key:field,value}))
 
@@ -44,8 +44,8 @@ const
                     expandIcon={expanded ? <CheckCircleRoundedIcon color='primary' /> : <RadioButtonUncheckedRoundedIcon />}
                     sx={{
                         backgroundColor:expanded 
-                            ? blue[theme.palette.mode==='light' ? 50 : 800] 
-                            : theme.palette.grey[theme.palette.mode==='light' ? 50 : 800],
+                            ? blue[mode==='light' ? 50 : 800] 
+                            : grey[mode==='light' ? 50 : 800],
                         '.Mui-expanded':{
                             transform:'none !important'
                         }
@@ -53,7 +53,7 @@ const
                 >{title}</AccordionSummary>
                 <AccordionDetails
                     sx={{
-                        ...(theme.palette.mode==='dark' && {
+                        ...(mode==='dark' && {
                             backgroundImage: 'linear-gradient(rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.16))'
                         }),
                     }}

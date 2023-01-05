@@ -3,9 +3,10 @@ import Grid from '@mui/material/Grid';
 import IconButton from '@mui/material/IconButton';
 import ArrowDownwardRoundedIcon from '@mui/icons-material/ArrowDownwardRounded';
 import { useTheme } from '@mui/material/styles';
+import scrollToBottom from "./functions/to-bottom";
 
 const 
-    ScrollToBottomBtn = memo(forwardRef(({scrollToBottom}:{scrollToBottom:()=>void},ref:ForwardedRef<HTMLButtonElement>)=>{
+    ScrollToBottomBtn = memo(forwardRef((_,ref:ForwardedRef<HTMLButtonElement>)=>{
         const {palette:{background,grey,mode,text}} = useTheme()
         return (
             <IconButton
@@ -36,6 +37,7 @@ const
             ref={ref}
             container 
             direction='row' 
+            id='chat-to-bottom-btn'
             sx={{
                 justifyContent:'center',
                 position:'absolute',

@@ -218,12 +218,12 @@ const
 
         useEffect(()=>{
             setTimeout(init,1)
-            window.addEventListener('resize',onResize)
-            window.addEventListener('mousemove',onMouseMovement,{passive:false})
-            window.addEventListener('mouseup',onMovtEnd)
-            window.addEventListener('touchmove',onTouchMovement,{passive:false})
-            window.addEventListener('touchend',onMovtEnd)
-            window.addEventListener('touchcancel',onMovtEnd)
+            window.addEventListener('resize',onResize,{passive:true})
+            window.addEventListener('mousemove',onMouseMovement,{passive:true})
+            window.addEventListener('mouseup',onMovtEnd,{passive:true})
+            window.addEventListener('touchmove',onTouchMovement,{passive:true})
+            window.addEventListener('touchend',onMovtEnd,{passive:true})
+            window.addEventListener('touchcancel',onMovtEnd,{passive:true})
 
             return () => {
                 window.removeEventListener('resize',onResize)

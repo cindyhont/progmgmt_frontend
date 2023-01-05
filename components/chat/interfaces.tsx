@@ -46,7 +46,8 @@ export interface Room {
     isGroup:boolean;
     markAsRead:number;
     pinned:boolean;
-    scrollY:number;
+    scrollY:number; // this is the entire chat logs' bounding rect top
+    viewportLatestConvoID:EntityId;
 
     draft:string;
     replyMsgID:EntityId;

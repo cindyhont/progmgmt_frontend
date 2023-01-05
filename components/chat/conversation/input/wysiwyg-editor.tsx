@@ -1,4 +1,4 @@
-import React, { memo, useEffect, useMemo, useRef, useState } from 'react';
+import React, { memo, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { ReduxState, useAppDispatch, useAppSelector } from '@reducers';
 import { Editor } from '@tinymce/tinymce-react';
 import { EditorEvent, Editor as EditorType } from 'tinymce';
@@ -13,15 +13,13 @@ import { enterIsPressed, fileInputSelector } from '@components/functions';
 import { useSendWsMessageMutation } from 'websocket/api';
 import { ActionTypes } from '../../reducers/ws-message-types';
 import { useCreateConvoInExistingRoomMutation, useCreateRoomNoConvoMutation, useCreateRoomWithFirstConvoMutation } from '@components/chat/reducers/api';
+import scrollToBottom from '../functions/to-bottom';
+import { ChatEventDispatchContext, ChatEventStateContext, updateEditorLoadStatus } from '../functions/reducer-context';
 
 const WYSIWHYeditor = memo((
     {
-        editorLoaded,
-        editorIsLoaded,
         setNoInputString,
     }:{
-        editorLoaded:boolean;
-        editorIsLoaded:()=>void;
         setNoInputString:(v:boolean)=>void;
     }
 ) => {
@@ -39,6 +37,9 @@ const WYSIWHYeditor = memo((
         dispatch = useAppDispatch(),
         [typing,setTyping] = useState(false),
         timestamp = useRef(0),
+        {editorLoaded} = useContext(ChatEventStateContext),
+        chatContentEventDispatch = useContext(ChatEventDispatchContext),
+        editorOnLoad = () => chatContentEventDispatch(updateEditorLoadStatus()),
         [sendWsMessage] = useSendWsMessageMutation(),
         editorCommandOnExec = (e:EditorEvent<any>) => {
             if (e.command !== 'mceFocus' && !e?.value?.dialog) {
@@ -82,6 +83,7 @@ const WYSIWHYeditor = memo((
                     } catch {}
                 }
             }
+            setTimeout(()=>scrollToBottom(),10)
         },
         submitOnClick = () => submitConvo(editorRef.current.innerHTML),
         emoticonOnClick = () => {
@@ -147,15 +149,15 @@ const WYSIWHYeditor = memo((
             emojiBtn = document.getElementById('chat-emoji-btn'),
             submitBtn = document.getElementById('chat-submit-btn')
 
-        if (editorIsLoaded) {
+        if (editorLoaded) {
             if (!editorRef.current) editorRef.current = document.getElementById(editorID) as HTMLDivElement
-            editorRef.current.addEventListener('keydown',onKeyDown)
-            editorRef.current.addEventListener('keyup',onKeyUp)
-            editorRef.current.addEventListener('cut',onClipboardEvent)
-            editorRef.current.addEventListener('paste',onClipboardEvent)
+            editorRef.current.addEventListener('keydown',onKeyDown,{passive:true})
+            editorRef.current.addEventListener('keyup',onKeyUp,{passive:true})
+            editorRef.current.addEventListener('cut',onClipboardEvent,{passive:true})
+            editorRef.current.addEventListener('paste',onClipboardEvent,{passive:true})
 
-            emojiBtn.addEventListener('click',emoticonOnClick)
-            submitBtn.addEventListener('click',submitOnClick)
+            emojiBtn.addEventListener('click',emoticonOnClick,{passive:true})
+            submitBtn.addEventListener('click',submitOnClick,{passive:true})
         }
         return () => {
             if (!!editorRef.current){
@@ -184,7 +186,7 @@ const WYSIWHYeditor = memo((
             tinymceScriptSrc="tinymce/tinymce.min.js"
             inline
             id={editorID}
-            onInit={editorIsLoaded}
+            onInit={editorOnLoad}
             onFocus={editorOnFocus}
             init={{
                 menubar:false,

@@ -34,7 +34,7 @@ const CheckboxElem = memo((
     }
 )=>{
     const 
-        theme = useTheme(),
+        {palette:{grey}} = useTheme(),
         router = useRouter(),
         taskID = router.query.taskid as string,
         editRightSelector = useMemo(()=>createSelector(
@@ -93,7 +93,7 @@ const CheckboxElem = memo((
                     <TableRow>
                         <TableCell sx={{width:0,cursor:'move'}}>
                             <Box sx={{display:'flex',justifyContent:'center'}}>
-                                <DragIndicatorIcon fontSize="small" sx={{mx:1}} htmlColor={theme.palette.grey[500]} />
+                                <DragIndicatorIcon fontSize="small" sx={{mx:1}} htmlColor={grey[500]} />
                             </Box>
                         </TableCell>
                         <TableCell>

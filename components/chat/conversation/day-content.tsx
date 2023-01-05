@@ -54,8 +54,8 @@ const ChatDayContent = memo(({date}:{date:number})=>{
     },[])
 
     useEffect(()=>{
-        const elem = document.getElementById('convo-container')
-        elem.addEventListener('scroll',onScroll)
+        const elem = document.getElementById('convo-window')
+        elem.addEventListener('scroll',onScroll,{passive:true})
         return () => window.removeEventListener('scroll',onScroll)
     },[])
 

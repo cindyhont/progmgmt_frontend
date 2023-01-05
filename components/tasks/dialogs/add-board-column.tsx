@@ -29,9 +29,6 @@ const AddBoardColumnDialog = memo(({open}:{open:boolean;}) => {
 
             const 
                 state = store.getState() as ReduxState,
-                // boardColumnTypeID = taskCustomFieldTypesSelector.selectAll(state).find(t=>t.fieldType==='board_column').id,
-                // boardColumnFieldID = taskCustomFieldSelector.selectAll(state).find(f=>f.fieldTypeID===boardColumnTypeID).id,
-                // boardColumnFieldObj = taskCustomFieldSelector.selectById(state,boardColumnFieldID)
                 boardColumnFieldObj = taskFieldSelector.selectAll(state).find(e=>e.fieldType==='board_column')
 
             dispatch(taskApi.endpoints.editCustomField.initiate({

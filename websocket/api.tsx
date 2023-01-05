@@ -157,10 +157,10 @@ const
                     try {
                         if (!ws) {
                             ws = new WebSocket(`${WS_HOST}/ws`)
-                            ws.addEventListener('open',connected)
-                            ws.addEventListener('error',e=>console.log(e))
-                            ws.addEventListener('close',closeWS)
-                            ws.addEventListener('message',e=>dispatchMessage(e.data))
+                            ws.addEventListener('open',connected,{passive:true})
+                            ws.addEventListener('error',e=>console.log(e),{passive:true})
+                            ws.addEventListener('close',closeWS,{passive:true})
+                            ws.addEventListener('message',e=>dispatchMessage(e.data),{passive:true})
                         }
                     } catch (error) {
                         console.log(error)

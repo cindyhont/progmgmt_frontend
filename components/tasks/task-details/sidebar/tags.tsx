@@ -59,13 +59,13 @@ const
         )
     }),
     Tag = memo(({name,color}:{name:string;color:string;})=>{
-        const theme = useTheme()
+        const {palette:{getContrastText}} = useTheme()
         return (
             <Chip 
                 label={name} 
                 sx={{
                     backgroundColor:color,
-                    color:theme.palette.getContrastText(color),
+                    color:getContrastText(color),
                     mr:1,
                     mb:1
                 }} 
@@ -75,7 +75,7 @@ const
     }),
     Editor = memo(({fieldID,editModeOff}:{fieldID:EntityId;editModeOff:()=>void;})=>{
         const
-            theme = useTheme(),
+            {palette:{getContrastText}} = useTheme(),
             router = useRouter(),
             taskID = router.query.taskid as string,
             options = useAppSelector(state => taskFieldSelector.selectById(state,fieldID).details.options as Itag[]),
@@ -118,7 +118,7 @@ const
                         sx={{
                             backgroundColor:color,
                             '.MuiChip-label':{
-                                color:theme.palette.getContrastText(color)
+                                color:getContrastText(color)
                             }
                         }}
                         key={index}

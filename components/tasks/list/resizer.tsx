@@ -78,8 +78,8 @@ const Resizer = memo((
         }
 
     useEffect(()=>{
-        document.addEventListener('mousemove',onMouseMove)
-        document.addEventListener('mouseup',onMouseUp)
+        document.addEventListener('mousemove',onMouseMove,{passive:true})
+        document.addEventListener('mouseup',onMouseUp,{passive:true})
         return () => {
             document.removeEventListener('mousemove',onMouseMove)
             document.removeEventListener('mouseup',onMouseUp)

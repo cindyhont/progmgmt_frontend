@@ -99,7 +99,7 @@ const
             checkDragHasFiles = (e:DragEvent) => dragHasFiles.current = e.dataTransfer.types.includes('Files')
 
         useEffect(()=>{
-            window.addEventListener('dragover',checkDragHasFiles)
+            window.addEventListener('dragover',checkDragHasFiles,{passive:true})
             return () => window.removeEventListener('dragover',checkDragHasFiles)
         },[])
 
@@ -150,7 +150,7 @@ const
         }
     )=>{
         const
-            theme = useTheme(),
+            {palette:{mode}} = useTheme(),
             router = useRouter(),
             taskID = router.query.taskid as string,
             fileNameSelector = useMemo(()=>createSelector(
@@ -191,7 +191,7 @@ const
             fileName,
             onCancel,
             onDelete,
-            backgroundColor:`rgba(255,255,255,${theme.palette.mode==='light' ? 1 : 0.2})`
+            backgroundColor:`rgba(255,255,255,${mode==='light' ? 1 : 0.2})`
         }} />
 
         return <FileDivertComponent 

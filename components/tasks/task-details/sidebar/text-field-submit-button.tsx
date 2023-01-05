@@ -4,21 +4,21 @@ import CheckRoundedIcon from '@mui/icons-material/CheckRounded';
 import IconButton from '@mui/material/IconButton'
 
 const TextFieldSubmitButton = ({onSubmit}:{onSubmit:()=>void}) => {
-    const theme = useTheme()
+    const {palette:{primary,getContrastText}} = useTheme()
     return (
         <IconButton 
             sx={{
-                backgroundColor:theme.palette.primary.main,
+                backgroundColor:primary.main,
                 borderRadius:1,
                 ml:2,
                 mr:1,
                 '&:hover':{
-                    backgroundColor:theme.palette.primary.dark,
+                    backgroundColor:primary.dark,
                 },
                 '.MuiSvgIcon-root':{
-                    fill:theme.palette.getContrastText(theme.palette.primary.main),
+                    fill:getContrastText(primary.main),
                     '&:hover':{
-                        fill:theme.palette.getContrastText(theme.palette.primary.dark)
+                        fill:getContrastText(primary.dark)
                     }
                 }
             }}

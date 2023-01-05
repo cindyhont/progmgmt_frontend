@@ -93,7 +93,7 @@ const
 
         useEffect(()=>{
             updateScreen()
-            window.addEventListener('resize',updateScreen)
+            window.addEventListener('resize',updateScreen,{passive:true})
             return () => window.removeEventListener('resize',updateScreen)
         },[])
 

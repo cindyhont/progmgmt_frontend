@@ -66,7 +66,7 @@ const
                         if (!worker){
                             worker = new Worker(new URL('./worker.ts',import.meta.url));
                             
-                            worker.addEventListener('message',listener)
+                            worker.addEventListener('message',listener,{passive:true})
                         }
                     } catch {}
                     await cacheEntryRemoved

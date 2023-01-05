@@ -22,7 +22,7 @@ const TaskTimer = () => {
                 const timerRunning = timeRecords.find(r=>!r.end && r.uid===uid)
                 return {
                     taskName:!!timerRunning ? taskSelector.selectById(state,timerRunning.taskID).name : null,
-                    timerID:timerRunning.id || null
+                    timerID:timerRunning?.id || null
                 }
             }
         ),[]),

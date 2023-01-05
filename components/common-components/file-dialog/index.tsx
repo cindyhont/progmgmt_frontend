@@ -40,7 +40,7 @@ const
 
         useEffect(()=>{
             updateOrientation()
-            window.addEventListener('resize',updateOrientation)
+            window.addEventListener('resize',updateOrientation,{passive:true})
             return () => window.removeEventListener('resize',updateOrientation)
         },[])
 

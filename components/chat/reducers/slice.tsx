@@ -33,6 +33,9 @@ const
             updateChatRoomStatus(state:Ichat,{payload}:PayloadAction<Update<Room>>){
                 roomAdapter.updateOne(state.rooms,payload)
             },
+            updateChatManyRoomStatus(state:Ichat,{payload}:PayloadAction<Update<Room>[]>){
+                roomAdapter.updateMany(state.rooms,payload)
+            },
             chatRoomAddOne(state:Ichat,{payload}:PayloadAction<{
                 id:EntityId;
                 users:EntityId[];
@@ -64,6 +67,7 @@ const
                     scrollY:0,
                     hasMoreConvos:false,
                     fetchingConvos:false,
+                    viewportLatestConvoID:'',
                 })
                 // roomUserAdapter.setAll(state.rooms.entities[payload.id].users,payload.users.map(id=>({id,lastSeen:0,typing:false})))
             },
@@ -121,6 +125,7 @@ export const {
     
     chatRoomUpsertMany,
     updateChatRoomStatus,
+    updateChatManyRoomStatus,
     updateChatRoomUserStatus,
     updateChatUserStatus,
     chatRoomFileInputSetAll,

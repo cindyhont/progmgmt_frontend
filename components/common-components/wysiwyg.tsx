@@ -17,7 +17,7 @@ const
         input.addEventListener('change', (e:any) => {
             const file = (e as ChangeEvent<HTMLInputElement>).target.files[0];
             cb(URL.createObjectURL(file))
-        });
+        },{passive:true});
 
         input.click();
     },

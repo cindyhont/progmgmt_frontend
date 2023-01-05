@@ -166,7 +166,7 @@ const
             })
 
         useEffect(()=>{
-            // if (open) topRef.current.scrollIntoView()
+            if (open) topRef.current.scrollIntoView()
         },[open])
 
         return (

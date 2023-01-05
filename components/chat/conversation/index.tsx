@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react";
 import Grid from '@mui/material/Grid';
 import ChatInput from "./input";
 import { ScrollToBottomBtn, ScrollToBottomBtnContainer } from "./scrollToBottomBtn";
@@ -16,6 +16,12 @@ import { useRouter } from "next/router";
 import { enterIsPressed } from "@components/functions";
 import { useFetchMoreConvosMutation, useFetchRepliedConvosAtInitMutation, useFetchRepliedConvosMutation } from "../reducers/api";
 import useNarrowBody from "hooks/theme/narrow-body";
+import { ChatEventDispatchContext, ChatEventStateContext, initialState, reducer } from "./functions/reducer-context";
+import useReturnToPrevRoomUser from "./functions/on-return-to-prev-room-or-user";
+import useScrollOnReplyEdit from "./functions/scroll-on-reply-or-edit";
+import useViewportLatestConvo from "./functions/viewport-latest-convo";
+import useFetchOldConvos from "./functions/fetch-old-convos";
+import useScrollOnChange from "./functions/scroll-on-change";
 
 const 
     Conversation = () => {
@@ -59,225 +65,65 @@ const
         const
             {query} = useRouter(),
             roomID = query.roomid as string,
-            userID = query.userid as string,
-            containerRef = useRef<HTMLDivElement>(),
-            headerRef = useRef<HTMLDivElement>(),
-            bodyRef = useRef<HTMLDivElement>(),
+            inputContainer = useRef<HTMLDivElement>(),
+            chatWindow = useRef<HTMLDivElement>(),
             chatConvoContainer = useRef<HTMLDivElement>(),
-            editorRef = useRef<HTMLDivElement>(),
-            submitBtnRef = useRef<HTMLButtonElement>(),
-            [editorLoaded,setEditorLoaded] = useState(false),
-            editorIsLoaded = useCallback(()=>setEditorLoaded(true),[]),
-            toBottom = useCallback(()=>chatConvoContainer.current.scrollIntoView({behavior:'smooth',block:'end'}),[]),
             bottomBtnContainerRef = useRef<HTMLDivElement>(),
             bottomBtnRef = useRef<HTMLButtonElement>(),
-            replyRef = useRef<HTMLDivElement>(),
-            tabBarHeightRef = useRef(0),
-            editRef = useRef<HTMLDivElement>(),
-            roomDetailsSelector = useMemo(()=>createSelector(
-                (state:ReduxState)=>chatRoomSelector.selectById(state,roomID),
-                (r:Room)=>({
-                    replyStatus:!!r && r.reply,
-                    editStatus:!!r && r.edit,
-                    fetchingConvos:!!r && r.fetchingConvos,
-                    convoCount:!!r ? chatConvoSelector.selectTotal(r) : 0
-                })
-            ),[roomID]),
-            {replyStatus,editStatus,fetchingConvos,convoCount} = useAppSelector(state => roomDetailsSelector(state)),
-            store = useStore(),
-            dispatch = useDispatch(),
-            [fetchMoreConvos] = useFetchMoreConvosMutation(),
-            [fetchRepliedConvos] = useFetchRepliedConvosMutation(),
-            onScroll = () => {
-                const 
-                    convoListRect = chatConvoContainer.current.getBoundingClientRect(),
-                    atBottom = convoListRect.bottom - bodyRef.current.getBoundingClientRect().bottom < 200,
-                    newHeight = editorRef.current.getBoundingClientRect().height + (replyStatus || editStatus ? tabBarHeightRef.current : 0) + 50
-                    
-                bottomBtnContainerRef.current.style.bottom = `${newHeight}px`
-                bottomBtnContainerRef.current.style.transform = atBottom ? `translateY(${newHeight}px)` : 'none'
-                bottomBtnContainerRef.current.style.opacity = atBottom ? '0' : '1'
-                bottomBtnRef.current.disabled = atBottom
-                bottomBtnRef.current.style.cursor = atBottom ? 'default' : 'pointer'
-                
-                if (!!roomID) {
-                    dispatch(updateChatRoomStatus({id:roomID,changes:{scrollY:bodyRef.current.scrollTop}}))
-                    const 
-                        state = store.getState() as ReduxState,
-                        room = chatRoomSelector.selectById(state,roomID)
-                    if (!room || !room.hasMoreConvos || room.fetchingConvos) return
-
-                    if (convoListRect.top > -500) fetchMoreConvos(roomID)
-                    else {
-                        const
-                            allConvoIDs = chatConvoSelector.selectIds(room),
-                            convosWithReply = chatConvoSelector.selectAll(room).filter(e=>!!e.replyMsgID),
-                            convosNoReplyDownloaded = convosWithReply.filter(e=>!allConvoIDs.includes(e.replyMsgID)),
-                            len = convosNoReplyDownloaded.length
-                        if (!len) return
-                        const 
-                            idToCheck = len===1 ? convosNoReplyDownloaded[0].id : convosNoReplyDownloaded.sort((a,b)=>b.dt - a.dt)[0].id,
-                            elem = document.getElementById(idToCheck.toString()),
-                            rect = elem.getBoundingClientRect()
-                        if (rect.bottom > -500) fetchRepliedConvos({roomID,convoID:idToCheck})
-                    }
-                }
-            },
-            updateTransitions = (transition:string) => {
-                replyRef.current.style.transition = transition
-                editRef.current.style.transition = transition
-                bodyRef.current.style.transition = transition
-            },
             narrowBody = useNarrowBody(),
-            timestamp = useRef(0),
-            inputH = useRef(0),
-            editorTimeoutRef = useRef<NodeJS.Timeout>(),
-            editorOnChange = () => {
-                clearTimeout(editorTimeoutRef.current)
-                const editorHeight = editorRef.current.getBoundingClientRect().height
-                if (inputH.current !== editorHeight) {
-                    bodyRef.current.scrollBy(0,editorHeight - inputH.current)
-                    inputH.current = editorHeight
-                }
-            },
-            setEditorTimeout = () => editorTimeoutRef.current = setTimeout(editorOnChange,10),
-            onInputEvent = (e:KeyboardEvent) => {
-                if (e.timeStamp === timestamp.current) return
-                timestamp.current = e.timeStamp
-                if (enterIsPressed(e)) setTimeout(toBottom,10)
-                else setEditorTimeout()
-            },
-            onClipboardEvent = (e:ClipboardEvent) => {
-                if (e.timeStamp === timestamp.current) return
-                timestamp.current = e.timeStamp
-                setEditorTimeout()
-            },
-            renewBodyTimeout = useRef<NodeJS.Timeout>(),
-            renewBody = (scrollY:number) => bodyRef.current.scrollTo(0,scrollY),
-            setRenewBodyTimeout = (scrollY:number) => renewBodyTimeout.current = setTimeout(renewBody,10,scrollY),
+            [chatContentEventState,chatContentEventDispatch] = useReducer(reducer,initialState),
             [fetchRepliedConvosAtInit] = useFetchRepliedConvosAtInitMutation()
-
-        useEffect(()=>{
-            if (editorLoaded && !fetchingConvos) bodyRef.current.style.overflowY = 'hidden'
-        },[fetchingConvos])
-
-        useEffect(()=>{
-            if (editorLoaded && !!convoCount && !!roomID && bodyRef.current.style.overflowY === 'hidden') {
-                const 
-                    state = store.getState() as ReduxState,
-                    room = chatRoomSelector.selectById(state,roomID),
-                    scrollY = room.scrollY
-                renewBody(scrollY)
-                bodyRef.current.style.overflowY = 'auto'
-            }
-        },[convoCount])
-
-        useEffect(()=>{
-            if (editorLoaded){
-                bodyRef.current.scrollBy({left:0,top:replyStatus || editStatus ? tabBarHeightRef.current : -tabBarHeightRef.current,behavior:'smooth'})
-            }
-        },[replyStatus || editStatus])
-        
-        useEffect(()=>{
-            if (editorLoaded){
-                replyRef.current.style.height = `${replyStatus ? tabBarHeightRef.current : 0}px`
-                editRef.current.style.height = `${editStatus ? tabBarHeightRef.current : 0}px`
-            } else {
-                replyRef.current.style.height = '0px'
-                editRef.current.style.height = '0px'
-            }
-        },[replyStatus,editStatus])
 
         useEffect(()=>{
             if (!!roomID) fetchRepliedConvosAtInit(roomID)
         },[roomID])
         
-        useEffect(()=>{
-            if (editorLoaded){
-                if (!editorRef.current) {
-                    editorRef.current = document.getElementById('chat-input') as HTMLDivElement
-                    submitBtnRef.current = document.getElementById('chat-submit-btn') as HTMLButtonElement
-                    inputH.current = editorRef.current.getBoundingClientRect().height
-                    tabBarHeightRef.current = replyRef.current.scrollHeight
-                }
-                editorRef.current.addEventListener('keydown',onInputEvent)
-                submitBtnRef.current.addEventListener('click',setEditorTimeout)
-                editorRef.current.removeEventListener('cut',onClipboardEvent)
-                editorRef.current.removeEventListener('paste',onClipboardEvent)
-                
-                updateTransitions('none')
-            
-                const state = store.getState() as ReduxState
-    
-                if (!!roomID){
-                    const r = chatRoomSelector.selectById(state,roomID)
-                    if (!!r && !!r.draft) editorRef.current.innerHTML = r.draft
-                    else editorRef.current.innerHTML = ''
-
-                    setRenewBodyTimeout(!!r ? r.scrollY : 0)
-                } else if (!!userID){
-                    const u = chatUserSelector.selectById(state,userID)
-                    if (!!u && !!u.draft) editorRef.current.innerHTML = u.draft
-                    else editorRef.current.innerHTML = ''
-                }
-    
-                updateTransitions('all 0.2s')
-            }
-            return () => {
-                if (!!submitBtnRef.current) submitBtnRef.current.addEventListener('click',setEditorTimeout)
-
-                if (!!editorRef.current) {
-                    editorRef.current.addEventListener('keydown',onInputEvent)
-                    editorRef.current.removeEventListener('cut',onClipboardEvent)
-                    editorRef.current.removeEventListener('paste',onClipboardEvent)
-                }
-            }
-        },[editorLoaded,roomID,userID])
-
-        useEffect(()=>{
-            if (editorLoaded && !!bodyRef.current) bodyRef.current.addEventListener('scroll',onScroll)
-            return () => {
-                if (!!bodyRef.current) bodyRef.current.removeEventListener('scroll',onScroll)
-            }
-        },[editorLoaded,replyStatus || editStatus,roomID,userID])
+        useReturnToPrevRoomUser(chatContentEventState.editorLoaded)
+        useScrollOnReplyEdit(chatContentEventState.editorLoaded)
+        useViewportLatestConvo(chatContentEventState.editorLoaded)
+        useFetchOldConvos(chatContentEventState.editorLoaded)
+        useScrollOnChange(chatContentEventState.editorLoaded)
 
         return (
-            <Grid 
-                ref={containerRef} 
-                container 
-                direction='column' 
-                wrap="nowrap" 
-                sx={{
-                    position:'relative',
-                    height:'100%',
-                    overflow:'hidden',
-                    display:editorLoaded ? 'display' : 'none'
-                }}
-            >
-                <Header ref={headerRef} />
-                <Grid 
-                    ref={bodyRef} 
-                    container 
-                    direction='column-reverse' 
-                    flexWrap='nowrap'
-                    id='convo-container'
-                    sx={{
-                        overflowY:'auto',
-                        mb:1,
-                        transition:'height 0.2s',
-                        ...(narrowBody && {px:1}),
-                        height:'100%',
-                    }}
-                >
-                    <ChatContent ref={chatConvoContainer} />
-                    <ScrollToBottomBtnContainer ref={bottomBtnContainerRef}>
-                        <ScrollToBottomBtn ref={bottomBtnRef} scrollToBottom={toBottom} />
-                    </ScrollToBottomBtnContainer>
-                </Grid>
-                <ReplyBar ref={replyRef}  />
-                <EditBar ref={editRef} />
-                <ChatInput {...{editorLoaded,editorIsLoaded}} />
-            </Grid>
+            <ChatEventDispatchContext.Provider value={chatContentEventDispatch}>
+                <ChatEventStateContext.Provider value={chatContentEventState}>
+                    <Grid 
+                        container 
+                        direction='column' 
+                        wrap="nowrap" 
+                        sx={{
+                            position:'relative',
+                            height:'100%',
+                            overflow:'hidden',
+                            display:chatContentEventState.editorLoaded ? 'display' : 'none'
+                        }}
+                    >
+                        <Header />
+                        <Grid 
+                            ref={chatWindow} 
+                            container 
+                            direction='column-reverse' 
+                            flexWrap='nowrap'
+                            id='convo-window'
+                            sx={{
+                                overflowY:'auto',
+                                mb:1,
+                                transition:'height 0.2s',
+                                ...(narrowBody && {px:1}),
+                                height:'100%',
+                            }}
+                        >
+                            <ChatContent ref={chatConvoContainer} />
+                            <ScrollToBottomBtnContainer ref={bottomBtnContainerRef}>
+                                <ScrollToBottomBtn ref={bottomBtnRef} />
+                            </ScrollToBottomBtnContainer>
+                        </Grid>
+                        <ReplyBar  />
+                        <EditBar />
+                        <ChatInput ref={inputContainer} />
+                    </Grid>
+                </ChatEventStateContext.Provider>
+            </ChatEventDispatchContext.Provider>
         )
     }
 

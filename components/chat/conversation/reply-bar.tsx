@@ -1,4 +1,4 @@
-import React, { ForwardedRef, forwardRef, memo, useMemo } from "react";
+import React, { ForwardedRef, forwardRef, memo, useContext, useEffect, useMemo, useRef } from "react";
 import Grid from '@mui/material/Grid';
 import IconButton from '@mui/material/IconButton';
 import { useTheme } from '@mui/material/styles';
@@ -16,14 +16,17 @@ import { useStore } from "react-redux";
 import { userDetailsSelector } from "@reducers/user-details/slice";
 import { useRouter } from "next/router";
 import { Room } from "../interfaces";
+import { ChatEventStateContext } from "./functions/reducer-context";
 
-const ReplyBar = memo(forwardRef((_,ref:ForwardedRef<HTMLDivElement>)=>{
+const ReplyBar = memo(()=>{
     const
         theme = useTheme(),
         dispatch = useAppDispatch(),
         store = useStore(),
+        container = useRef<HTMLDivElement>(),
         {query} = useRouter(),
         roomID = query.roomid as string,
+        {editorLoaded} = useContext(ChatEventStateContext),
         replyStatusSelector = useMemo(()=>createSelector(
             (state:ReduxState)=>chatRoomSelector.selectById(state,roomID),
             (r:Room)=>!!r && r.reply
@@ -73,8 +76,20 @@ const ReplyBar = memo(forwardRef((_,ref:ForwardedRef<HTMLDivElement>)=>{
         },
         cancelOnClick = () => dispatch(updateChatRoomStatus({id:roomID,changes:{reply:false}}))
 
+    useEffect(()=>{
+        container.current.style.height = replyStatus && editorLoaded ? `${container.current.scrollHeight}px` : '0px'
+    },[replyStatus && editorLoaded])
+
     return (
-        <Grid ref={ref} sx={{display:'block',opacity:replyStatus ? '1' : '0',transition:'all 0.2s'}}>
+        <Grid 
+            ref={container} 
+            id='chat-reply-bar' 
+            sx={{
+                display:'block',
+                opacity:replyStatus ? '1' : '0',
+                transition:'all 0.2s',
+            }}
+        >
             <Table
                 sx={{
                     borderRadius:1000,
@@ -161,7 +176,7 @@ const ReplyBar = memo(forwardRef((_,ref:ForwardedRef<HTMLDivElement>)=>{
             </Table>
         </Grid>
     )
-}))
+})
 
 ReplyBar.displayName = 'ReplyBar'
 export default ReplyBar

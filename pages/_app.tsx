@@ -68,14 +68,17 @@ const
 
             const userMode = sessionStorage.getItem('userMode')
             if (!!userMode && ['light','dark','system'].includes(userMode)) dispatch(updateUserMode(userMode as "light" | "dark" | "system"))
-            else sessionStorage.setItem('userMode','system')
+            else {
+                sessionStorage.setItem('userMode','system')
+                dispatch(updateUserMode('system'))
+            }
 
             const isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
             dispatch(systemIsDark(isDark))
             sessionStorage.setItem('systemDark',isDark.toString())
 
-            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', systemThemeOnChange);
-            document.addEventListener('visibilitychange',onVisibilityChange)
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', systemThemeOnChange,{passive:true});
+            document.addEventListener('visibilitychange',onVisibilityChange,{passive:true})
             return () => {
                 window.matchMedia('(prefers-color-scheme: dark)').removeEventListener('change', systemThemeOnChange);
                 document.removeEventListener('visibilitychange',onVisibilityChange)
@@ -94,7 +97,7 @@ const
             
         useEffect(()=>{
             broadcastChannel.current = new BroadcastChannel('auth')
-            broadcastChannel.current.addEventListener('message',bcReceiveMessage)
+            broadcastChannel.current.addEventListener('message',bcReceiveMessage,{passive:true})
             
             return () => {
                 broadcastChannel.current.removeEventListener('message',bcReceiveMessage)

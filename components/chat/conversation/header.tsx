@@ -17,19 +17,19 @@ import { useRouter } from "next/router";
 import useNarrowBody from "hooks/theme/narrow-body";
 
 const 
-    Header = memo(forwardRef((_,ref:ForwardedRef<HTMLDivElement>)=>{
+    Header = memo(()=>{
         const 
             {query} = useRouter(),
             roomID = query.roomid as string,
             userID = query.userid as string
 
         return (
-            <TableContainer ref={ref} sx={{overflow:'initial'}}>
+            <TableContainer sx={{overflow:'initial'}}>
                 {!!roomID && <RoomHeader roomID={roomID} />}
                 {!!userID && <UserHeader userID={userID} />}
             </TableContainer>
         )
-    })),
+    }),
     RoomHeader = memo(({roomID}:{roomID:EntityId})=>{
         const 
             avatar = useAppSelector(state => chatRoomSelector.selectById(state,roomID)?.avatar || ''),

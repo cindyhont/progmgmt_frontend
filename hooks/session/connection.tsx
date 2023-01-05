@@ -69,8 +69,8 @@ const useConnection = () => {
         setOnline(navigator.onLine)
         dispatch(googleUploadApi.endpoints.initGoogleUpload.initiate())
         dispatch(googleDownloadApi.endpoints.initGoogleDownload.initiate())
-        window.addEventListener('online',onOnline)
-        window.addEventListener('offline',onOffline)
+        window.addEventListener('online',onOnline,{passive:true})
+        window.addEventListener('offline',onOffline,{passive:true})
 
         return () => {
             window.removeEventListener('online',onOnline)

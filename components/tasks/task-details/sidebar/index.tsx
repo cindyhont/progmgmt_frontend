@@ -176,7 +176,7 @@ const
             initState()
             const state = store.getState() as ReduxState
             idb.current = new IndexedDB(state.misc.uid.toString(),1)
-            window.addEventListener('dragover',handleDragOver)
+            window.addEventListener('dragover',handleDragOver,{passive:true})
             return () => window.removeEventListener('dragover',handleDragOver)
         },[])
 
@@ -230,7 +230,7 @@ const
             fieldType = useAppSelector(state => taskFieldSelector.selectById(state,fieldID)?.fieldType || ''),
             expanded = useAppSelector(state => taskFieldSelector.selectById(state,fieldID)?.detailsSidebarExpand || false),
             dispatch = useAppDispatch(),
-            theme = useTheme(),
+            {palette:{grey}} = useTheme(),
             store = useStore(),
             {layoutOrderDispatch} = useContext(LayoutOrderDispatchContext),
             idb = useRef<IndexedDB>(),
@@ -294,7 +294,7 @@ const
                     draggable
                     onDragStart={onDragStart}
                     onDragEnter={onDragEnter}
-                    expandIcon={<ExpandMoreRoundedIcon htmlColor={theme.palette.grey[500]} />}
+                    expandIcon={<ExpandMoreRoundedIcon htmlColor={grey[500]} />}
                     sx={{
                         minHeight:'unset',
                         '& .MuiAccordionSummary-content':{
@@ -315,7 +315,7 @@ const
                                     onTouchCancel={handleTouchEnd}
                                 >
                                     <Box sx={{display:'flex',justifyContent:'center'}}>
-                                        <DragIndicatorIcon fontSize="small" sx={{mx:1}} htmlColor={theme.palette.grey[500]} />
+                                        <DragIndicatorIcon fontSize="small" sx={{mx:1}} htmlColor={grey[500]} />
                                     </Box>
                                 </TableCell>
                                 <TableCell>

@@ -43,9 +43,9 @@ const
                         if (!worker){
                             worker = new Worker(new URL('./worker.ts',import.meta.url));
                             
-                            worker.addEventListener('message',listener)
-                            worker.addEventListener('error',()=>console.log('downloader error'))
-                            worker.addEventListener('messageerror',()=>console.log('downloader message error'))
+                            worker.addEventListener('message',listener,{passive:true})
+                            worker.addEventListener('error',()=>console.log('downloader error'),{passive:true})
+                            worker.addEventListener('messageerror',()=>console.log('downloader message error'),{passive:true})
                         }
                     } catch {}
                     await cacheEntryRemoved

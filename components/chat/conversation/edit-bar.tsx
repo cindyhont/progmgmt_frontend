@@ -1,4 +1,4 @@
-import React, { ForwardedRef, forwardRef, memo, useMemo } from "react";
+import React, { ForwardedRef, forwardRef, memo, useContext, useEffect, useMemo, useRef } from "react";
 import Grid from '@mui/material/Grid';
 import IconButton from '@mui/material/IconButton';
 import { useTheme } from '@mui/material/styles';
@@ -15,14 +15,17 @@ import { chatConvoSelector, chatRoomSelector, updateChatRoomStatus } from "../re
 import { createSelector, EntityId } from "@reduxjs/toolkit";
 import { Room } from "../interfaces";
 import { useRouter } from "next/router";
+import { ChatEventStateContext } from "./functions/reducer-context";
 
-const EditBar = memo(forwardRef((_,ref:ForwardedRef<HTMLDivElement>)=>{
+const EditBar = memo(()=>{
     const
         theme = useTheme(),
+        container = useRef<HTMLDivElement>(),
         dispatch = useAppDispatch(),
         store = useStore(),
         {query} = useRouter(),
         roomID = query.roomid as string,
+        {editorLoaded} = useContext(ChatEventStateContext),
         editStatusSelector = useMemo(()=>createSelector(
             (state:ReduxState)=>chatRoomSelector.selectById(state,roomID).editMsgID,
             (state:ReduxState)=>chatRoomSelector.selectById(state,roomID).edit,
@@ -53,8 +56,20 @@ const EditBar = memo(forwardRef((_,ref:ForwardedRef<HTMLDivElement>)=>{
         },
         closeOnClick = () => dispatch(updateChatRoomStatus({id:roomID,changes:{edit:false}}))
 
+    useEffect(()=>{
+        container.current.style.height = editStatus && editorLoaded ? `${container.current.scrollHeight}px` : '0px'
+    },[editStatus && editorLoaded])
+
     return (
-        <Grid ref={ref} sx={{display:'block',opacity:editStatus ? '1' : '0',transition:'all 0.2s'}}>
+        <Grid 
+            ref={container} 
+            id='chat-edit-bar' 
+            sx={{
+                display:'block',
+                opacity:editStatus ? '1' : '0',
+                transition:'all 0.2s',
+            }}
+        >
             <Table
                 sx={{
                     borderRadius:1000,
@@ -141,7 +156,7 @@ const EditBar = memo(forwardRef((_,ref:ForwardedRef<HTMLDivElement>)=>{
             </Table>
         </Grid>
     )
-}))
+})
 
 EditBar.displayName = 'EditBar'
 export default EditBar

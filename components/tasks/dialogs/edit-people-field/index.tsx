@@ -5,7 +5,7 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import { ReduxState, useAppDispatch, useAppSelector } from "@reducers";
 import { createSelector, EntityId } from "@reduxjs/toolkit";
-import { taskCustomFieldTypesSelector, taskSelector, taskEditSingleField, taskFieldSelector } from '@components/tasks/reducers/slice'
+import { taskSelector, taskEditSingleField, taskFieldSelector } from '@components/tasks/reducers/slice'
 import { addAction, deleteAction, Iaction, reducer, setAllAction } from "./reducer";
 import { useStore } from "react-redux";
 import { userDetailsSelector } from "@reducers/user-details/slice";

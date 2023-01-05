@@ -1,4 +1,4 @@
-import React, { memo, useState } from 'react';
+import React, { ForwardedRef, forwardRef, memo, useState } from 'react';
 import IconButton from '@mui/material/IconButton';
 import { useTheme } from '@mui/material/styles';
 import TableBody from '@mui/material/TableBody';
@@ -11,15 +11,7 @@ import FileButton from './file-button';
 import Table from '@mui/material/Table';
 import SubmitBtn from './submit-btn';
 
-const ChatInput = memo((
-    {
-        editorLoaded,
-        editorIsLoaded
-    }:{
-        editorLoaded:boolean;
-        editorIsLoaded:()=>void;
-    }
-)=>{
+const ChatInput = memo(forwardRef((_,ref:ForwardedRef<HTMLDivElement>)=>{
     const 
         {palette:{grey}} = useTheme(),
         [noInputString,setNoInputString] = useState(true)
@@ -32,6 +24,7 @@ const ChatInput = memo((
                 border:`1px solid ${grey[500]}`,
                 ml:'1px'
             }}
+            ref={ref}
         >
             <Table
                 sx={{
@@ -58,11 +51,7 @@ const ChatInput = memo((
                             </IconButton>
                         </TableCell>
                         <TableCell>
-                            <WYSIWHYeditor {...{
-                                editorLoaded,
-                                editorIsLoaded,
-                                setNoInputString,
-                            }} />
+                            <WYSIWHYeditor {...{setNoInputString}} />
                         </TableCell>
                         <TableCell>
                             <FileButton />
@@ -76,7 +65,7 @@ const ChatInput = memo((
         </Box>
         </>
     )
-})
+}))
 
 ChatInput.displayName = 'ChatInput'
 export default ChatInput

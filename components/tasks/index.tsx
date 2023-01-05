@@ -27,7 +27,7 @@ const
             isVisitor = useAppSelector(state => state.misc.visitor)
 
         useEffect(()=>{
-            window.addEventListener('dragover',onDragOver)
+            window.addEventListener('dragover',onDragOver,{passive:true})
             return () => window.removeEventListener('dragover',onDragOver)
         },[])
         

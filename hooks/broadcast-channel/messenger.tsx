@@ -41,7 +41,7 @@ const useBroadcastChannelMessenger = () => {
 
     useEffect(()=>{
         bc.current = new BroadcastChannel('taskLayouts')
-        bc.current.addEventListener('message',handleBCmessage)
+        bc.current.addEventListener('message',handleBCmessage,{passive:true})
         
         return () => {
             bc.current.removeEventListener('message',handleBCmessage)

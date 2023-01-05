@@ -120,7 +120,7 @@ const TasksByStatus = () => {
     useEffect(()=>{
         if (show) {
             drawChart()
-            window.addEventListener('resize',drawChart)
+            window.addEventListener('resize',drawChart,{passive:true})
         }
         return () => {
             if (!!chart.current) window.removeEventListener('resize',drawChart)

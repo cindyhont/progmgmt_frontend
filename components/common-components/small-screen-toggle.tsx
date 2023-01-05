@@ -128,7 +128,7 @@ const SmallScreenToggle = memo(forwardRef((
 
     useEffect(()=>{
         updateTogglePosition()
-        window.addEventListener('resize',updateTogglePosition)
+        window.addEventListener('resize',updateTogglePosition,{passive:true})
         return () => {
             window.removeEventListener('resize',updateTogglePosition)
         }
