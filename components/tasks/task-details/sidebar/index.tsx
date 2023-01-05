@@ -1,4 +1,4 @@
-import React, { memo, TouchEvent, useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState } from "react";
+import React, { memo, MouseEvent as ReactMouseEvent, TouchEvent, useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState } from "react";
 import Stack from '@mui/material/Stack'
 import { ReduxState, useAppDispatch, useAppSelector } from "@reducers";
 import { grey } from '@mui/material/colors';
@@ -105,6 +105,11 @@ const
                 clonedElem.current.style.opacity = '0.7'
                 containerRef.current.appendChild(clonedElem.current)
             },
+            dragEnterTimeout = useRef<NodeJS.Timeout>(),
+            setDragEnterTimeout = (i:number) => {
+                clearTimeout(dragEnterTimeout.current)
+                dragEnterTimeout.current = setTimeout(onDragEnter,20,i)
+            },
             handleTouchMove = (x:number,y:number)=>{
                 moduleMoving.current = true
                 clonedElem.current.style.left = `${x - startingPoint.current.touchX + startingPoint.current.rectLeft}px`
@@ -117,10 +122,10 @@ const
                         fieldID = sidebarState.fields[i],
                         mod = document.getElementById(getTaskDetailsSidebarModuleID(fieldID))
                     if (!mod) continue
-
+                    
                     const {top,bottom,left,right} = mod.getBoundingClientRect()
                     if (x>left && x<right && y>top && y<bottom){
-                        onDragEnter(i)
+                        setDragEnterTimeout(i)
                         break
                     }
                 }
@@ -170,6 +175,18 @@ const
             tempStateOnChange = () => {
                 clearTimeout(timer.current)
                 timer.current = setTimeout(updateReduxIDB,500)
+            },
+            mouseDragging = useRef(false),
+            handleMouseDown = (x:number,y:number,i:number) => {
+                mouseDragging.current = true
+                handleTouchStart(x,y,i)
+            },
+            onMouseMove = (e:MouseEvent) => {
+                if (mouseDragging.current) handleTouchMove(e.pageX,e.pageY)
+            },
+            onMouseUp = () => {
+                mouseDragging.current = false
+                handleTouchEnd()
             }
 
         useEffect(()=>{
@@ -177,11 +194,20 @@ const
             const state = store.getState() as ReduxState
             idb.current = new IndexedDB(state.misc.uid.toString(),1)
             window.addEventListener('dragover',handleDragOver,{passive:true})
-            return () => window.removeEventListener('dragover',handleDragOver)
+
+            return () => {
+                window.removeEventListener('dragover',handleDragOver)
+            }
         },[])
 
         useEffect(()=>{
             tempStateOnChange()
+            window.addEventListener('mousemove',onMouseMove,{passive:true})
+            window.addEventListener('mouseup',onMouseUp,{passive:true})
+            return () => {
+                window.removeEventListener('mousemove',onMouseMove)
+                window.removeEventListener('mouseup',onMouseUp)
+            }
         },[sidebarState.fields])
 
         useEffect(()=>{
@@ -203,6 +229,7 @@ const
                         handleTouchStart:(x:number,y:number)=>handleTouchStart(x,y,i),
                         handleTouchMove,
                         handleTouchEnd,
+                        handleMouseDown:(x:number,y:number)=>handleMouseDown(x,y,i),
                     }} key={fieldID} />
                 ))}
             </Stack>
@@ -215,7 +242,8 @@ const
             onDragEnter,
             handleTouchStart,
             handleTouchMove,
-            handleTouchEnd
+            handleTouchEnd,
+            handleMouseDown,
         }:{
             fieldID:EntityId;
             onDragStart:()=>void;
@@ -223,6 +251,7 @@ const
             handleTouchStart:(x:number,y:number)=>void;
             handleTouchMove:(x:number,y:number)=>void;
             handleTouchEnd:()=>void;
+            handleMouseDown:(x:number,y:number)=>void;
         }
     ) => {
         const 
@@ -273,7 +302,8 @@ const
             onTouchMove = (e:TouchEvent<HTMLTableCellElement>) => {
                 const f = e.touches[0]
                 handleTouchMove(f.pageX,f.pageY)
-            }
+            },
+            onMouseStart = (e:ReactMouseEvent<HTMLTableCellElement>) => handleMouseDown(e.pageX,e.pageY)
 
         useEffect(()=>{
             const state = store.getState() as ReduxState
@@ -291,9 +321,6 @@ const
                 sx={{borderRadius:1}}
             >
                 <AccordionSummary
-                    draggable
-                    onDragStart={onDragStart}
-                    onDragEnter={onDragEnter}
                     expandIcon={<ExpandMoreRoundedIcon htmlColor={grey[500]} />}
                     sx={{
                         minHeight:'unset',
@@ -313,6 +340,7 @@ const
                                     onTouchMove={onTouchMove}
                                     onTouchEnd={handleTouchEnd}
                                     onTouchCancel={handleTouchEnd}
+                                    onMouseDown={onMouseStart}
                                 >
                                     <Box sx={{display:'flex',justifyContent:'center'}}>
                                         <DragIndicatorIcon fontSize="small" sx={{mx:1}} htmlColor={grey[500]} />

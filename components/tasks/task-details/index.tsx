@@ -114,7 +114,7 @@ const
                             sx:{
                                 position:'absolute',
                                 pt:2,
-                                zIndex:1,
+                                zIndex:3,
                                 top:0,
                                 left:'100%',
                                 width:'100%',

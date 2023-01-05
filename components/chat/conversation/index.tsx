@@ -3,18 +3,14 @@ import Grid from '@mui/material/Grid';
 import ChatInput from "./input";
 import { ScrollToBottomBtn, ScrollToBottomBtnContainer } from "./scrollToBottomBtn";
 import ChatContent from "./content";
-import { ReduxState, useAppSelector } from "@reducers";
+import { ReduxState } from "@reducers";
 import { useStore } from "react-redux";
 import Header from "./header";
 import ReplyBar from "./reply-bar";
 import EditBar from "./edit-bar";
-import { createSelector } from "@reduxjs/toolkit";
-import { Room } from "../interfaces";
-import { chatConvoSelector, chatRoomSelector, chatRoomUserSelector, chatUserSelector, updateChatRoomStatus } from "../reducers/slice";
-import { useDispatch } from "react-redux";
+import { chatRoomSelector, chatRoomUserSelector } from "../reducers/slice";
 import { useRouter } from "next/router";
-import { enterIsPressed } from "@components/functions";
-import { useFetchMoreConvosMutation, useFetchRepliedConvosAtInitMutation, useFetchRepliedConvosMutation } from "../reducers/api";
+import { useFetchRepliedConvosAtInitMutation } from "../reducers/api";
 import useNarrowBody from "hooks/theme/narrow-body";
 import { ChatEventDispatchContext, ChatEventStateContext, initialState, reducer } from "./functions/reducer-context";
 import useReturnToPrevRoomUser from "./functions/on-return-to-prev-room-or-user";
@@ -65,11 +61,6 @@ const
         const
             {query} = useRouter(),
             roomID = query.roomid as string,
-            inputContainer = useRef<HTMLDivElement>(),
-            chatWindow = useRef<HTMLDivElement>(),
-            chatConvoContainer = useRef<HTMLDivElement>(),
-            bottomBtnContainerRef = useRef<HTMLDivElement>(),
-            bottomBtnRef = useRef<HTMLButtonElement>(),
             narrowBody = useNarrowBody(),
             [chatContentEventState,chatContentEventDispatch] = useReducer(reducer,initialState),
             [fetchRepliedConvosAtInit] = useFetchRepliedConvosAtInitMutation()
@@ -100,7 +91,6 @@ const
                     >
                         <Header />
                         <Grid 
-                            ref={chatWindow} 
                             container 
                             direction='column-reverse' 
                             flexWrap='nowrap'
@@ -113,14 +103,14 @@ const
                                 height:'100%',
                             }}
                         >
-                            <ChatContent ref={chatConvoContainer} />
-                            <ScrollToBottomBtnContainer ref={bottomBtnContainerRef}>
-                                <ScrollToBottomBtn ref={bottomBtnRef} />
+                            <ChatContent />
+                            <ScrollToBottomBtnContainer>
+                                <ScrollToBottomBtn />
                             </ScrollToBottomBtnContainer>
                         </Grid>
                         <ReplyBar  />
                         <EditBar />
-                        <ChatInput ref={inputContainer} />
+                        <ChatInput />
                     </Grid>
                 </ChatEventStateContext.Provider>
             </ChatEventDispatchContext.Provider>

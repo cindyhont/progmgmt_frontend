@@ -1,4 +1,4 @@
-import React, { ForwardedRef, forwardRef, memo, useState } from 'react';
+import React, { memo, useState } from 'react';
 import IconButton from '@mui/material/IconButton';
 import { useTheme } from '@mui/material/styles';
 import TableBody from '@mui/material/TableBody';
@@ -11,7 +11,7 @@ import FileButton from './file-button';
 import Table from '@mui/material/Table';
 import SubmitBtn from './submit-btn';
 
-const ChatInput = memo(forwardRef((_,ref:ForwardedRef<HTMLDivElement>)=>{
+const ChatInput = memo(()=>{
     const 
         {palette:{grey}} = useTheme(),
         [noInputString,setNoInputString] = useState(true)
@@ -24,7 +24,6 @@ const ChatInput = memo(forwardRef((_,ref:ForwardedRef<HTMLDivElement>)=>{
                 border:`1px solid ${grey[500]}`,
                 ml:'1px'
             }}
-            ref={ref}
         >
             <Table
                 sx={{
@@ -65,7 +64,7 @@ const ChatInput = memo(forwardRef((_,ref:ForwardedRef<HTMLDivElement>)=>{
         </Box>
         </>
     )
-}))
+})
 
 ChatInput.displayName = 'ChatInput'
 export default ChatInput

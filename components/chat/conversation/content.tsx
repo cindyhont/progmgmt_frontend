@@ -13,7 +13,7 @@ import { useRouter } from 'next/router';
 import useEllipsis from 'hooks/counter/ellipsis';
 
 const 
-    ChatContent = memo(forwardRef((_,ref:ForwardedRef<HTMLDivElement>)=>{
+    ChatContent = memo(()=>{
         const 
             {query} = useRouter(),
             roomID = query.roomid as string
@@ -22,13 +22,12 @@ const
             <Grid 
                 container 
                 direction='column' 
-                ref={ref}
                 id='chat-content'
             >
                 {!!roomID && <RoomContent />}
             </Grid>
         )
-    })),
+    }),
     RoomContent = () => {
         const
             {query} = useRouter(),

@@ -142,7 +142,7 @@ const SmallScreenToggle = memo(forwardRef((
             disableRipple
             sx={{
                 position:'fixed',
-                zIndex:2,
+                zIndex:5,
                 backgroundColor:primary.main,
                 '.MuiSvgIcon-root':{
                     fill:mode==='light' ? '#fff' : '#000'

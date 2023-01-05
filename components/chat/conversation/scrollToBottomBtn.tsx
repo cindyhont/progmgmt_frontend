@@ -1,4 +1,4 @@
-import React, { ForwardedRef, forwardRef, memo } from "react";
+import React, { memo } from "react";
 import Grid from '@mui/material/Grid';
 import IconButton from '@mui/material/IconButton';
 import ArrowDownwardRoundedIcon from '@mui/icons-material/ArrowDownwardRounded';
@@ -6,11 +6,10 @@ import { useTheme } from '@mui/material/styles';
 import scrollToBottom from "./functions/to-bottom";
 
 const 
-    ScrollToBottomBtn = memo(forwardRef((_,ref:ForwardedRef<HTMLButtonElement>)=>{
+    ScrollToBottomBtn = memo(()=>{
         const {palette:{background,grey,mode,text}} = useTheme()
         return (
             <IconButton
-                ref={ref}
                 onClick={scrollToBottom}
                 size='large'
                 sx={{
@@ -28,13 +27,11 @@ const
                 <ArrowDownwardRoundedIcon />
             </IconButton>
         )
-    })),
-    ScrollToBottomBtnContainer = memo(forwardRef((
-        {children}:{children:JSX.Element},
-        ref:ForwardedRef<HTMLDivElement>
+    }),
+    ScrollToBottomBtnContainer = memo((
+        {children}:{children:JSX.Element}
     )=>(
         <Grid 
-            ref={ref}
             container 
             direction='row' 
             id='chat-to-bottom-btn'
@@ -46,7 +43,7 @@ const
                 pointerEvents:'none'
             }}
         >{children}</Grid>
-    )))
+    ))
 
 ScrollToBottomBtn.displayName = 'ScrollToBottomBtn'
 ScrollToBottomBtnContainer.displayName = 'ScrollToBottomBtnContainer'
