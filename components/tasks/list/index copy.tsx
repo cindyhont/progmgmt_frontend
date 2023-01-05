@@ -1,4 +1,4 @@
-import React, { createContext, Dispatch, memo, useCallback, useEffect, useMemo, useReducer, useRef, useState, MouseEvent as ReactMouseEvent } from "react";
+import React, { createContext, Dispatch, memo, useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState, MouseEvent } from "react";
 import Grid from '@mui/material/Grid';
 import TableContainer from '@mui/material/TableContainer';
 import Table from '@mui/material/Table';
@@ -7,10 +7,11 @@ import TableBody from '@mui/material/TableBody';
 import TableRow from '@mui/material/TableRow';
 import { ReduxState, useAppDispatch, useAppSelector } from "@reducers";
 import { 
+    taskEditMultipleFields, 
     taskFieldSelector, 
     taskSelector,
 } from "../reducers/slice";
-import { createSelector, EntityId } from "@reduxjs/toolkit";
+import { createSelector, EntityId, Update } from "@reduxjs/toolkit";
 import StringElem from "./string";
 import DateElem from "./date";
 import SinglePerson from "./single-person";
@@ -26,7 +27,9 @@ import TagsElem from "./tags";
 import { useStore } from "react-redux";
 import Approval from "./approval";
 import { useRouter } from "next/router";
-import { Iaction, initialState, movingAction, reducer, startMovingAction } from "./column-reducer";
+import IndexedDB from "@indexeddb";
+import { Iaction, initialState, movingAction, reducer, setAllAction, startMovingAction } from "./column-reducer";
+import { LayoutOrderDispatchContext } from "@pages";
 import TableCell from "@mui/material/TableCell";
 import { useTheme } from "@mui/material";
 import { updateSession } from "@components/functions";
@@ -35,16 +38,26 @@ import { updateRouterHistory } from "@reducers/misc";
 import TimeAccumulated from "./timer";
 import Parent from "./parent";
 import useNarrowBody from "hooks/theme/narrow-body";
-import useUpdateListColumnState from "./hooks/update-state";
-import useDragManager from "@hooks/drag/drag-manager";
 
 const 
+    createColumnListSelector = (wideScreen:boolean)=>createSelector(
+        (state:ReduxState)=>state,
+        (state:ReduxState)=>{
+            const 
+                key = wideScreen ? 'listWideScreenOrder' : 'listNarrowScreenOrder',
+                fields = taskFieldSelector.selectAll(state).filter(e=>e[key]!==-1)
+            return fields.length === 0 ? [] : fields.length === 1 ? [fields[0].id] : Array.from(fields).sort((a,b)=>a[key]-b[key]).map(({id})=>id)
+        }
+    ),
     ResizerDragContent = createContext<{resizerDragAction:(dragging:boolean)=>void;}>({resizerDragAction:()=>{}}),
-    getFieldID = (id:string) => `task-list-table-${id}`,
     ListView = () => {
         const 
-            {palette:{grey,background}} = useTheme(),
+            dispatch = useAppDispatch(),
+            theme = useTheme(),
+            {palette:{grey}} = theme,
             narrowBody = useNarrowBody(),
+            idb = useRef<IndexedDB>(),
+            store = useStore(),
             [resizerDragging,setResizerDragging] = useState(false),
             dragTimer = useRef<NodeJS.Timeout>(),
             resizerDragAction = useCallback((dragging:boolean)=>{
@@ -52,6 +65,7 @@ const
                 if (dragging) setResizerDragging(true)
                 else dragTimer.current = setTimeout(()=>setResizerDragging(false),100)
             },[]),
+            {layoutOrderDispatch} = useContext(LayoutOrderDispatchContext),
             idsSelector = useMemo(()=>createSelector(
                 (state:ReduxState)=>taskSelector.selectAll(state),
                 (state:ReduxState)=>state.misc.uid,
@@ -67,123 +81,92 @@ const
                 }
             ),[]),
             ids = useAppSelector(state => idsSelector(state)),
+            wideScreenColumnListSelector = useMemo(()=>createColumnListSelector(true),[]),
+            narrowScreenColumnListSelector = useMemo(()=>createColumnListSelector(false),[]),
+            listColumnsWideScreen = useAppSelector(state => wideScreenColumnListSelector(state)),
+            listColumnsNarrowScreen = useAppSelector(state => narrowScreenColumnListSelector(state)),
             [columnState,columnDispatch] = useReducer(reducer,initialState),
             onDragStart = useCallback((idx:number) => columnDispatch(startMovingAction(columnState.fields[idx])),[columnState.fields]),
             onDragEnter = useCallback((idx:number) => columnDispatch(movingAction(idx)),[]),
-            startingPoint = useRef({touchX:-1,touchY:-1,rectLeft:-1,rectTop:-1}),
-            tablebody = useRef<HTMLTableSectionElement>(),
-            clonedElem = useRef<HTMLElement>(null),
-            containerRef = useRef<HTMLDivElement>(),
-            indexeddbOK = useAppSelector(state => state.misc.indexeddbOK),
-            {handleDragStart,handleDragMove,handleDragEnd} = useDragManager(
-                onDragStart,
-                onDragEnter,
-                columnState.fields,
-                getFieldID,
-                clonedElem,
-            ),
-            dragStart = (x:number,y:number,i:number) => {
-                if (!indexeddbOK) return
+            setFromRedux = (arr:EntityId[]) => {
+                if (columnState.fields.length === arr.length && columnState.fields.every((e,i)=>arr.indexOf(e)===i)) return
+                columnDispatch(setAllAction(arr))
+            },
+            updateReduxIDB = () => {
+                const
+                    state = store.getState() as ReduxState,
+                    key = narrowBody ? 'listNarrowScreenOrder' : 'listWideScreenOrder',
+                    fieldsInRedux = taskFieldSelector.selectAll(state).filter(e=>e.fieldType!=='order_in_board_column'),
+                    fieldCount = fieldsInRedux.length
 
-                document.body.style.overscrollBehavior = 'none'
-                clonedElem.current = document.createElement('table')
-                const 
-                    field = columnState.fields[i],
-                    thead = document.createElement('thead'),
-                    headTr = document.createElement('tr'),
-                    th = document.querySelector(`th.${field}`) as HTMLTableCellElement,
-                    newTh = th.cloneNode(true) as HTMLTableCellElement,
-                    {left,top} = th.getBoundingClientRect()
+                let updates:Update<TaskField>[] = []
 
-                headTr.style.cssText = th.parentElement.style.cssText
-                thead.style.cssText = th.parentElement.parentElement.style.cssText
-                clonedElem.current.style.cssText = th.parentElement.parentElement.parentElement.style.cssText
-
-                newTh.style.width = `${th.getBoundingClientRect().width}px`
-
-                headTr.appendChild(newTh)
-                thead.appendChild(headTr)
-                clonedElem.current.appendChild(thead)
-
-                const tbody = document.createElement('tbody')
-                tbody.style.cssText = tablebody.current.style.cssText
-
-                const 
-                    bodyTr = document.createElement('tr'),
-                    tableRow = tablebody.current.querySelector('tr')
-                bodyTr.style.cssText = tableRow.style.cssText
-
-                const cells = tablebody.current.querySelectorAll(`.${field}`)
-                cells.forEach(e=>{
+                for (let i=0; i<fieldCount; i++){
                     const 
-                        cell = e.cloneNode(true) as HTMLTableCellElement,
-                        rowTr = bodyTr.cloneNode(true)
-
-                    cell.style.cssText = (e as HTMLTableCellElement).style.cssText
-                    cell.style.height = `${e.getBoundingClientRect().height}px`
-
-                    rowTr.appendChild(cell)
-                    tbody.appendChild(rowTr)
-                })
-
-                clonedElem.current.style.zIndex = '3'
-                clonedElem.current.style.backgroundColor = background.default
-                clonedElem.current.appendChild(tbody)
-
-                handleDragStart(i,{left,top})
-
-                containerRef.current.appendChild(clonedElem.current)
-
-                startingPoint.current = {touchX:x,touchY:y,rectLeft:left,rectTop:top}
-
-                onDragStart(i)
-            },
-            dragMove = (x:number,y:number) => {
-                clonedElem.current.style.left = `${x - startingPoint.current.touchX + startingPoint.current.rectLeft}px`
-                clonedElem.current.style.top = `${y - startingPoint.current.touchY + startingPoint.current.rectTop}px`
-
-                const {top,bottom} = containerRef.current.getBoundingClientRect()
-                handleDragMove(x,y,{top,bottom})
-            },
-            dragEnd = () => {
-                handleDragEnd()
-                if (!!clonedElem.current) {
-                    clonedElem.current.remove()
-                    clonedElem.current = null
+                        field = fieldsInRedux[i],
+                        {id} = field,
+                        newPos = columnState.fields.indexOf(id)
+                    if (newPos !== field[key]) updates = [...updates,{id,changes:{[key]:newPos}}]
                 }
+                if (!updates.length) return
+                
+                dispatch(taskEditMultipleFields(updates))
+                
+                layoutOrderDispatch({payload:fieldsInRedux.map(
+                    (
+                        {
+                            listWideScreenOrder,
+                            listNarrowScreenOrder,
+                            detailsSidebarOrder,
+                            detailsSidebarExpand,
+                            id
+                        }
+                    )=>({
+                        listWideScreenOrder: narrowBody ? listWideScreenOrder : columnState.fields.indexOf(id),
+                        listNarrowScreenOrder: narrowBody ? columnState.fields.indexOf(id) : listNarrowScreenOrder,
+                        detailsSidebarOrder,
+                        detailsSidebarExpand,
+                        id
+                    })
+                )})
+                
+                idb.current.updateMultipleEntries(idb.current.storeNames.taskFields,updates)
             },
-            mouseDragging = useRef(false),
-            handleMouseDown = (x:number,y:number,i:number) => {
-                mouseDragging.current = true
-                dragStart(x,y,i)
-            },
-            onMouseMove = (e:MouseEvent) => {
-                if (mouseDragging.current) dragMove(e.pageX,e.pageY)
-            },
-            onMouseUp = () => {
-                mouseDragging.current = false
-                dragEnd()
+            timer = useRef<NodeJS.Timeout>(),
+            tempStateOnChange = () => {
+                clearTimeout(timer.current)
+                timer.current = setTimeout(updateReduxIDB,500)
             }
-
-        useUpdateListColumnState(columnState.fields,columnDispatch)
+            // [loaded,setLoaded] = useState(false)
 
         useEffect(()=>{
-            return () => clearTimeout(dragTimer.current)
+            // setLoaded(true)
+            const s = store.getState() as ReduxState
+            idb.current = new IndexedDB(s.misc.uid.toString(),1)
+            return () => {
+                clearTimeout(dragTimer.current)
+            }
         },[])
 
         useEffect(()=>{
-            window.addEventListener('mousemove',onMouseMove,{passive:true})
-            window.addEventListener('mouseup',onMouseUp,{passive:true})
-            return () => {
-                window.removeEventListener('mousemove',onMouseMove)
-                window.removeEventListener('mouseup',onMouseUp)
-            }
+            setFromRedux([...(narrowBody ? listColumnsNarrowScreen : listColumnsWideScreen)])
+        },[narrowBody])
+
+        useEffect(()=>{
+            if (!narrowBody) setFromRedux(listColumnsWideScreen)
+        },[listColumnsWideScreen])
+
+        useEffect(()=>{
+            if (narrowBody) setFromRedux(listColumnsNarrowScreen)
+        },[listColumnsNarrowScreen])
+
+        useEffect(()=>{
+            if (columnState.fields.length) tempStateOnChange()
         },[columnState.fields])
 
         return (
             <Grid
                 sx={{margin:'auto',...(!narrowBody && {mx:2.5,mt:2})}}
-                ref={containerRef}
             >
                 <TableContainer
                     sx={{
@@ -212,10 +195,8 @@ const
                                         <HeaderCell 
                                             {...{
                                                 field,
-                                                dragStart:(x:number,y:number)=>dragStart(x,y,i),
-                                                dragMove,
-                                                dragEnd,
-                                                handleMouseDown:(x:number,y:number)=>handleMouseDown(x,y,i)
+                                                onDragEnter:()=>onDragEnter(i),
+                                                onDragStart:()=>onDragStart(i)
                                             }} 
                                             key={field} 
                                         />
@@ -223,7 +204,7 @@ const
                                     <TableCell sx={{width:0,p:0}} />
                                 </TableRow>
                             </TableHead>
-                            <TableBody ref={tablebody}>
+                            <TableBody>
                                 {ids.map(id=>(<ListViewRow key={id} {...{id,fields:columnState.fields,columnDispatch,resizerDragging}} />))}
                             </TableBody>
                         </Table>
@@ -259,7 +240,7 @@ const
             },
             router = useRouter(),
             dispatch = useAppDispatch(),
-            onClick = (e:ReactMouseEvent<HTMLDivElement>) => {
+            onClick = (e:MouseEvent<HTMLDivElement>) => {
                 if (resizerDragging) return
                 const 
                     paths = e.nativeEvent.composedPath() as HTMLElement[],

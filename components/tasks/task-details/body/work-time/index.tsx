@@ -154,9 +154,7 @@ const
         },[hasAllRights])
 
         useEffect(()=>{
-            if (dialogOpen){
-                userDispatch(setAllAction(userIDs))
-            }
+            if (dialogOpen) userDispatch(setAllAction(userIDs))
         },[dialogOpen])
 
         useEffect(()=>{

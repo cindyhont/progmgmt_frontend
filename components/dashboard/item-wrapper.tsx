@@ -4,9 +4,7 @@ import Table from '@mui/material/Table'
 import TableBody from '@mui/material/TableBody'
 import TableRow from '@mui/material/TableRow'
 import TableCell from '@mui/material/TableCell'
-import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
-import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
 import { grey } from '@mui/material/colors';
 import IconButton from "@mui/material/IconButton";
 import MoreVertIcon from '@mui/icons-material/MoreVert';
@@ -43,13 +41,13 @@ const ItemWrapper = forwardRef((
                             }
                         }}
                     >
-                        <TableCell sx={{width:0,cursor:'move'}}>
+                        {/*<TableCell sx={{width:0,cursor:'move'}}>
                             <Box sx={{display:'flex',justifyContent:'center'}}>
                                 <DragIndicatorIcon fontSize="small" sx={{mx:1}} htmlColor={grey[500]} />
                             </Box>
-                        </TableCell>
+                        </TableCell>*/}
                         <TableCell>
-                            <Typography sx={sideBarHeadStyle}>{title}</Typography>
+                            <Typography sx={{...sideBarHeadStyle,ml:2}}>{title}</Typography>
                         </TableCell>
                         <TableCell sx={{width:0}}>
                             <IconButton>
@@ -58,7 +56,7 @@ const ItemWrapper = forwardRef((
                         </TableCell>
                     </TableRow>
                     <TableRow>
-                        <TableCell colSpan={3} sx={{p:0,border:'none'}}>{children}</TableCell>
+                        <TableCell colSpan={2} sx={{p:0,border:'none'}}>{children}</TableCell>
                     </TableRow>
                 </TableBody>
             </Table>

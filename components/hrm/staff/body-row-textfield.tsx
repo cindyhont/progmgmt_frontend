@@ -9,6 +9,7 @@ import Tooltip from '@mui/material/Tooltip';
 import Typography from "@mui/material/Typography";
 import { createFieldValueSelector, frontendStaffFilterSelector } from "./reducers/slice";
 import { EditModeContext } from ".";
+import useFuncWithTimeout from "hooks/counter/function-with-timeout";
 
 const 
     BodyRowTextField = memo((
@@ -60,7 +61,6 @@ const
             }),
             [errorMsg,setErrorMsg] = useState(''),
             inputRef = useRef<HTMLInputElement>(),
-            timeoutRef = useRef<NodeJS.Timeout>(),
             [updateField,{isLoading}] = useUpdateHrmStaffActiveMutation(),
             update = async () => {
                 if (value === inputRef.current.value) return
@@ -79,14 +79,7 @@ const
                     else setErrorMsg('Failed to update')
                 }
             },
-            onChange = () => {
-                clearTimeout(timeoutRef.current)
-                timeoutRef.current = setTimeout(update,2000)
-            },
-            onBlur = () => {
-                clearTimeout(timeoutRef.current)
-                update()
-            }
+            [onChange,onBlur] = useFuncWithTimeout(update,2000)
 
         useEffect(()=>{
             if (!!value && value !== inputRef.current.value) inputRef.current.value = value

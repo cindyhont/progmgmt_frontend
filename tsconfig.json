@@ -25,6 +25,7 @@
       "@reducers": ["reducers/index"],
       "@reducers/*": ["reducers/*"],
       "@components/*": ["components/*"],
+      "@hooks/*": ["hooks/*"],
       "@pages": ["pages/index"],
       "@pages/*": ["pages/*"]
     }

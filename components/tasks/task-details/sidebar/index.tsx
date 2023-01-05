@@ -1,13 +1,12 @@
-import React, { memo, MouseEvent as ReactMouseEvent, TouchEvent, useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState } from "react";
+import React, { memo, MouseEvent as ReactMouseEvent, TouchEvent, useCallback, useContext, useEffect, useMemo, useReducer, useRef } from "react";
 import Stack from '@mui/material/Stack'
 import { ReduxState, useAppDispatch, useAppSelector } from "@reducers";
 import { grey } from '@mui/material/colors';
-import { createSelector, EntityId, Update } from "@reduxjs/toolkit";
+import { createSelector, EntityId } from "@reduxjs/toolkit";
 import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import Typography from '@mui/material/Typography'
-import { getSortedFieldIDs } from "@indexeddb/functions";
 import { useStore } from "react-redux";
 import ExpandMoreRoundedIcon from '@mui/icons-material/ExpandMoreRounded';
 import Table from '@mui/material/Table'
@@ -17,9 +16,9 @@ import TableCell from '@mui/material/TableCell'
 import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
 import Box from '@mui/material/Box'
 import { useTheme } from "@mui/material";
-import { taskCustomFieldTypesSelector, taskEditMultipleFields, taskFieldSelector, taskSelector } from "@components/tasks/reducers/slice";
+import { taskEditMultipleFields, taskFieldSelector, taskSelector } from "@components/tasks/reducers/slice";
 import { Task, TaskField } from "@components/tasks/interfaces";
-import { initialState, movingAction, reducer, setAllAction, startMovingAction } from "./reducer";
+import { initialState, movingAction, reducer, startMovingAction } from "./reducer";
 import CheckboxElem from "./checkboxes";
 import { People, SinglePerson } from "./people";
 import Timer from "./timer";
@@ -35,6 +34,9 @@ import { useRouter } from "next/router";
 import { LayoutOrderDispatchContext } from "@pages";
 import IndexedDB from "@indexeddb";
 import Parent from "./parent";
+import useDragContainsFiles from "@hooks/drag/drag-contains-files";
+import useUpdateSidebarState from "./hooks/update-state";
+import useDragManager from "@hooks/drag/drag-manager";
 
 export const sideBarHeadStyle = {
     textTransform:'uppercase',
@@ -61,147 +63,59 @@ const
     Sidebar = memo(()=>{
         const 
             containerRef = useRef<HTMLDivElement>(),
-            [dragHasFiles,setDragHasFiles] = useState(false),
-            fieldsSelector = useMemo(()=>createSelector(
-                (state:ReduxState)=>taskFieldSelector.selectAll(state).filter(e=>{
-                    const type = taskCustomFieldTypesSelector.selectById(state,e.fieldType)
-                    return !!type && type?.taskDetailsSidebar
-                }),
-                (f:TaskField[])=>getSortedFieldIDs(f,'detailsSidebarOrder')
-            ),[]),
-            fields = useAppSelector(state => fieldsSelector(state)),
+            dragHasFiles = useDragContainsFiles(),
             [sidebarState,sidebarDispatch] = useReducer(reducer,initialState),
-            {layoutOrderDispatch} = useContext(LayoutOrderDispatchContext),
-            store = useStore(),
-            idb = useRef<IndexedDB>(),
-            initState = () => {
-                const
-                    state = store.getState() as ReduxState,
-                    fields = fieldsSelector(state)
-                sidebarDispatch(setAllAction(fields))
-            },
             onDragStart = useCallback((idx:number) => sidebarDispatch(startMovingAction(sidebarState.fields[idx])),[sidebarState.fields]),
             onDragEnter = useCallback((idx:number) => {
                 if (!dragHasFiles) sidebarDispatch(movingAction(idx))
             },[dragHasFiles]),
-            handleDragOver = (e:DragEvent) => setDragHasFiles(e.dataTransfer.types.includes('Files')),
-            startingPoint = useRef({touchX:-1,touchY:-1,rectLeft:-1,rectTop:-1}),
             clonedElem = useRef<HTMLElement>(null),
-            moduleMoving = useRef(false),
-            handleTouchStart = (x:number,y:number,i:number) => {
-                document.body.style.overscrollBehavior = 'none'
+            {handleDragStart,handleDragMove,handleDragEnd} = useDragManager(
+                onDragStart,
+                onDragEnter,
+                sidebarState.fields,
+                getTaskDetailsSidebarModuleID,
+                clonedElem,
+            ),
+            startingPoint = useRef({touchX:0,touchY:0,rectLeft:0,rectTop:0}),
+            dragStart = (x:number,y:number,i:number) => {
                 const 
                     originalModule = document.getElementById(getTaskDetailsSidebarModuleID(sidebarState.fields[i])),
                     rect = originalModule.getBoundingClientRect()
-                startingPoint.current = {touchX:x,touchY:y,rectLeft:rect.left,rectTop:rect.top}
-                onDragStart(i)
+
                 clonedElem.current = originalModule.cloneNode(true) as HTMLElement
-                clonedElem.current.id = `cloned-${sidebarState.fields[i]}`
-                clonedElem.current.style.position = 'fixed'
-                clonedElem.current.style.left = `${rect.left}px`
-                clonedElem.current.style.top = `${rect.top}px`
-                clonedElem.current.style.width = `${rect.width}px`
-                clonedElem.current.style.height = `${rect.height}px`
-                clonedElem.current.style.opacity = '0.7'
+                handleDragStart(i,{...rect})
                 containerRef.current.appendChild(clonedElem.current)
+                startingPoint.current = {touchX:x,touchY:y,rectLeft:rect.left,rectTop:rect.top}
             },
-            dragEnterTimeout = useRef<NodeJS.Timeout>(),
-            setDragEnterTimeout = (i:number) => {
-                clearTimeout(dragEnterTimeout.current)
-                dragEnterTimeout.current = setTimeout(onDragEnter,20,i)
-            },
-            handleTouchMove = (x:number,y:number)=>{
-                moduleMoving.current = true
+            dragMove = (x:number,y:number)=>{
                 clonedElem.current.style.left = `${x - startingPoint.current.touchX + startingPoint.current.rectLeft}px`
                 clonedElem.current.style.top = `${y - startingPoint.current.touchY + startingPoint.current.rectTop}px`
-
-                const len = sidebarState.fields.length
-
-                for (let i=0; i<len; i++){
-                    const 
-                        fieldID = sidebarState.fields[i],
-                        mod = document.getElementById(getTaskDetailsSidebarModuleID(fieldID))
-                    if (!mod) continue
-                    
-                    const {top,bottom,left,right} = mod.getBoundingClientRect()
-                    if (x>left && x<right && y>top && y<bottom){
-                        setDragEnterTimeout(i)
-                        break
-                    }
-                }
+                handleDragMove(x,y)
             },
-            handleTouchEnd = () => {
-                document.body.style.overscrollBehavior = null
+            dragEnd = () => {
+                handleDragEnd()
                 if (!!clonedElem.current) {
                     clonedElem.current.remove()
                     clonedElem.current = null
                 }
-                if (!moduleMoving.current) return
-                moduleMoving.current = false
-            },
-            dispatch = useAppDispatch(),
-            updateReduxIDB = () => {
-                const 
-                    state = store.getState() as ReduxState,
-                    fieldsInRedux = taskFieldSelector.selectAll(state).filter(e=>e.fieldType!=='order_in_board_column'),
-                    fieldCount = fieldsInRedux.length
-
-                let updates:Update<TaskField>[] = []
-
-                for (let i=0; i<fieldCount; i++){
-                    const 
-                        field = fieldsInRedux[i],
-                        {id} = field,
-                        newPos = sidebarState.fields.indexOf(id)
-                    if (newPos !== field.detailsSidebarOrder) updates = [...updates,{id,changes:{detailsSidebarOrder:newPos}}]
-                }
-                if (!updates.length) return
-
-                dispatch(taskEditMultipleFields(updates))
-                
-                layoutOrderDispatch({
-                    payload:fieldsInRedux.map(e=>({
-                        listWideScreenOrder:e.listWideScreenOrder,
-                        listNarrowScreenOrder:e.listNarrowScreenOrder,
-                        detailsSidebarExpand:e.detailsSidebarExpand,
-                        detailsSidebarOrder:sidebarState.fields.indexOf(e.id),
-                        id:e.id
-                    }))
-                })
-
-                idb.current.updateMultipleEntries(idb.current.storeNames.taskFields,updates)
-            },
-            timer = useRef<NodeJS.Timeout>(),
-            tempStateOnChange = () => {
-                clearTimeout(timer.current)
-                timer.current = setTimeout(updateReduxIDB,500)
             },
             mouseDragging = useRef(false),
             handleMouseDown = (x:number,y:number,i:number) => {
                 mouseDragging.current = true
-                handleTouchStart(x,y,i)
+                dragStart(x,y,i)
             },
             onMouseMove = (e:MouseEvent) => {
-                if (mouseDragging.current) handleTouchMove(e.pageX,e.pageY)
+                if (mouseDragging.current) dragMove(e.pageX,e.pageY)
             },
             onMouseUp = () => {
                 mouseDragging.current = false
-                handleTouchEnd()
+                dragEnd()
             }
 
-        useEffect(()=>{
-            initState()
-            const state = store.getState() as ReduxState
-            idb.current = new IndexedDB(state.misc.uid.toString(),1)
-            window.addEventListener('dragover',handleDragOver,{passive:true})
-
-            return () => {
-                window.removeEventListener('dragover',handleDragOver)
-            }
-        },[])
+        useUpdateSidebarState(sidebarState.fields,sidebarDispatch)
 
         useEffect(()=>{
-            tempStateOnChange()
             window.addEventListener('mousemove',onMouseMove,{passive:true})
             window.addEventListener('mouseup',onMouseUp,{passive:true})
             return () => {
@@ -210,25 +124,22 @@ const
             }
         },[sidebarState.fields])
 
-        useEffect(()=>{
-            sidebarDispatch(setAllAction(fields))
-        },[fields])
-
         return (
             <Stack 
                 direction='column' 
                 spacing={2} 
                 pb={2}
                 ref={containerRef}
+                id='task-details-side-container'
             >
                 {sidebarState.fields.map((fieldID,i)=>(
                     <Module {...{
                         fieldID,
                         onDragStart:()=>onDragStart(i),
                         onDragEnter:()=>onDragEnter(i),
-                        handleTouchStart:(x:number,y:number)=>handleTouchStart(x,y,i),
-                        handleTouchMove,
-                        handleTouchEnd,
+                        dragStart:(x:number,y:number)=>dragStart(x,y,i),
+                        dragMove,
+                        dragEnd,
                         handleMouseDown:(x:number,y:number)=>handleMouseDown(x,y,i),
                     }} key={fieldID} />
                 ))}
@@ -240,17 +151,17 @@ const
             fieldID,
             onDragStart,
             onDragEnter,
-            handleTouchStart,
-            handleTouchMove,
-            handleTouchEnd,
+            dragStart,
+            dragMove,
+            dragEnd,
             handleMouseDown,
         }:{
             fieldID:EntityId;
             onDragStart:()=>void;
             onDragEnter:()=>void;
-            handleTouchStart:(x:number,y:number)=>void;
-            handleTouchMove:(x:number,y:number)=>void;
-            handleTouchEnd:()=>void;
+            dragStart:(x:number,y:number)=>void;
+            dragMove:(x:number,y:number)=>void;
+            dragEnd:()=>void;
             handleMouseDown:(x:number,y:number)=>void;
         }
     ) => {
@@ -297,11 +208,11 @@ const
             onTouchStart = (e:TouchEvent<HTMLTableCellElement>) => {
                 if (e.touches.length !== 1) return
                 const f = e.touches[0]
-                handleTouchStart(f.pageX,f.pageY)
+                dragStart(f.pageX,f.pageY)
             },
             onTouchMove = (e:TouchEvent<HTMLTableCellElement>) => {
                 const f = e.touches[0]
-                handleTouchMove(f.pageX,f.pageY)
+                dragMove(f.pageX,f.pageY)
             },
             onMouseStart = (e:ReactMouseEvent<HTMLTableCellElement>) => handleMouseDown(e.pageX,e.pageY)
 
@@ -338,8 +249,8 @@ const
                                     sx={{width:0,cursor:'move'}} 
                                     onTouchStart={onTouchStart}
                                     onTouchMove={onTouchMove}
-                                    onTouchEnd={handleTouchEnd}
-                                    onTouchCancel={handleTouchEnd}
+                                    onTouchEnd={dragEnd}
+                                    onTouchCancel={dragEnd}
                                     onMouseDown={onMouseStart}
                                 >
                                     <Box sx={{display:'flex',justifyContent:'center'}}>

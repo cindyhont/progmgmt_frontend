@@ -1,4 +1,4 @@
-import React, { memo, useContext, useEffect, useRef } from "react";
+import React, { memo, MouseEvent as ReactMouseEvent, useContext, useEffect, useRef } from "react";
 import TableCell from '@mui/material/TableCell';
 import { EntityId } from "@reduxjs/toolkit";
 import { ResizerDragContent } from ".";
@@ -37,7 +37,7 @@ const Resizer = memo((
                 cells[i].classList.remove('hover')
             }
         },
-        onMouseDown = (e:React.MouseEvent) => {
+        onMouseDown = (e:ReactMouseEvent) => {
             if (e.button!==0) return
             resizerDragAction(true)
             

@@ -15,6 +15,7 @@ import { backendDeptFilterSelector, frontendDeptFilterSelector } from "./reducer
 import { createSelector } from "@reduxjs/toolkit";
 import { IhrmDeptFrontendItem } from "../interfaces";
 import { EditModeContext } from ".";
+import useFuncWithTimeout from "hooks/counter/function-with-timeout";
 
 const 
     Row = memo(({id}:{id:string})=>{
@@ -86,7 +87,6 @@ const
                 selectFromResult:({currentData}) => ({value:currentData ? fieldValueSelector(currentData) : ''})
             }),
             inputRef = useRef<HTMLInputElement>(),
-            timeoutRef = useRef<NodeJS.Timeout>(),
             [updateField,{isLoading}] = useUpdateHrmDeptActiveMutation(),
             update = async () => {
                 if (value === inputRef.current.value) return
@@ -104,14 +104,7 @@ const
                     else setErrorMsg('Failed to update')
                 }
             },
-            onChange = () => {
-                clearTimeout(timeoutRef.current)
-                timeoutRef.current = setTimeout(update,2000)
-            },
-            onBlur = () => {
-                clearTimeout(timeoutRef.current)
-                update()
-            }
+            [onChange,onBlur] = useFuncWithTimeout(update,2000)
 
         useEffect(()=>{
             if (!!value && value !== inputRef.current.value) inputRef.current.value = value

@@ -19,6 +19,7 @@ import taskApi, { useTaskMovedInBoardMutation } from "../reducers/api";
 import { DialogCtxMenuDispatchContext } from "../contexts";
 import TaskItem from "./task-item";
 import useNarrowBody from "hooks/theme/narrow-body";
+import useFuncWithTimeout from "hooks/counter/function-with-timeout";
 
 export interface Ioption {
     id:EntityId;
@@ -66,22 +67,16 @@ const
             [state,boardViewDispatch] = useReducer(reducer,initialState),
             store = useStore(),
             dispatch = useAppDispatch(),
-            columnMoveTimeout = useRef<NodeJS.Timeout>(),
             [taskMovedInBoard] = useTaskMovedInBoardMutation(),
-            taskMovedTimeout = useRef<NodeJS.Timeout>(),
             dispatchTaskMovedInBoard = (taskID:EntityId,newColumnID:EntityId,newIdxInColumn:number) => {
                 taskMovedInBoard({taskID,newColumnID,newIdxInColumn,active:true})
             },
-            taskJustMoved = () => {
-                if (!!taskMovedTimeout.current) clearTimeout(taskMovedTimeout.current)
-                taskMovedTimeout.current = setTimeout(
-                    dispatchTaskMovedInBoard,
-                    1000,
-                    state.taskMoving,
-                    state.columnIDs[state.columnIdx],
-                    state.taskIdx
-                )
-            },
+            [updateTaskInBoard] = useFuncWithTimeout(dispatchTaskMovedInBoard,1000),
+            taskJustMoved = () => updateTaskInBoard(
+                state.taskMoving,
+                state.columnIDs[state.columnIdx],
+                state.taskIdx,
+            ),
             dispatchColumnIDs = () => {
                 const 
                     s = store.getState() as ReduxState,
@@ -110,10 +105,7 @@ const
                     }
                 }))
             },
-            columnJustChanged = () => {
-                if (!!columnMoveTimeout.current) clearTimeout(columnMoveTimeout.current)
-                columnMoveTimeout.current = setTimeout(dispatchColumnIDs,500)
-            },
+            [updateColumnChange] = useFuncWithTimeout(dispatchColumnIDs,500),
             checkSameOrderFromState = () => {
                 const 
                     s = store.getState() as ReduxState,
@@ -144,7 +136,7 @@ const
             }
 
         useEffect(()=>{
-            if (!!state.columnIDs.length) columnJustChanged()
+            if (!!state.columnIDs.length) updateColumnChange()
         },[state.columnIDs])
         
         useEffect(()=>{

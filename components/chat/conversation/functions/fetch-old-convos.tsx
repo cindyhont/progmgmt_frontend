@@ -22,8 +22,10 @@ const useFetchOldConvos = (editorLoaded:boolean) => {
         handleIntersectionObserver = (entries:IntersectionObserverEntry[],observer:IntersectionObserver) => {
             const targets = entries.filter(e=>e.isIntersecting)
             if (!!targets.length){
-                console.log('intersection observer fetch')
-                fetchMoreConvos(roomID)
+                const 
+                    state = store.getState() as ReduxState,
+                    room = chatRoomSelector.selectById(state,roomID)
+                if (!!room?.fetchingConvos) fetchMoreConvos(roomID)
                 targets.forEach(e=>observer.unobserve(e.target))
             }
         },
@@ -32,7 +34,6 @@ const useFetchOldConvos = (editorLoaded:boolean) => {
 
             const {top,bottom} = convoElem.current.getBoundingClientRect()
             if (!(bottom < chatWindowMeasurement.current.t && top > chatWindowMeasurement.current.b)) {
-                console.log('scroll fetch')
                 fetchMoreConvos(roomObserving.current)
                 convoElem.current = undefined
             }

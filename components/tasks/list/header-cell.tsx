@@ -1,4 +1,4 @@
-import React, { memo } from "react";
+import React, { memo, MouseEvent, TouchEvent } from "react";
 import TableCell from '@mui/material/TableCell';
 import { useAppSelector } from "@reducers";
 import { EntityId } from "@reduxjs/toolkit";
@@ -8,28 +8,47 @@ import { taskFieldSelector } from "../reducers/slice";
 const HeaderCell = memo((
     {
         field,
-        onDragEnter,
-        onDragStart
+        dragStart,
+        dragMove,
+        dragEnd,
+        handleMouseDown,
     }:{
         field:EntityId;
-        onDragEnter:()=>void;
-        onDragStart:()=>void;
+        dragStart:(x:number,y:number)=>void;
+        dragMove:(x:number,y:number)=>void;
+        dragEnd:()=>void;
+        handleMouseDown:(x:number,y:number)=>void;
     }
 )=>{
     const 
         fieldName = useAppSelector(state=>taskFieldSelector.selectById(state,field)?.fieldName || ''),
         indexeddbOK = useAppSelector(state => state.misc.indexeddbOK),
-        isTouchScreen = useAppSelector(state => state.misc.isTouchScreen)
+        isTouchScreen = useAppSelector(state => state.misc.isTouchScreen),
+        onTouchStart = (e:TouchEvent<HTMLTableCellElement>) => {
+            if (e.touches.length !== 1) return
+            const f = e.touches[0]
+            dragStart(f.pageX,f.pageY)
+        },
+        onMouseDown = (e:MouseEvent<HTMLTableCellElement>) => { 
+            if (indexeddbOK) handleMouseDown(e.pageX,e.pageY)
+        },
+        onTouchMove = (e:TouchEvent<HTMLTableCellElement>) => {
+            const f = e.touches[0]
+            dragMove(f.pageX,f.pageY)
+        }
+
 
     return (
         <>
         <TableCell 
-            className={field.toString()}
-            draggable={indexeddbOK}
-            onDragEnter={onDragEnter}
-            onDragStart={onDragStart}
+            className={`${field}`}
+            id={`task-list-table-${field}`}
             sx={{cursor:'move'}}
             data-field={field}
+            onTouchStart={onTouchStart}
+            onTouchMove={onTouchMove}
+            onTouchEnd={dragEnd}
+            onMouseDown={onMouseDown}
         >{fieldName}</TableCell>
         {!isTouchScreen && <Resizer field={field} />}
         </>

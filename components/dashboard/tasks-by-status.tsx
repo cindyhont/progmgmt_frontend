@@ -125,7 +125,7 @@ const TasksByStatus = () => {
         return () => {
             if (!!chart.current) window.removeEventListener('resize',drawChart)
         }
-    },[show])
+    },[show,mode])
 
     useEffect(()=>{
         if (googleChartLoaded) {

@@ -1,6 +1,7 @@
 import { chatConvoSelector, chatRoomSelector, updateChatRoomStatus } from "@components/chat/reducers/slice"
 import { useAppSelector } from "@reducers"
 import { EntityId } from "@reduxjs/toolkit"
+import useFuncWithTimeout from "hooks/counter/function-with-timeout"
 import { useRouter } from "next/router"
 import { useEffect, useRef } from "react"
 import { useDispatch } from "react-redux"
@@ -17,7 +18,6 @@ const useViewportLatestConvo = (editorLoaded:boolean) => {
         dispatch = useDispatch(),
         convoIDs = useAppSelector(state => chatConvoSelector.selectIds(chatRoomSelector.selectById(state,roomID))),
         roomObserving = useRef<string>(),
-        scrollTimeout = useRef<NodeJS.Timeout>(),
         onScroll = () => {
             if (chatContainerMeasurement.current.h <= chatWindowMeasurement.current.h) return
 
@@ -45,11 +45,7 @@ const useViewportLatestConvo = (editorLoaded:boolean) => {
             if (!!filteredArr.length) latestConvoID.current = filteredArr.reduce((a,b)=>!!a && !!b ? a.bottom > b.bottom ? a : b : a || b).id
             else latestConvoID.current = filteredArr.reduce((a,b)=>!!a && !!b ? a.occupancy > b.occupancy ? a : b : a || b).id
         },
-        setScrollTimeout = () => {
-            clearTimeout(scrollTimeout.current)
-            scrollTimeout.current = setTimeout(onScroll,100)
-        },
-        resizeTimeout = useRef<NodeJS.Timeout>(),
+        [runOnScroll] = useFuncWithTimeout(onScroll,100),
         onResize = () => {
             const {width,height,bottom,top} = chatWindow.current.getBoundingClientRect()
             if (
@@ -65,10 +61,7 @@ const useViewportLatestConvo = (editorLoaded:boolean) => {
                 } else chatContainer.current.scrollIntoView({block:'end',behavior:'auto'})
             }
         },
-        setResizeTimeout = () => {
-            clearTimeout(resizeTimeout.current)
-            resizeTimeout.current = setTimeout(onResize,100)
-        }
+        [runOnResize] = useFuncWithTimeout(onResize,100)
 
     useEffect(()=>{
         chatWindow.current = document.getElementById('convo-window')
@@ -78,9 +71,9 @@ const useViewportLatestConvo = (editorLoaded:boolean) => {
     useEffect(()=>{
         if (editorLoaded){
             onResize()
-            window.addEventListener('resize',setResizeTimeout,{passive:true})
+            window.addEventListener('resize',runOnResize,{passive:true})
         }
-        return () => window.removeEventListener('resize',setResizeTimeout)
+        return () => window.removeEventListener('resize',runOnResize)
     },[editorLoaded])
 
     useEffect(()=>{
@@ -90,10 +83,10 @@ const useViewportLatestConvo = (editorLoaded:boolean) => {
                 latestConvoID.current = undefined
                 roomObserving.current = roomID
             }
-            chatWindow.current.addEventListener('scroll',setScrollTimeout,{passive:true})
+            chatWindow.current.addEventListener('scroll',runOnScroll,{passive:true})
         } 
         return () => {
-            chatWindow.current.removeEventListener('scroll',setScrollTimeout)
+            chatWindow.current.removeEventListener('scroll',runOnScroll)
         }
     },[editorLoaded,roomID,convoIDs])
 

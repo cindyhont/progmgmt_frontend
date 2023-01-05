@@ -2,6 +2,7 @@ import { Room } from "@components/chat/interfaces"
 import { chatConvoSelector, chatRoomSelector, updateChatManyRoomStatus, updateChatRoomStatus } from "@components/chat/reducers/slice"
 import { ReduxState, useAppSelector } from "@reducers"
 import { createSelector } from "@reduxjs/toolkit"
+import useFuncWithTimeout from "hooks/counter/function-with-timeout"
 import { useRouter } from "next/router"
 import { useEffect, useMemo, useRef } from "react"
 import { useDispatch, useStore } from "react-redux"
@@ -52,18 +53,14 @@ const useScrollOnChange = (editorLoaded:boolean) => {
             if (Math.abs(chatContainerRect.bottom - chatWindowMeasurement.current.b) < 1) chatContainerTop.current = 0
             else chatContainerTop.current = chatContainerRect.top
         },
-        inputChangeTimeout = useRef<NodeJS.Timeout>(),
-        onInputChange = () => {
+        inputChange = () => {
             const currentH = editor.current.getBoundingClientRect().height
             if (!chatContainerTop.current) chatContainer.current.scrollIntoView({block:'end',behavior:'auto'})
             else if (editorH.current !== currentH) chatWindow.current.scrollBy({top:currentH - editorH.current,behavior:'auto'})
 
             editorH.current = currentH
         },
-        setInputChangeTimeout = () => {
-            clearTimeout(inputChangeTimeout.current)
-            inputChangeTimeout.current = setTimeout(onInputChange,10)
-        }
+        [onInputChange] = useFuncWithTimeout(inputChange,10)
         
 
     useEffect(()=>{
@@ -78,17 +75,17 @@ const useScrollOnChange = (editorLoaded:boolean) => {
                 editor.current = document.getElementById('chat-input')
                 editorH.current = editor.current.getBoundingClientRect().height
             }
-            editor.current.addEventListener('keydown',setInputChangeTimeout,{passive:true})
-            editor.current.addEventListener('keyup',setInputChangeTimeout,{passive:true})
-            editor.current.addEventListener('cut',setInputChangeTimeout,{passive:true})
-            editor.current.addEventListener('paste',setInputChangeTimeout,{passive:true})
+            editor.current.addEventListener('keydown',onInputChange,{passive:true})
+            editor.current.addEventListener('keyup',onInputChange,{passive:true})
+            editor.current.addEventListener('cut',onInputChange,{passive:true})
+            editor.current.addEventListener('paste',onInputChange,{passive:true})
         }
         return () => {
             if (!!editor.current){
-                editor.current.removeEventListener('keydown',setInputChangeTimeout)
-                editor.current.removeEventListener('keyup',setInputChangeTimeout)
-                editor.current.removeEventListener('cut',setInputChangeTimeout)
-                editor.current.removeEventListener('paste',setInputChangeTimeout)
+                editor.current.removeEventListener('keydown',onInputChange)
+                editor.current.removeEventListener('keyup',onInputChange)
+                editor.current.removeEventListener('cut',onInputChange)
+                editor.current.removeEventListener('paste',onInputChange)
             }
         }
     },[editorLoaded])
@@ -126,12 +123,12 @@ const useScrollOnChange = (editorLoaded:boolean) => {
     useEffect(()=>{
         // right after old convos are added, scroll back to the previous position, release scroll lock
         if (editorLoaded && !!convoCount && !!roomID && chatWindow.current.style.overflowY === 'hidden') {
+            chatWindow.current.style.overflowY = null
             if (!chatContainerTop.current) chatWindow.current.scrollIntoView({block:'end',behavior:'auto'})
             else {
                 const currentRectTop = chatContainer.current.getBoundingClientRect().top
                 chatWindow.current.scrollBy({top:currentRectTop - chatContainerTop.current,behavior:'auto'})
             }
-            chatWindow.current.style.overflowY = 'auto'
         }
     },[convoCount])
 }
