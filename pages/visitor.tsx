@@ -49,7 +49,9 @@ const
         const
             systemDark = useAppSelector(state => state.misc.systemDark),
             userMode = useAppSelector(state => state.misc.userMode),
-            theme = useMemo(()=>createTheme({palette: {mode: userMode === 'system' ? (systemDark ? 'dark' : 'light') : userMode}}),[systemDark,userMode])
+            theme = useMemo(()=>createTheme(!!userMode && systemDark !== null ? {palette: {
+                mode: userMode === 'system' ? (systemDark ? 'dark' : 'light') : userMode
+            }} : {}),[systemDark,userMode])
 
         return (
             <>
@@ -57,7 +59,7 @@ const
                 <title>Visitor - Project Management Tool</title>
                 <meta name="description" content="Visitor - Project Management Tool"></meta>
             </Head>
-            <ThemeProvider theme={theme}>
+            {!!userMode && systemDark !== null && <ThemeProvider theme={theme}>
                 <CssBaseline />
                 <Container component="main" maxWidth="xl">
                     <NonIndexPageThemeToggle />
@@ -65,7 +67,7 @@ const
                         <Form />
                     </Container>
                 </Container>
-            </ThemeProvider>
+            </ThemeProvider>}
             </>
         )
     },
