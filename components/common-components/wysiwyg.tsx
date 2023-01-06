@@ -45,7 +45,7 @@ const
 
         return (
             <Editor 
-                tinymceScriptSrc="tinymce/tinymce.min.js"
+                tinymceScriptSrc="/tinymce/tinymce.min.js"
                 onEditorChange={handleUpdate}
                 value={value}
                 init={{

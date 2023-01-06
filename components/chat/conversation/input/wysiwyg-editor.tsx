@@ -183,7 +183,7 @@ const WYSIWHYeditor = memo((
 
     return (
         <Editor
-            tinymceScriptSrc="tinymce/tinymce.min.js"
+            tinymceScriptSrc="/tinymce/tinymce.min.js"
             inline
             id={editorID}
             onInit={editorOnLoad}
