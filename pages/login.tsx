@@ -30,9 +30,7 @@ export const getServerSideProps: GetServerSideProps = async ({req:{cookies}}) =>
                 json = await response.json()
 
             if (json.data.sidValid) return {redirect:{destination:'/',permanent:false}}
-        } catch (error) {
-            
-        }
+        } catch {}
     }
 
     return {
