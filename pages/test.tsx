@@ -6,6 +6,7 @@ export const getServerSideProps: GetServerSideProps = async () => {
     let resultA:any = null
     let resultB:any = null
     try {
+        /*
         const 
             testLink = (url:string) => new Promise<any>(resolve=>{
                 fetch(url,{
@@ -23,11 +24,20 @@ export const getServerSideProps: GetServerSideProps = async () => {
             testLink(process.env.NEXT_PUBLIC_SSR_API_URL_A),
             testLink(process.env.NEXT_PUBLIC_SSR_API_URL_B),
         ])
+        */
 
-        const responseA = await fetch(process.env.NEXT_PUBLIC_SSR_API_URL_A)
+        const responseA = await fetch(process.env.NEXT_PUBLIC_SSR_API_URL_A, {
+            headers: { 
+                'Content-Type': 'application/json',
+            },
+        })
         resultA = await responseA.json()
 
-        const responseB = await fetch(process.env.NEXT_PUBLIC_SSR_API_URL_B)
+        const responseB = await fetch(process.env.NEXT_PUBLIC_SSR_API_URL_B, {
+            headers: { 
+                'Content-Type': 'application/json',
+            },
+        })
         resultB = await responseB.json()
     } catch {}
 
