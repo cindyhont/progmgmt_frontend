@@ -8,7 +8,7 @@ const
             res.json()
         })
         .then(r=>resolve(r))
-        .catch(()=>resolve(''))
+        .catch(e=>resolve(e))
     })
 
 export const getServerSideProps: GetServerSideProps = async ({req}) => {
