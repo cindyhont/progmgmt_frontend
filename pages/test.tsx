@@ -1,15 +1,19 @@
 import React, { useEffect } from 'react';
 import { GetServerSideProps } from 'next'
 
+const 
+    testLink = (url:string) => new Promise<any>(resolve=>{
+        fetch(url)
+        .then(res=>{
+            res.json()
+        })
+        .then(r=>resolve(r))
+        .catch(()=>resolve(''))
+    })
+
 export const getServerSideProps: GetServerSideProps = async ({req}) => {
     let links:any = null
     try {
-        const 
-            testLink = (url:string) => new Promise<string>(resolve=>{
-                fetch(url)
-                .then(()=>resolve(url))
-                .catch(()=>resolve(''))
-            })
         links = await Promise.all([
             testLink(process.env.NEXT_PUBLIC_SSR_API_URL_A),
             testLink(process.env.NEXT_PUBLIC_SSR_API_URL_B),
@@ -19,16 +23,18 @@ export const getServerSideProps: GetServerSideProps = async ({req}) => {
     return {
         props:{
             headers:req.headers,
-            api:process.env.NEXT_PUBLIC_SSR_API_URL,
+            apiA:process.env.NEXT_PUBLIC_SSR_API_URL_A,
+            apiB:process.env.NEXT_PUBLIC_SSR_API_URL_B,
             links
         }
     }
 }
 
-const TestPage = ({headers,api,links}:{headers:any;api:string;links:any}) => {
+const TestPage = ({headers,apiA,apiB,links}:{headers:any;apiA:string;apiB:string;links:any}) => {
     useEffect(()=>{
         console.log(headers)
-        console.log(api)
+        console.log(apiA)
+        console.log(apiB)
         console.log(links)
     },[])
     return <></>
