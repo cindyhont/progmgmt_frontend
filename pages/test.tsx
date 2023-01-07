@@ -3,7 +3,11 @@ import { GetServerSideProps } from 'next'
 
 const 
     testLink = (url:string) => new Promise<any>(resolve=>{
-        fetch(url)
+        fetch(url,{
+            headers: { 
+                'Content-Type': 'application/json',
+            },
+        })
         .then(res=>{
             res.json()
         })
