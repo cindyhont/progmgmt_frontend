@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { GetServerSideProps } from 'next'
 
 export const getServerSideProps: GetServerSideProps = async () => {
-    let links:any = null
+    // let links:any = null
     let resultA:any = null
     let resultB:any = null
     try {
@@ -45,17 +45,17 @@ export const getServerSideProps: GetServerSideProps = async () => {
         props:{
             apiA:process.env.NEXT_PUBLIC_SSR_API_URL_A,
             apiB:process.env.NEXT_PUBLIC_SSR_API_URL_B,
-            links,
-            resultA
+            // links,
+            resultA,
+            resultB,
         }
     }
 }
 
-const TestPage = ({apiA,apiB,links,resultA,resultB}:{apiA:string;apiB:string;links:any;resultA:any;resultB:any;}) => {
+const TestPage = ({apiA,apiB,resultA,resultB}:{apiA:string;apiB:string;resultA:any;resultB:any;}) => {
     useEffect(()=>{
         console.log(apiA)
         console.log(apiB)
-        console.log(links)
         console.log(resultA)
         console.log(resultB)
     },[])
