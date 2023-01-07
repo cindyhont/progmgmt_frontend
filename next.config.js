@@ -4,7 +4,8 @@ module.exports = {
     return [
       {source: '/api/:slug*',destination: `${process.env.API_URL}/:slug*`},
       ...['user-dark.svg','user-light.svg','tinymce/:slug*'].map(e=>({
-        source: `/${e}`,destination: `${process.env.NODE_ENV === 'production' ? 'https://pm-cdn.cindyhodev.com' : ''}/${e}`
+        // source: `/${e}`,destination: `${process.env.NODE_ENV === 'production' ? 'https://pm-cdn.cindyhodev.com' : ''}/${e}`
+        source: `/${e}`,destination: `${process.env.CDN_PREFIX}/${e}`
       })),
       {source: '/',destination: '/?page=dashboard'},
       ...[
