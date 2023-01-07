@@ -1,18 +1,18 @@
 import React, { useEffect } from 'react';
 import { GetServerSideProps } from 'next'
 
-export const getServerSideProps: GetServerSideProps = async ({req:{headers:{host}}}) => {
+export const getServerSideProps: GetServerSideProps = async ({req}) => {
     return {
         props:{
-            host,
+            headers:req.headers,
             api:process.env.NEXT_PUBLIC_SSR_API_URL
         }
     }
 }
 
-const TestPage = ({host,api}:{host:string;api:string;}) => {
+const TestPage = ({headers,api}:{headers:any;api:string;}) => {
     useEffect(()=>{
-        console.log(host)
+        console.log(headers)
         console.log(api)
     },[])
     return <></>
