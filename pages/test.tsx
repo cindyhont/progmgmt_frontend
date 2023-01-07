@@ -24,7 +24,7 @@ export const getServerSideProps: GetServerSideProps = async () => {
             testLink(process.env.NEXT_PUBLIC_SSR_API_URL_B),
         ])
 
-        const responseA = await fetch(process.env.NEXT_PUBLIC_SSR_API_URL_B)
+        const responseA = await fetch(process.env.NEXT_PUBLIC_SSR_API_URL_A)
         resultA = await responseA.json()
 
         const responseB = await fetch(process.env.NEXT_PUBLIC_SSR_API_URL_B)
