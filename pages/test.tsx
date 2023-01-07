@@ -4,7 +4,6 @@ import { GetServerSideProps } from 'next'
 export const getServerSideProps: GetServerSideProps = async () => {
     // let links:any = null
     let resultA:any = null
-    let resultB:any = null
     try {
         /*
         const 
@@ -26,38 +25,27 @@ export const getServerSideProps: GetServerSideProps = async () => {
         ])
         */
 
-        const responseA = await fetch(process.env.NEXT_PUBLIC_SSR_API_URL_A, {
+        const responseA = await fetch(process.env.NEXT_PUBLIC_SSR_API_URL, {
             headers: { 
                 'Content-Type': 'application/json',
             },
         })
         resultA = await responseA.json()
-
-        const responseB = await fetch(process.env.NEXT_PUBLIC_SSR_API_URL_B, {
-            headers: { 
-                'Content-Type': 'application/json',
-            },
-        })
-        resultB = await responseB.json()
     } catch {}
 
     return {
         props:{
-            apiA:process.env.NEXT_PUBLIC_SSR_API_URL_A,
-            apiB:process.env.NEXT_PUBLIC_SSR_API_URL_B,
+            apiA:process.env.NEXT_PUBLIC_SSR_API_URL,
             // links,
             resultA,
-            resultB,
         }
     }
 }
 
-const TestPage = ({apiA,apiB,resultA,resultB}:{apiA:string;apiB:string;resultA:any;resultB:any;}) => {
+const TestPage = ({apiA,resultA,}:{apiA:string;resultA:any;}) => {
     useEffect(()=>{
         console.log(apiA)
-        console.log(apiB)
         console.log(resultA)
-        console.log(resultB)
     },[])
     return <></>
 }
