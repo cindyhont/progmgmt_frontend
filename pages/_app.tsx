@@ -1,5 +1,5 @@
 import type { AppProps } from 'next/app'
-import '../styles.scss'
+import '../styles.css'
 import { useEffect, useMemo, useRef } from 'react';
 import { Provider, shallowEqual } from "react-redux";
 import configureAppStore, { IpreloadedState, useAppDispatch, useAppSelector } from '@reducers'
