@@ -183,7 +183,7 @@ const WYSIWHYeditor = memo((
 
     return (
         <Editor
-            tinymceScriptSrc="/tinymce/tinymce.min.js"
+            tinymceScriptSrc={`${process.env.NEXT_PUBLIC_CDN_URL || ''}/tinymce/tinymce.min.js`}
             inline
             id={editorID}
             onInit={editorOnLoad}
@@ -227,7 +227,7 @@ const WYSIWHYeditor = memo((
                                                         items:[
                                                             {
                                                                 type: 'cardimage',
-                                                                src: !!avatar ? avatar : `/user-${modeRef.current}.svg`,
+                                                                src: !!avatar ? avatar : `${process.env.NEXT_PUBLIC_CDN_URL || ''}/user-${modeRef.current}.svg`,
                                                                 alt: fullName,
                                                                 classes: ['tinymce-mention-avatar']
                                                             },
