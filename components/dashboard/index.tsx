@@ -7,6 +7,7 @@ import { useStore } from "react-redux";
 import { googleChartIsLoaded } from "@reducers/misc";
 import AssignedToMe from "./assigned-to-me";
 import useNarrowBody from "hooks/theme/narrow-body";
+import WysiwygPreload from "@components/common-components/wysiwyg-preload";
 
 
 const 
@@ -27,6 +28,7 @@ const
 
         if (!narrowBody) return (
             <Stack direction='row' spacing={2} p={2}>
+                <WysiwygPreload />
                 <DashboardColumn>
                     <>
                     <TasksByStatus />
@@ -42,6 +44,7 @@ const
             
         return (
             <Grid p={2} sx={{minHeight:'calc(100vh - 64px)'}}>
+                <WysiwygPreload />
                 <DashboardColumn>
                     <>
                     <TasksByStatus />
