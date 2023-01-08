@@ -145,7 +145,8 @@ const
                             dispatch(websocketIsOn())
                             console.log('websocket is connected')
                         },
-                        closeWS = () => {
+                        closeWS = (e:CloseEvent) => {
+                            console.log(e)
                             dispatch(websocketIsOff(Date.now()))
                             if (!!ws){
                                 ws.close()
