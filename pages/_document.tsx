@@ -25,7 +25,8 @@ export default class MyDocument extends Document {
             `,
             }}
           />
-          <Script id='google-chart-loader' src="https://www.gstatic.com/charts/loader.js" strategy="beforeInteractive" />
+          <Script id='tinymce' src={`${process.env.NEXT_PUBLIC_CDN_URL || ''}/tinymce/tinymce.min.js`} strategy="beforeInteractive" async defer />
+          <Script id='google-chart-loader' src="https://www.gstatic.com/charts/loader.js" strategy="beforeInteractive" async defer />
         </Head>
         <body>
           <Main />
