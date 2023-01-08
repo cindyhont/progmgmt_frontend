@@ -23,7 +23,7 @@ const
                     content_css:false,
                     statusbar: false,
                     menubar:false,
-                    plugins:`autolink lists table link image code emoticons mention`,
+                    plugins:`autolink lists table link image code emoticons`,
                     toolbar:`emoticons | bold italic underline strikethrough | bullist numlist table | link image | code`,
                     contextmenu:'autolink lists table link image code emoticons',
                     file_picker_types:'image',
