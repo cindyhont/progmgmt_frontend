@@ -7,8 +7,8 @@ const useWindowHeight = () => {
 
     useEffect(()=>{
         onResize()
-        window.addEventListener('resize',onResize,{passive:true})
-        return () => window.removeEventListener('resize',onResize)
+        window.visualViewport.addEventListener('resize',onResize,{passive:true})
+        return () => window.visualViewport.removeEventListener('resize',onResize)
     },[])
 
     return height
