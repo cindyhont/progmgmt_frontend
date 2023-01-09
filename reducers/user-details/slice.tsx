@@ -42,6 +42,13 @@ const
                 if (!!existingIDs.length) userDetailsAdapter.updateMany(state,existingIDs.map(id=>({id,changes:{online:true}})))
                 if (!!newIDs.length) userDetailsAdapter.addMany(state,newIDs.map(id=>({id,online:true,firstName:'',lastName:'',avatar:''})))
             },
+            otherServerDisconnect(state:EntityState<UserDetails>,{payload}:PayloadAction<EntityId[]>){
+                const currentOnlineUserIDs = Object.values(state.entities).filter(e=>e.online).map(e=>e.id)
+                if (!!currentOnlineUserIDs.length){
+                    const userIDsToOffline = payload.filter(e=>currentOnlineUserIDs.includes(e))
+                    if (!!userIDsToOffline.length) userDetailsAdapter.updateMany(state,userIDsToOffline.map(id=>({id,changes:{online:false}})))
+                }
+            },
             userDetailsUpsertMany:userDetailsAdapter.upsertMany,
             userDetailsUpdateOne(state:EntityState<UserDetails>,{payload}:PayloadAction<Update<UserDetails>>){
                 if (state.ids.includes(payload.id)) userDetailsAdapter.updateOne(state,payload)
@@ -53,8 +60,9 @@ const
 
 export const {
     addUserDetailsStatusUnknown,
-    userDetailsUpsertMany,
     newOnlineUserList,
+    otherServerDisconnect,
+    userDetailsUpsertMany,
     userDetailsUpdateOne,
 } = slice.actions
 export { 

@@ -30,6 +30,9 @@ export const processWsMessage = async (msg:IwsAction,dispatch:AppDispatch) => {
         case UserDetailsActionTypes.userStatus:
             await dispatch(userDetailsApi.endpoints.newUserStatus.initiate(payload)).unwrap();
             break;
+        case UserDetailsActionTypes.otherServerDisconnect:
+            await dispatch(userDetailsApi.endpoints.otherServerDisconnect.initiate(payload)).unwrap();
+            break;
         case ChatActionTypes.typing:
             await dispatch(chatWsHandlerApi.endpoints.roomTyping.initiate(payload)).unwrap();
             break;
@@ -146,7 +149,6 @@ const
                             console.log('websocket is connected')
                         },
                         closeWS = (e:CloseEvent) => {
-                            console.log(e)
                             dispatch(websocketIsOff(Date.now()))
                             if (!!ws){
                                 ws.close()

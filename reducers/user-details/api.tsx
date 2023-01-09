@@ -1,6 +1,6 @@
 import apiSlice, { fetchConfig } from "@reducers/api";
 import { isSignedOut, sessionRenewTime } from "@reducers/misc";
-import { addUserDetailsStatusUnknown, newOnlineUserList, userDetailsUpdateOne } from "@reducers/user-details/slice";
+import { addUserDetailsStatusUnknown, newOnlineUserList, otherServerDisconnect, userDetailsUpdateOne } from "@reducers/user-details/slice";
 import { EntityId } from "@reduxjs/toolkit";
 import { IoptionRawUser } from "./interfaces";
 
@@ -32,6 +32,12 @@ const
             newOnlineUserList:build.mutation<any,{ids:EntityId[]}>({
                 queryFn({ids},{dispatch}){
                     dispatch(newOnlineUserList(ids))
+                    return {data:null}
+                }
+            }),
+            otherServerDisconnect:build.mutation<any,{ids:EntityId[]}>({
+                queryFn({ids},{dispatch}){
+                    dispatch(otherServerDisconnect(ids))
                     return {data:null}
                 }
             }),
