@@ -77,7 +77,7 @@ const
                 direction='row'
                 mt={1}
                 sx={{
-                    height:`calc(100% - 79px)`,
+                    height:`calc(100vh - 79px)`,
                     position:'relative',
                     overflowX:'hidden'
                 }}
@@ -89,7 +89,7 @@ const
                     sm={sidebarOpen ? 12 : 5} 
                     xs={12} 
                     sx={{
-                        height:`calc(100% - 79px)`,
+                        height:`calc(100vh - 79px)`,
                         position:'relative',
                         overflow:'hidden',
                         '&:hover .MuiButtonBase-root':{
@@ -108,7 +108,7 @@ const
                     sm={sidebarOpen ? 12 : 7} 
                     xs={12} 
                     sx={{
-                        height:`calc(100% - 79px)`,
+                        height:`calc(100vh - 79px)`,
                         ...(narrowBody ? {
                             position:'absolute',
                             zIndex:2,
