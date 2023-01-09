@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 
-const useWindowHeight = () => {
+const useViewportHeight = () => {
     const 
         [height,setHeight] = useState('100vh'),
         onResize = () => setHeight(`${window.visualViewport.height}px`)
@@ -14,4 +14,4 @@ const useWindowHeight = () => {
     return height
 }
 
-export default useWindowHeight
+export default useViewportHeight

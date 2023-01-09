@@ -32,7 +32,7 @@ const
         const 
             [fileState,fileDispatch] = useReducer(reducer,initialState),
             [isLandscape,setIsLandscape] = useState(true),
-            updateOrientation = () => setIsLandscape(window.innerWidth > window.innerHeight),
+            updateOrientation = () => setIsLandscape(window.innerWidth > window.visualViewport.height),
             okOnClick = () => {
                 onClose()
                 updateFiles(fileState.files)

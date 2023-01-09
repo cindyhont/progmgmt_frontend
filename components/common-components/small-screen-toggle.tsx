@@ -24,7 +24,7 @@ const SmallScreenToggle = memo(forwardRef((
         localStorageTopKey = useRef('small-screen-toggle-top').current,
         updateTogglePosition = () => {
             const 
-                {innerHeight,innerWidth} = window,
+                {innerWidth,visualViewport:{height}} = window,
                 button = document.getElementById(buttonID)
             if (!narrowBody) {
                 button.style.display = 'none'
@@ -37,16 +37,16 @@ const SmallScreenToggle = memo(forwardRef((
                 storageLeft = localStorage.getItem(localStorageLeftKey),
                 storageTop = localStorage.getItem(localStorageTopKey),
                 left = Math.round((!!storageLeft && !isNaN(+storageLeft) ? +storageLeft : 0.8) * innerWidth - offsetWidth * 0.5),
-                top = Math.round((!!storageTop && !isNaN(+storageTop) ? +storageTop : 0.8) * innerHeight - offsetHeight * 0.5),
+                top = Math.round((!!storageTop && !isNaN(+storageTop) ? +storageTop : 0.8) * height - offsetHeight * 0.5),
                 finalLeft = Math.max(Math.min(innerWidth - m - offsetWidth,left),m),
-                finalTop = Math.max(Math.min(innerHeight - m - offsetHeight,top),m + 56)
+                finalTop = Math.max(Math.min(height - m - offsetHeight,top),m + 56)
 
             button.style.left = `${finalLeft}px`
             button.style.top = `${finalTop}px`
             button.style.display = 'flex'
 
             localStorage.setItem(localStorageLeftKey,((finalLeft + offsetWidth * 0.5) / innerWidth).toString())
-            localStorage.setItem(localStorageTopKey,((finalTop + offsetHeight * 0.5) / innerHeight).toString())
+            localStorage.setItem(localStorageTopKey,((finalTop + offsetHeight * 0.5) / height).toString())
         },
         moveStart = useRef({touchTop:-1,touchLeft:-1,btnTop:-1,btnLeft:-1}),
         touching = useRef(false),
@@ -68,19 +68,19 @@ const SmallScreenToggle = memo(forwardRef((
         onDragEnd = (e:DragEvent<HTMLButtonElement>) => {
             e.preventDefault()
             const 
-                {innerHeight,innerWidth} = window,
+                {innerWidth,visualViewport:{height}} = window,
                 button = document.getElementById(buttonID),
                 {offsetHeight,offsetWidth} = button,
                 left = e.pageX - moveStart.current.touchLeft + moveStart.current.btnLeft,
                 top = e.pageY - moveStart.current.touchTop + moveStart.current.btnTop,
                 finalLeft = Math.max(Math.min(innerWidth - m - offsetWidth,left),m),
-                finalTop = Math.max(Math.min(innerHeight - m - offsetHeight,top),m + 56)
+                finalTop = Math.max(Math.min(height - m - offsetHeight,top),m + 56)
 
             button.style.left = `${finalLeft}px`
             button.style.top = `${finalTop}px`
 
             localStorage.setItem(localStorageLeftKey,((finalLeft + offsetWidth * 0.5) / innerWidth).toString())
-            localStorage.setItem(localStorageTopKey,((finalTop + offsetHeight * 0.5) / innerHeight).toString())
+            localStorage.setItem(localStorageTopKey,((finalTop + offsetHeight * 0.5) / height).toString())
         },
         onTouchStart = (e:TouchEvent<HTMLButtonElement>) => {
             if (e.touches.length !== 1) return
@@ -104,18 +104,18 @@ const SmallScreenToggle = memo(forwardRef((
             const 
                 button = document.getElementById(buttonID),
                 rect = button.getBoundingClientRect(),
-                {innerHeight,innerWidth} = window,
+                {innerWidth,visualViewport:{height}} = window,
                 {offsetHeight,offsetWidth} = button,
                 left = rect.left,
                 top = rect.top,
                 finalLeft = Math.max(Math.min(innerWidth - m - offsetWidth,left),m),
-                finalTop = Math.max(Math.min(innerHeight - m - offsetHeight,top),m + 56)
+                finalTop = Math.max(Math.min(height - m - offsetHeight,top),m + 56)
 
             button.style.left = `${finalLeft}px`
             button.style.top = `${finalTop}px`
 
             localStorage.setItem(localStorageLeftKey,((finalLeft + offsetWidth * 0.5) / innerWidth).toString())
-            localStorage.setItem(localStorageTopKey,((finalTop + offsetHeight * 0.5) / innerHeight).toString())
+            localStorage.setItem(localStorageTopKey,((finalTop + offsetHeight * 0.5) / height).toString())
         },
         onTouchMove = (e:TouchEvent<HTMLButtonElement>) => {
             touching.current = true

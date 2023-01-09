@@ -44,7 +44,7 @@ const useScrollOnChange = (editorLoaded:boolean) => {
             const
                 chatContainerRect = chatContainer.current.getBoundingClientRect(),
                 atBottom = chatContainerRect.bottom - chatWindowMeasurement.current.b < 200,
-                newHeight = window.innerHeight - chatWindowMeasurement.current.b + (replyOrEdit ? replyEditBarHeight.current : 0) + 50
+                newHeight = window.visualViewport.height - chatWindowMeasurement.current.b + (replyOrEdit ? replyEditBarHeight.current : 0) + 50
 
             toBottomBtn.current.style.bottom = `${newHeight}px`
             toBottomBtn.current.style.transform = atBottom ? `translateY(${newHeight}px)` : 'none'

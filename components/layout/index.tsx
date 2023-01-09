@@ -29,7 +29,7 @@ import { useTheme } from "@mui/material";
 import { useRouter } from 'next/router';
 import NarrowAppBarContent from './narrow-app-bar-content';
 import WebsocketOfflineTooLongDialog from './ws-offline-too-long-dialog';
-import useWindowHeight from '@hooks/theme/window-height';
+import useViewportHeight from '@hooks/theme/viewport-height';
 
 const drawerWidth: number = 240;
 
@@ -207,7 +207,7 @@ const
                 if (matchesSM) localStorage.setItem('menuOpen',(false).toString())
                 dispatch(openSidebar(false))
             },[matchesSM]),
-            height = useWindowHeight()
+            viewportHeight = useViewportHeight()
 
         return (
             <>
@@ -290,7 +290,7 @@ const
                     component="main"
                     sx={{
                         flexGrow: 1,
-                        height: '100vh',
+                        height: viewportHeight,
                         overflow: 'auto',
                         backgroundColor: mode === 'light'
                                 ? grey[100]
@@ -330,31 +330,18 @@ const
                 <CircularProgress />
             </Backdrop>
             <WebsocketOfflineTooLongDialog />
-            <Box sx={{
-                backgroundColor:'#000',
-                color:'red',
-                zIndex:999999,
-                position:'fixed',
-                top:0,
-                right:0,
-                width:'fit-content'
-            }}>
-                <p>
-                    innerHeight:{height}
-                </p>
-            </Box>
             </>
         )
     }),
     DrawerContent = memo(({userRight}:{userRight:number})=>{
-        // const height = useWindowHeight()
+        const viewportHeight = useViewportHeight()
         return (
             <Grid
                 container
                 direction='column'
                 sx={{
                     justifyContent:'space-between',
-                    height:'100%',
+                    height:viewportHeight,
                     overflowX:'hidden'
                 }}
             >
