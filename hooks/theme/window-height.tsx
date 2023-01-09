@@ -3,7 +3,7 @@ import { useEffect, useState } from "react"
 const useWindowHeight = () => {
     const 
         [height,setHeight] = useState('100vh'),
-        onResize = () => setHeight(`${window.innerHeight}px`)
+        onResize = () => setHeight(`${window.visualViewport.height}px`)
 
     useEffect(()=>{
         onResize()
