@@ -290,7 +290,7 @@ const
                     component="main"
                     sx={{
                         flexGrow: 1,
-                        height: '100vh',
+                        height: '100%',
                         overflow: 'auto',
                         backgroundColor: mode === 'light'
                                 ? grey[100]
