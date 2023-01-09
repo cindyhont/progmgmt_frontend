@@ -29,6 +29,7 @@ import { useTheme } from "@mui/material";
 import { useRouter } from 'next/router';
 import NarrowAppBarContent from './narrow-app-bar-content';
 import WebsocketOfflineTooLongDialog from './ws-offline-too-long-dialog';
+import useWindowHeight from '@hooks/theme/window-height';
 
 const drawerWidth: number = 240;
 
@@ -191,9 +192,9 @@ const
         }
     )=>{
         const 
-            theme = useTheme(),
-            matchesSM = useMediaQuery(theme.breakpoints.up('sm')),
-            matchesMD = useMediaQuery(theme.breakpoints.up('md')),
+            {breakpoints:{up},direction,palette:{mode,grey},transitions} = useTheme(),
+            matchesSM = useMediaQuery(up('sm')),
+            matchesMD = useMediaQuery(up('md')),
             sidebarOpen = useAppSelector(state => state.misc.sidebarOpen),
             loading = useAppSelector(state => state.misc.loading),
             open = useAppSelector(state => state.misc.sidebarOpen),
@@ -205,7 +206,8 @@ const
             onClose = useCallback(() => {
                 if (matchesSM) localStorage.setItem('menuOpen',(false).toString())
                 dispatch(openSidebar(false))
-            },[matchesSM])
+            },[matchesSM]),
+            height = useWindowHeight()
 
         return (
             <>
@@ -276,7 +278,7 @@ const
                     <>
                     <NarrowDrawerHeader>
                         <IconButton onClick={onClose}>
-                            {theme.direction === 'ltr' ? <ChevronLeftIcon /> : <ChevronRightIcon />}
+                            {direction === 'ltr' ? <ChevronLeftIcon /> : <ChevronRightIcon />}
                         </IconButton>
                     </NarrowDrawerHeader>
                     <Divider />
@@ -288,23 +290,23 @@ const
                     component="main"
                     sx={{
                         flexGrow: 1,
-                        height: '100vh',
+                        height,//: '100vh',
                         overflow: 'auto',
-                        backgroundColor: theme.palette.mode === 'light'
-                                ? theme.palette.grey[100]
-                                : theme.palette.grey[900],
+                        backgroundColor: mode === 'light'
+                                ? grey[100]
+                                : grey[900],
                         ...(!matchesSM && {
                             // paddingTop: theme.spacing(3),
                             // paddingBottom: theme.spacing(3),
-                            transition: theme.transitions.create('margin', {
-                                easing: theme.transitions.easing.sharp,
-                                duration: theme.transitions.duration.leavingScreen,
+                            transition: transitions.create('margin', {
+                                easing: transitions.easing.sharp,
+                                duration: transitions.duration.leavingScreen,
                             }),
                             // marginLeft: `-${drawerWidth}px`,
                             ...(open && {
-                                transition: theme.transitions.create('margin', {
-                                easing: theme.transitions.easing.easeOut,
-                                duration: theme.transitions.duration.enteringScreen,
+                                transition: transitions.create('margin', {
+                                easing: transitions.easing.easeOut,
+                                duration: transitions.duration.enteringScreen,
                             }),
                         })
                     })}}
@@ -331,20 +333,23 @@ const
             </>
         )
     }),
-    DrawerContent = memo(({userRight}:{userRight:number})=>(
-        <Grid
-            container
-            direction='column'
-            sx={{
-                justifyContent:'space-between',
-                height:'100%',
-                overflowX:'hidden'
-            }}
-        >
-            <TopSideBarButtons {...{userRight}} />
-            <BottomSidebarButtons />
-        </Grid>
-    ))
+    DrawerContent = memo(({userRight}:{userRight:number})=>{
+        const height = useWindowHeight()
+        return (
+            <Grid
+                container
+                direction='column'
+                sx={{
+                    justifyContent:'space-between',
+                    height,//:'100%',
+                    overflowX:'hidden'
+                }}
+            >
+                <TopSideBarButtons {...{userRight}} />
+                <BottomSidebarButtons />
+            </Grid>
+        )
+    })
 Layout.displayName = 'Layout'
 LayoutWrapper.displayName = 'LayoutWrapper'
 LayoutContent.displayName = 'LayoutContent'

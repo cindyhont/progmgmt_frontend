@@ -202,6 +202,7 @@ const
                                 mb:2,
                                 mt:1,
                                 border:'none',
+                                maxWidth:'100vw'
                             }}
                         >
                             <ComponentDivert {...{state,field:'name'}} />
