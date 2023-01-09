@@ -330,6 +330,19 @@ const
                 <CircularProgress />
             </Backdrop>
             <WebsocketOfflineTooLongDialog />
+            <Box sx={{
+                backgroundColor:'#000',
+                color:'red',
+                zIndex:999999,
+                position:'fixed',
+                top:0,
+                right:0,
+                width:'fit-content'
+            }}>
+                <p>
+                    innerHeight:{height}
+                </p>
+            </Box>
             </>
         )
     }),
