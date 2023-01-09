@@ -203,6 +203,7 @@ const
             <Head>
                 <title>Project Management Tool</title>
                 <meta name="description" content="Project Management Tool"></meta>
+                <meta name='viewport' content='width=device-width, interactive-widget=resizes-visual' />
             </Head>
             <DialogCtxMenuDispatchContext.Provider value={{dialogCtxMenuStatusDispatch}}>
                 <DialogCtxMenuStateContext.Provider value={dialogCtxMenuState}>

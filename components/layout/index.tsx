@@ -290,7 +290,7 @@ const
                     component="main"
                     sx={{
                         flexGrow: 1,
-                        height,//: '100vh',
+                        height: '100vh',
                         overflow: 'auto',
                         backgroundColor: mode === 'light'
                                 ? grey[100]
@@ -347,14 +347,14 @@ const
         )
     }),
     DrawerContent = memo(({userRight}:{userRight:number})=>{
-        const height = useWindowHeight()
+        // const height = useWindowHeight()
         return (
             <Grid
                 container
                 direction='column'
                 sx={{
                     justifyContent:'space-between',
-                    height,//:'100%',
+                    height:'100%',
                     overflowX:'hidden'
                 }}
             >
