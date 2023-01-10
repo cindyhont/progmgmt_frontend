@@ -117,6 +117,7 @@ const WYSIWYGeditor = memo((
         },
         onClipboardEvent = (e:EditorEvent<ClipboardEvent>) => onChange(e),
         onInput = (e:EditorEvent<InputEvent>) => {
+            console.log(e.inputType)
             if (e.inputType==="insertParagraph"){
                 const 
                     state = store.getState() as ReduxState,
@@ -190,7 +191,6 @@ const WYSIWYGeditor = memo((
                 quickbars_insert_toolbar:false,
                 contextmenu:'link',
                 link_default_target:'_blank',
-                toolbar_mode: 'floating',
                 setup:(editor)=>{
                     editor.on('ExecCommand',editorCommandOnExec)
                     editor.on('input',onInput)
