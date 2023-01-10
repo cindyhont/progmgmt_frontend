@@ -62,7 +62,6 @@ const useScrollOnChange = (editorLoaded:boolean) => {
         },
         [onInputChange] = useFuncWithTimeout(inputChange,10)
         
-
     useEffect(()=>{
         chatWindow.current = document.getElementById('convo-window')
         chatContainer.current = document.getElementById('chat-content')
@@ -75,18 +74,10 @@ const useScrollOnChange = (editorLoaded:boolean) => {
                 editor.current = document.getElementById('chat-input')
                 editorH.current = editor.current.getBoundingClientRect().height
             }
-            editor.current.addEventListener('keydown',onInputChange,{passive:true})
-            editor.current.addEventListener('keyup',onInputChange,{passive:true})
-            editor.current.addEventListener('cut',onInputChange,{passive:true})
-            editor.current.addEventListener('paste',onInputChange,{passive:true})
+            editor.current.addEventListener('inputchange',onInputChange,{passive:true})
         }
         return () => {
-            if (!!editor.current){
-                editor.current.removeEventListener('keydown',onInputChange)
-                editor.current.removeEventListener('keyup',onInputChange)
-                editor.current.removeEventListener('cut',onInputChange)
-                editor.current.removeEventListener('paste',onInputChange)
-            }
+            if (!!editor.current) editor.current.removeEventListener('inputchange',onInputChange)
         }
     },[editorLoaded])
 

@@ -9,7 +9,7 @@ import { createSelector, EntityId } from '@reduxjs/toolkit';
 import { useStore } from 'react-redux';
 import { useTheme } from '@mui/material/styles';
 import { useRouter } from 'next/router';
-import { enterIsPressed, fileInputSelector } from '@components/functions';
+import { fileInputSelector } from '@components/functions';
 import { useSendWsMessageMutation } from 'websocket/api';
 import { ActionTypes } from '../../reducers/ws-message-types';
 import { useCreateConvoInExistingRoomMutation, useCreateRoomNoConvoMutation, useCreateRoomWithFirstConvoMutation } from '@components/chat/reducers/api';
@@ -36,7 +36,6 @@ const WYSIWHYeditor = memo((
         userIdRef = useRef<EntityId>(),
         dispatch = useAppDispatch(),
         [typing,setTyping] = useState(false),
-        timestamp = useRef(0),
         {editorLoaded} = useContext(ChatEventStateContext),
         chatContentEventDispatch = useContext(ChatEventDispatchContext),
         editorOnLoad = () => chatContentEventDispatch(updateEditorLoadStatus()),
@@ -65,9 +64,12 @@ const WYSIWHYeditor = memo((
         [createConvoInRoom] = useCreateConvoInExistingRoomMutation(),
         [createRoomWithFirstConvo] = useCreateRoomWithFirstConvoMutation(),
         [createRoomNoConvo] = useCreateRoomNoConvoMutation(),
+        dispatchEventToContainer = () => editorRef.current.dispatchEvent(new Event('inputchange')),
         submitConvo = async(msg:string) => {
             setNoInputString(true)
             editorRef.current.innerHTML = ''
+            setTimeout(()=>dispatchEventToContainer(),10)
+
             if (!!roomID) {
                 createConvoInRoom({msg,roomID})
             } else if (!!userID){
@@ -83,7 +85,7 @@ const WYSIWHYeditor = memo((
                     } catch {}
                 }
             }
-            setTimeout(()=>scrollToBottom(),10)
+            setTimeout(()=>scrollToBottom(),20)
         },
         submitOnClick = () => submitConvo(editorRef.current.innerHTML),
         emoticonOnClick = () => {
@@ -91,22 +93,30 @@ const WYSIWHYeditor = memo((
             const btn = document.querySelector('.tox-tinymce-inline .tox-toolbar__group:first-child > button') as HTMLButtonElement
             if (!!btn) btn.click()
         },
-        onChange = () => {
-            setNoInputString(editorRef.current.innerText.trim()==='')
-            clearTimeout(typingTimeoutRef.current)
+        onChange = (e:EditorEvent<ClipboardEvent | InputEvent>) => {
+            const 
+                paths = e.composedPath(),
+                len = paths.length
 
-            const draft = editorRef.current.innerHTML
+            for (let i=0; i<len; i++){
+                const path = paths[i] as HTMLElement
+                if (path.id===editorID){
+                    const {innerHTML,innerText} = path
+                    setNoInputString(innerText.trim()==='')
 
-            if (!!roomID){
-                dispatch(updateChatRoomStatus({id:roomID,changes:{draft}}))
-                setTyping(true)
-                typingTimeoutRef.current = setTimeout(()=>setTyping(false),1000)
-            } else dispatch(updateChatUserStatus({id:userID,changes:{draft}}))
+                    if (!!roomID){
+                        dispatch(updateChatRoomStatus({id:roomID,changes:{draft:innerHTML}}))
+                        setTyping(true)
+                        typingTimeoutRef.current = setTimeout(()=>setTyping(false),1000)
+                    } else dispatch(updateChatUserStatus({id:userID,changes:{draft:innerHTML}}))
+
+                    dispatchEventToContainer()
+                }
+            }
         },
-        onKeyDown = (e:KeyboardEvent) => {
-            if (e.timeStamp === timestamp.current) return
-            timestamp.current = e.timeStamp
-            if (enterIsPressed(e)) {
+        onClipboardEvent = (e:EditorEvent<ClipboardEvent>) => onChange(e),
+        onInput = (e:EditorEvent<InputEvent>) => {
+            if (e.inputType==="insertParagraph"){
                 const 
                     state = store.getState() as ReduxState,
                     entity = !!roomID ? chatRoomSelector.selectById(state,roomID) : chatUserSelector.selectById(state,userID),
@@ -116,17 +126,7 @@ const WYSIWHYeditor = memo((
                     doc = parser.parseFromString(draft,'text/html')
 
                 if (!!fileInputSelector.selectTotal(files) || doc.body.innerText.trim() !== '') submitConvo(doc.body.innerHTML)
-            }
-        },
-        onKeyUp = (e:KeyboardEvent) => {
-            if (e.timeStamp === timestamp.current) return
-            timestamp.current = e.timeStamp
-            if (!enterIsPressed(e)) onChange()
-        },
-        onClipboardEvent = (e:ClipboardEvent) => {
-            if (e.timeStamp === timestamp.current) return
-            timestamp.current = e.timeStamp
-            onChange()
+            } else onChange(e)
         }
 
     useEffect(()=>{
@@ -151,21 +151,14 @@ const WYSIWHYeditor = memo((
 
         if (editorLoaded) {
             if (!editorRef.current) editorRef.current = document.getElementById(editorID) as HTMLDivElement
-            editorRef.current.addEventListener('keydown',onKeyDown,{passive:true})
-            editorRef.current.addEventListener('keyup',onKeyUp,{passive:true})
-            editorRef.current.addEventListener('cut',onClipboardEvent,{passive:true})
-            editorRef.current.addEventListener('paste',onClipboardEvent,{passive:true})
 
             emojiBtn.addEventListener('click',emoticonOnClick,{passive:true})
             submitBtn.addEventListener('click',submitOnClick,{passive:true})
+
+            dispatchEventToContainer()
         }
         return () => {
             if (!!editorRef.current){
-                editorRef.current.removeEventListener('keydown',onKeyDown)
-                editorRef.current.removeEventListener('keyup',onKeyUp)
-                editorRef.current.removeEventListener('cut',onClipboardEvent)
-                editorRef.current.removeEventListener('paste',onClipboardEvent)
-
                 emojiBtn.removeEventListener('click',emoticonOnClick)
                 submitBtn.removeEventListener('click',submitOnClick)
             }
@@ -198,6 +191,9 @@ const WYSIWHYeditor = memo((
                 link_default_target:'_blank',
                 setup:(editor)=>{
                     editor.on('ExecCommand',editorCommandOnExec)
+                    editor.on('input',onInput)
+                    editor.on('paste',onClipboardEvent)
+                    editor.on('cut',onClipboardEvent)
 
                     window.tinymce.PluginManager.add('mention',(editor:EditorType)=>{
                         editor.ui.registry.addAutocompleter('mentionAutoComplete',{
