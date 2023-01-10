@@ -122,7 +122,7 @@ const WYSIWYGeditor = memo((
                 const 
                     state = store.getState() as ReduxState,
                     entity = !!roomID ? chatRoomSelector.selectById(state,roomID) : chatUserSelector.selectById(state,userID),
-                    draft = entity.draft,
+                    draft = entity?.draft || '',
                     files = entity.fileInputs,
                     parser = new DOMParser(),
                     doc = parser.parseFromString(draft,'text/html')
