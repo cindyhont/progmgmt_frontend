@@ -117,7 +117,6 @@ const WYSIWYGeditor = memo((
         },
         onClipboardEvent = (e:EditorEvent<ClipboardEvent>) => onChange(e),
         onInput = (e:EditorEvent<InputEvent>) => {
-            console.log(e.inputType)
             if (e.inputType==="insertParagraph"){
                 const 
                     state = store.getState() as ReduxState,
@@ -128,6 +127,7 @@ const WYSIWYGeditor = memo((
                     doc = parser.parseFromString(draft,'text/html')
 
                 if (!!fileInputSelector.selectTotal(files) || doc.body.innerText.trim() !== '') submitConvo(doc.body.innerHTML)
+                else editorRef.current.innerHTML = ''
             } else onChange(e)
         }
 
