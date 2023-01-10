@@ -45,7 +45,7 @@ const
 
         return (
             <Editor 
-                // tinymceScriptSrc={`${process.env.NEXT_PUBLIC_CDN_URL || ''}/tinymce/tinymce.min.js`}
+                tinymceScriptSrc={`${process.env.NEXT_PUBLIC_CDN_URL || ''}/tinymce/tinymce.min.js`}
                 onEditorChange={handleUpdate}
                 value={value}
                 init={{

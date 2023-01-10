@@ -18,7 +18,7 @@ const
     WysiwygPreload = () => (
         <Box style={{width:0,height:0,position:'fixed',bottom:'100vh',right:'100vw',opacity:'0'}}>
             <Editor 
-                // tinymceScriptSrc={`${process.env.NEXT_PUBLIC_CDN_URL || ''}/tinymce/tinymce.min.js`}
+                tinymceScriptSrc={`${process.env.NEXT_PUBLIC_CDN_URL || ''}/tinymce/tinymce.min.js`}
                 init={{
                     content_css:false,
                     statusbar: false,
