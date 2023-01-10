@@ -18,6 +18,7 @@ import useScrollOnReplyEdit from "./functions/scroll-on-reply-or-edit";
 import useViewportLatestConvo from "./functions/viewport-latest-convo";
 import useFetchOldConvos from "./functions/fetch-old-convos";
 import useScrollOnChange from "./functions/scroll-on-change";
+import Spinner from "@components/common-components/spinner";
 
 const 
     Conversation = () => {
@@ -70,6 +71,11 @@ const
         return (
             <ChatEventDispatchContext.Provider value={chatContentEventDispatch}>
                 <ChatEventStateContext.Provider value={chatContentEventState}>
+                    <>
+                    {show && <Spinner {...{
+                        height:'100%',
+                        show:show && !chatContentEventState.editorLoaded
+                    }} />}
                     <Grid 
                         container 
                         direction='column' 
@@ -104,6 +110,7 @@ const
                         <EditBar />
                         <ChatInput />
                     </Grid>
+                    </>
                 </ChatEventStateContext.Provider>
             </ChatEventDispatchContext.Provider>
         )

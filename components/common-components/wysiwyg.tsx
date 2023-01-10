@@ -3,12 +3,11 @@ import { ReduxState, useAppDispatch } from "@reducers"
 import { userDetailsSelector } from "@reducers/user-details/slice"
 import { useTheme } from "@mui/material"
 import Box from '@mui/material/Box';
-import Grid from '@mui/material/Grid';
 import { Editor } from '@tinymce/tinymce-react';
 import {Editor as EditorType} from 'tinymce'
 import userDetailsApi from "@reducers/user-details/api"
 import { useStore } from "react-redux"
-import CircularProgress from '@mui/material/CircularProgress';
+import Spinner from './spinner'
 
 const
     file_picker_callback = (cb:Function) => {
@@ -229,23 +228,7 @@ const
 
         return (
             <>
-            <Grid
-                container
-                direction='column'
-                sx={{
-                    height,
-                    display:loaded ? 'none' : 'flex',
-                    justifyContent:'center',
-                }}
-            >
-                <Grid
-                    container
-                    direction='row'
-                    sx={{justifyContent:'center'}}
-                >
-                    <CircularProgress />
-                </Grid>
-            </Grid>
+            <Spinner {...{show:!loaded,height}} />
             <WYSIWYGwrapper {...{showFileIconMark,fileBtnOnClick,height,loaded}}>
                 <>
                 {mode==='dark' &&  <WYSIWYGnoMode {...{

@@ -62,10 +62,10 @@ const
 
 
         useEffect(()=>{
-            let mode:'light'|'dark' = 'light'
-            if (userMode === 'system') mode = systemDark ? 'dark' : 'light'
-            else mode = userMode
-            document.getElementsByTagName('html')[0].style.backgroundColor = mode === 'light' ? 'white' : 'black'
+            if (!!userMode && systemDark !== null){
+                const mode:'light'|'dark' = userMode === 'system' ? (systemDark ? 'dark' : 'light') : userMode
+                document.getElementsByTagName('html')[0].style.backgroundColor = mode === 'light' ? 'white' : 'black'
+            }
         },[userMode,systemDark])
 
         useEffect(()=>{
