@@ -15,6 +15,7 @@ const SubmitBtn = memo(({noInputString}:{noInputString:boolean;}) => {
         noFileInputSelector = useMemo(()=>createSelector(
             (state:ReduxState)=>state,
             (state:ReduxState)=>{
+                if (!roomID && !userID) return true
                 const fileInput = !!roomID
                     ? chatRoomSelector.selectById(state,roomID).fileInputs
                     : chatUserSelector.selectById(state,userID).fileInputs;

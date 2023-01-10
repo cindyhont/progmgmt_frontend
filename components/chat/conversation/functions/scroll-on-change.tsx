@@ -6,6 +6,7 @@ import useFuncWithTimeout from "hooks/counter/function-with-timeout"
 import { useRouter } from "next/router"
 import { useEffect, useMemo, useRef } from "react"
 import { useDispatch, useStore } from "react-redux"
+import createConvoIdSelector from "./createConvoIdSelector"
 
 const useScrollOnChange = (editorLoaded:boolean) => {
     const
@@ -27,7 +28,8 @@ const useScrollOnChange = (editorLoaded:boolean) => {
         ),[roomID]),
         replyOrEdit = useAppSelector(state => replyOrEditSelector(state)),
         fetchingConvos = useAppSelector(state => chatRoomSelector.selectById(state,roomID)?.fetchingConvos),
-        convoCount = useAppSelector(state => chatConvoSelector.selectTotal(chatRoomSelector.selectById(state,roomID))),
+        convoIDselector = useMemo(()=>createConvoIdSelector(roomID),[roomID]),
+        convoCount = useAppSelector(state => convoIDselector(state).length),
         onResize = () => {
             const {width,height,top,bottom} = chatWindow.current.getBoundingClientRect()
             if (chatWindowMeasurement.current.w !== width || chatWindowMeasurement.current.h !== height){

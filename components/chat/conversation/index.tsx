@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react";
+import React, { useEffect, useReducer, useState } from "react";
 import Grid from '@mui/material/Grid';
 import ChatInput from "./input";
 import { ScrollToBottomBtn, ScrollToBottomBtnContainer } from "./scrollToBottomBtn";
@@ -47,23 +47,15 @@ const
                         }
                     }
                     setShow(true)
-                } else setShow(false)
-            }
+                }
+            },
+            narrowBody = useNarrowBody(),
+            [chatContentEventState,chatContentEventDispatch] = useReducer(reducer,initialState),
+            [fetchRepliedConvosAtInit] = useFetchRepliedConvosAtInitMutation()
 
         useEffect(()=>{
             matchUserID()
         },[userID,roomID])
-
-        if (show && (!!roomID || !!userID)) return <ConversationContent />
-        else return <Grid sx={{borderLeft:'1px solid rgba(255,255,255,0.1)',height:'100%'}} />
-    },
-    ConversationContent = () => {
-        const
-            {query} = useRouter(),
-            roomID = query.roomid as string,
-            narrowBody = useNarrowBody(),
-            [chatContentEventState,chatContentEventDispatch] = useReducer(reducer,initialState),
-            [fetchRepliedConvosAtInit] = useFetchRepliedConvosAtInitMutation()
 
         useEffect(()=>{
             if (!!roomID) fetchRepliedConvosAtInit(roomID)
@@ -86,7 +78,7 @@ const
                             position:'relative',
                             height:'100%',
                             overflow:'hidden',
-                            display:chatContentEventState.editorLoaded ? 'display' : 'none'
+                            display:show && chatContentEventState.editorLoaded ? 'display' : 'none'
                         }}
                     >
                         <Header />

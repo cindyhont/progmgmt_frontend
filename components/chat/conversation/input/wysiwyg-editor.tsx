@@ -16,7 +16,7 @@ import { useCreateConvoInExistingRoomMutation, useCreateRoomNoConvoMutation, use
 import scrollToBottom from '../functions/to-bottom';
 import { ChatEventDispatchContext, ChatEventStateContext, updateEditorLoadStatus } from '../functions/reducer-context';
 
-const WYSIWHYeditor = memo((
+const WYSIWYGeditor = memo((
     {
         setNoInputString,
     }:{
@@ -50,6 +50,7 @@ const WYSIWHYeditor = memo((
         noFileInputSelector = useMemo(()=>createSelector(
             (state:ReduxState)=>state,
             (state:ReduxState)=>{
+                if (!roomID && !userID) return true
                 const fileInput = !!roomID
                     ? chatRoomSelector.selectById(state,roomID).fileInputs
                     : chatUserSelector.selectById(state,userID).fileInputs;
@@ -259,5 +260,5 @@ const WYSIWHYeditor = memo((
         />
     )
 })
-WYSIWHYeditor.displayName = 'WYSIWHYeditor'
-export default WYSIWHYeditor
+WYSIWYGeditor.displayName = 'WYSIWYGeditor'
+export default WYSIWYGeditor

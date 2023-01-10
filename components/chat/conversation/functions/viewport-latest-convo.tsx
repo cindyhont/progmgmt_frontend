@@ -1,10 +1,11 @@
 import { chatConvoSelector, chatRoomSelector, updateChatRoomStatus } from "@components/chat/reducers/slice"
-import { useAppSelector } from "@reducers"
-import { EntityId } from "@reduxjs/toolkit"
+import { ReduxState, useAppSelector } from "@reducers"
+import { createSelector, EntityId } from "@reduxjs/toolkit"
 import useFuncWithTimeout from "hooks/counter/function-with-timeout"
 import { useRouter } from "next/router"
-import { useEffect, useRef } from "react"
+import { useEffect, useMemo, useRef } from "react"
 import { useDispatch } from "react-redux"
+import createConvoIdSelector from "./createConvoIdSelector"
 
 const useViewportLatestConvo = (editorLoaded:boolean) => {
     const
@@ -16,7 +17,8 @@ const useViewportLatestConvo = (editorLoaded:boolean) => {
         chatContainerMeasurement = useRef({h:0}),
         chatContainer = useRef<HTMLElement>(),
         dispatch = useDispatch(),
-        convoIDs = useAppSelector(state => chatConvoSelector.selectIds(chatRoomSelector.selectById(state,roomID))),
+        convoIDselector = useMemo(()=>createConvoIdSelector(roomID),[roomID]),
+        convoIDs = useAppSelector(state => convoIDselector(state)),
         roomObserving = useRef<string>(),
         onScroll = () => {
             if (chatContainerMeasurement.current.h <= chatWindowMeasurement.current.h) return

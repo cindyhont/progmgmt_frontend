@@ -1,12 +1,14 @@
-import React, { ChangeEvent, memo } from "react"
+import React, { ChangeEvent, memo, useCallback, useState } from "react"
 import { ReduxState, useAppDispatch } from "@reducers"
 import { userDetailsSelector } from "@reducers/user-details/slice"
 import { useTheme } from "@mui/material"
 import Box from '@mui/material/Box';
+import Grid from '@mui/material/Grid';
 import { Editor } from '@tinymce/tinymce-react';
 import {Editor as EditorType} from 'tinymce'
 import userDetailsApi from "@reducers/user-details/api"
 import { useStore } from "react-redux"
+import CircularProgress from '@mui/material/CircularProgress';
 
 const
     file_picker_callback = (cb:Function) => {
@@ -29,6 +31,7 @@ const
             contentStyle,
             height,
             fileBtnOnClick,
+            onInit,
         }:{
             handleUpdate:(e:string)=>void;
             value:string;
@@ -36,6 +39,7 @@ const
             contentStyle:string;
             height?:string;
             fileBtnOnClick?:()=>void;
+            onInit:()=>void;
         }
     ) => {
         const 
@@ -48,6 +52,7 @@ const
                 tinymceScriptSrc={`${process.env.NEXT_PUBLIC_CDN_URL || ''}/tinymce/tinymce.min.js`}
                 onEditorChange={handleUpdate}
                 value={value}
+                onInit={onInit}
                 init={{
                     content_css:false,
                     content_style:contentStyle,
@@ -149,17 +154,20 @@ const
             showFileIconMark,
             fileBtnOnClick,
             height,
+            loaded
         }:{
             children:JSX.Element;
             showFileIconMark:boolean;
             fileBtnOnClick?:()=>void;
             height?:string;
+            loaded:boolean;
         }
     )=>{
         const {palette:{mode,primary}} = useTheme()
         return (
             <Box
                 sx={{
+                    opacity:loaded ? '1' : '0',
                     '.tox-tinymce':{
                         border:`1px solid ${mode==='dark' ? '#777' : '#bbb'}`,
                         borderRadius:'4px',
@@ -203,7 +211,7 @@ const
             value:string;
             handleUpdate:(e:string)=>void;
             placeholder?:string;
-            height?:string;
+            height:string;
             showFileIconMark?:boolean;
             fileBtnOnClick?:()=>void;
         }
@@ -215,10 +223,30 @@ const
                     font-weight: bold;
                     color:${primary.main};
                 }
-            `
+            `,
+            [loaded,setLoaded] = useState(false),
+            onInit = useCallback(()=>setLoaded(true),[])
 
         return (
-            <WYSIWYGwrapper {...{showFileIconMark,fileBtnOnClick,height}}>
+            <>
+            <Grid
+                container
+                direction='column'
+                sx={{
+                    height,
+                    display:loaded ? 'none' : 'flex',
+                    justifyContent:'center',
+                }}
+            >
+                <Grid
+                    container
+                    direction='row'
+                    sx={{justifyContent:'center'}}
+                >
+                    <CircularProgress />
+                </Grid>
+            </Grid>
+            <WYSIWYGwrapper {...{showFileIconMark,fileBtnOnClick,height,loaded}}>
                 <>
                 {mode==='dark' &&  <WYSIWYGnoMode {...{
                     handleUpdate,
@@ -235,6 +263,7 @@ const
                         ${highlightStyle}
                     `,
                     fileBtnOnClick,
+                    onInit,
                 }} />}
                 {mode==='light' &&  <WYSIWYGnoMode {...{
                     handleUpdate,
@@ -248,9 +277,11 @@ const
                         ${highlightStyle}
                     `,
                     fileBtnOnClick,
+                    onInit,
                 }} />}
                 </>
             </WYSIWYGwrapper>
+            </>
         )
     })
 WYSIWYGwrapper.displayName = 'WYSIWYGwrapper'

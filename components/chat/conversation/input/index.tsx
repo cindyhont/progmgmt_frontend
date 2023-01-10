@@ -6,7 +6,7 @@ import TableCell from '@mui/material/TableCell';
 import TableRow from '@mui/material/TableRow';
 import Box from '@mui/material/Box';
 import MoodRoundedIcon from '@mui/icons-material/MoodRounded';
-import WYSIWHYeditor from './wysiwyg-editor';
+import WYSIWYGeditor from './wysiwyg-editor';
 import FileButton from './file-button';
 import Table from '@mui/material/Table';
 import SubmitBtn from './submit-btn';
@@ -50,7 +50,7 @@ const ChatInput = memo(()=>{
                             </IconButton>
                         </TableCell>
                         <TableCell>
-                            <WYSIWHYeditor {...{setNoInputString}} />
+                            <WYSIWYGeditor {...{setNoInputString}} />
                         </TableCell>
                         <TableCell>
                             <FileButton />

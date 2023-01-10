@@ -3,8 +3,9 @@ import { chatConvoSelector, chatRoomSelector } from "@components/chat/reducers/s
 import { ReduxState, useAppSelector } from "@reducers"
 import { EntityId } from "@reduxjs/toolkit"
 import { useRouter } from "next/router"
-import { useEffect, useRef } from "react"
+import { useEffect, useRef, useMemo } from "react"
 import { useStore } from "react-redux"
+import createConvoIdSelector from "./createConvoIdSelector"
 
 const useFetchOldConvos = (editorLoaded:boolean) => {
     const
@@ -17,7 +18,8 @@ const useFetchOldConvos = (editorLoaded:boolean) => {
         chatWindow = useRef<HTMLElement>(),
         convoElem = useRef<HTMLElement>(),
         [fetchMoreConvos] = useFetchMoreConvosMutation(),
-        convoCount = useAppSelector(state => chatConvoSelector.selectTotal(chatRoomSelector.selectById(state,roomID))),
+        convoIDselector = useMemo(()=>createConvoIdSelector(roomID),[roomID]),
+        convoCount = useAppSelector(state => convoIDselector(state).length),
         roomObserving = useRef<string>(),
         handleIntersectionObserver = (entries:IntersectionObserverEntry[],observer:IntersectionObserver) => {
             const targets = entries.filter(e=>e.isIntersecting)
