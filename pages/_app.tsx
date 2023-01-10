@@ -55,6 +55,7 @@ const
             onResize = () => {
                 const htmlTag = document.getElementsByTagName('html')[0]
                 htmlTag.style.setProperty('--viewport-height',`${window.visualViewport.height}px`)
+                setTimeout(()=>window.scrollTo({top:0,behavior:'smooth'}),10)
             }
 
         useEffect(()=>{

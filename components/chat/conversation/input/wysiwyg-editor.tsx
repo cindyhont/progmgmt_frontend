@@ -30,10 +30,7 @@ const WYSIWHYeditor = memo((
         userID = router.query.userid as string,
         editorID = useRef('chat-input').current,
         editorIsActive = useRef(false),
-        editorOnFocus = () => {
-            editorIsActive.current = true
-            setTimeout(()=>window.scrollTo({top:0,behavior:'smooth'}),100)
-        },
+        editorOnFocus = () => editorIsActive.current = true,
         editorRef = useRef<HTMLDivElement>(),
         roomIdRef = useRef<EntityId>(),
         userIdRef = useRef<EntityId>(),
