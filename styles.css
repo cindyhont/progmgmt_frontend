@@ -171,11 +171,8 @@ body, html {
 
 .body-dark .tox .tox-toolbar, 
 .body-dark .tox .tox-toolbar__overflow, 
+.body-dark .tox.tox-tinymce-aux .tox-toolbar__overflow,
 .body-dark .tox .tox-toolbar__primary {
-    background-color: transparent;
-}
-
-.body-dark .tox.tox-tinymce-aux .tox-toolbar__overflow {
     background-color: rgb(18, 18, 18);
     background-image: linear-gradient(rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.15));
 }
