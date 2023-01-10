@@ -1,6 +1,6 @@
 body, html {
+    max-height: var(--viewport-height);
     height: var(--viewport-height);
-    overflow-y: hidden;
 }
 
 @keyframes infiniteRotate {
