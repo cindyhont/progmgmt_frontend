@@ -123,12 +123,15 @@ const WYSIWYGeditor = memo((
                     state = store.getState() as ReduxState,
                     entity = !!roomID ? chatRoomSelector.selectById(state,roomID) : chatUserSelector.selectById(state,userID),
                     draft = entity?.draft || '',
-                    files = entity.fileInputs,
+                    files = entity?.fileInputs || {ids:[],entities:{}},
                     parser = new DOMParser(),
                     doc = parser.parseFromString(draft,'text/html')
 
                 if (!!fileInputSelector.selectTotal(files) || doc.body.innerText.trim() !== '') submitConvo(doc.body.innerHTML)
-                else editorRef.current.innerHTML = ''
+                else {
+                    editorRef.current.innerHTML = ''
+                    setTimeout(dispatchEventToContainer,10)
+                }
             } else onChange(e)
         }
 
