@@ -7,6 +7,7 @@ import { systemIsDark, updateUserMode, updateTouchScreen, updatePageVisibility }
 import { useRouter } from 'next/router';
 import { pushToLogin } from '@components/functions';
 import Head from 'next/head'
+import useFuncWithTimeout from '@hooks/counter/function-with-timeout';
 
 const 
     MyApp = ({ Component, pageProps }: AppProps) => {
@@ -52,11 +53,13 @@ const
                 if (e.data===logoutMsg) logout()
                 else if (e.data===loginMsg) login()
             },
-            onResize = () => {
+            setNewSize = () => {
                 const htmlTag = document.getElementsByTagName('html')[0]
                 htmlTag.style.setProperty('--viewport-height',`${window.visualViewport.height}px`)
                 setTimeout(()=>window.scrollTo({top:0,behavior:'smooth'}),10)
-            }
+            },
+            [onResize] = useFuncWithTimeout(setNewSize,100)
+
 
         useEffect(()=>{
             let mode:'light'|'dark' = 'light'
@@ -67,7 +70,7 @@ const
 
         useEffect(()=>{
             onVisibilityChange()
-            if ('visualViewport' in window) onResize()
+            if ('visualViewport' in window) setNewSize()
             
             const isTouchScreen = window.matchMedia("(pointer: coarse)").matches
             dispatch(updateTouchScreen(isTouchScreen))
