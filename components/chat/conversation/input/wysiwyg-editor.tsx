@@ -117,7 +117,6 @@ const WYSIWYGeditor = memo((
         },
         onClipboardEvent = (e:EditorEvent<ClipboardEvent>) => onChange(e),
         onInput = (e:EditorEvent<InputEvent>) => {
-            console.log(e.inputType)
             if (e.inputType==="insertParagraph"){
                 const 
                     state = store.getState() as ReduxState,
