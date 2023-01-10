@@ -190,6 +190,7 @@ const WYSIWYGeditor = memo((
                 quickbars_insert_toolbar:false,
                 contextmenu:'link',
                 link_default_target:'_blank',
+                toolbar_mode: 'floating',
                 setup:(editor)=>{
                     editor.on('ExecCommand',editorCommandOnExec)
                     editor.on('input',onInput)

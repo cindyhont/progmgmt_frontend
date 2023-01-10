@@ -153,6 +153,7 @@ const
                 formOnSubmit()
             },
             topRef = useRef<HTMLDivElement>(),
+            container = useRef<HTMLFormElement>(),
             sticky = (m:'light'|'dark',position:'sticky'|'fixed') => ({
                 position,
                 width:'100%',
@@ -167,6 +168,15 @@ const
 
         useEffect(()=>{
             if (open) topRef.current.scrollIntoView()
+            else {
+                const 
+                    wysiwygEnabledBtns = document.getElementsByClassName('tox-tbtn--enabled') as HTMLCollectionOf<HTMLButtonElement>,
+                    len = wysiwygEnabledBtns.length
+                
+                for (let i=0; i<len; i++){
+                    wysiwygEnabledBtns.item(i).click()
+                }
+            }
         },[open])
 
         return (
@@ -192,7 +202,7 @@ const
                 >
                     <Typography variant="h6" sx={{p:2,pb:1}}>Add Task</Typography>
                 </Box>
-                <Box component='form' onSubmit={onSubmit}>
+                <Box component='form' onSubmit={onSubmit} ref={container}>
                     <Context.Provider value={{addEditTaskDispatch}}>
                         <Stack
                             direction='column'
