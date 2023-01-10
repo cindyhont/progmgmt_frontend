@@ -372,9 +372,7 @@ const
         )
     }),
     GroupName = memo(({roomID}:{roomID:EntityId})=>{
-        const
-            selector = useMemo(()=>chatRoomSelector.selectById,[]),
-            name = useAppSelector(state=>selector(state,roomID).name)
+        const name = useAppSelector(state=>chatRoomSelector.selectById(state,roomID)?.name || '')
 
         return (
             <Grid item sx={{display:'grid'}}>
