@@ -381,6 +381,7 @@ const
                         textOverflow:'ellipsis',
                         overflow: 'hidden', 
                         whiteSpace: 'nowrap',
+                        height:'min-content',
                     }}
                 >{name}</Typography>
             </Grid>
