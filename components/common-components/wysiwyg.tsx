@@ -65,6 +65,7 @@ const
                     placeholder,
                     height,
                     toolbar_mode: 'floating',
+                    width:'100%',
                     extended_valid_elements:'span[data-userid|class]',
                     link_default_target:'_blank',
                     setup:()=>{
