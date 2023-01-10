@@ -167,7 +167,7 @@ const
         return (
             <Box
                 sx={{
-                    opacity:loaded ? '1' : '0',
+                    display:loaded ? 'block' : 'none',
                     '.tox-tinymce':{
                         border:`1px solid ${mode==='dark' ? '#777' : '#bbb'}`,
                         borderRadius:'4px',
