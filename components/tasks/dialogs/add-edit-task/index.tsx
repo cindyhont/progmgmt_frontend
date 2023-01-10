@@ -170,7 +170,7 @@ const
             if (open) topRef.current.scrollIntoView()
             else {
                 const 
-                    wysiwygEnabledBtns = document.getElementsByClassName('tox-tbtn--enabled') as HTMLCollectionOf<HTMLButtonElement>,
+                    wysiwygEnabledBtns = container.current.getElementsByClassName('tox-tbtn--enabled') as HTMLCollectionOf<HTMLButtonElement>,
                     len = wysiwygEnabledBtns.length
                 
                 for (let i=0; i<len; i++){
