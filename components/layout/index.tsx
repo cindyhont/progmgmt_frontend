@@ -29,6 +29,7 @@ import { useTheme } from "@mui/material";
 import { useRouter } from 'next/router';
 import NarrowAppBarContent from './narrow-app-bar-content';
 import WebsocketOfflineTooLongDialog from './ws-offline-too-long-dialog';
+import WysiwygPreload from '@components/common-components/wysiwyg-preload';
 
 const drawerWidth: number = 240;
 
@@ -210,6 +211,7 @@ const
         return (
             <>
             <Box sx={{ display: 'flex' }}>
+                <WysiwygPreload />
                 {matchesSM && <>
                 <WideAppBar position="absolute" open={open}>
                     <Toolbar sx={{pr:'8px !important'}}>

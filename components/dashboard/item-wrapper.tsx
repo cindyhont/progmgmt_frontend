@@ -6,8 +6,6 @@ import TableRow from '@mui/material/TableRow'
 import TableCell from '@mui/material/TableCell'
 import Typography from '@mui/material/Typography'
 import { grey } from '@mui/material/colors';
-import IconButton from "@mui/material/IconButton";
-import MoreVertIcon from '@mui/icons-material/MoreVert';
 
 export const sideBarHeadStyle = {
     fontSize:'0.9rem',
@@ -49,14 +47,14 @@ const ItemWrapper = forwardRef((
                         <TableCell>
                             <Typography sx={{...sideBarHeadStyle,ml:2}}>{title}</Typography>
                         </TableCell>
-                        <TableCell sx={{width:0}}>
+                        {/*<TableCell sx={{width:0}}>
                             <IconButton>
                                 <MoreVertIcon fontSize="small" htmlColor={grey[500]} />
                             </IconButton>
-                        </TableCell>
+                    </TableCell>*/}
                     </TableRow>
                     <TableRow>
-                        <TableCell colSpan={2} sx={{p:0,border:'none'}}>{children}</TableCell>
+                        <TableCell colSpan={1} sx={{p:0,border:'none'}}>{children}</TableCell>
                     </TableRow>
                 </TableBody>
             </Table>
