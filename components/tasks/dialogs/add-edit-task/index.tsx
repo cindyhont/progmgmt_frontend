@@ -168,7 +168,7 @@ const
 
         useEffect(()=>{
             if (open) topRef.current.scrollIntoView()
-            else {
+            else if (!!container.current) {
                 const 
                     wysiwygEnabledBtns = container.current.getElementsByClassName('tox-tbtn--enabled') as HTMLCollectionOf<HTMLButtonElement>,
                     len = wysiwygEnabledBtns.length
