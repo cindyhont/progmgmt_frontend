@@ -168,4 +168,9 @@ body, html {
 .body-dark #chat-input a[data-mce-selected="inline-boundary"] {
     background-color: #1565c0;
 }
-  
+
+.body-dark .tox .tox-toolbar, 
+.body-dark .tox .tox-toolbar__overflow, 
+.body-dark .tox .tox-toolbar__primary {
+    background-color: #000;
+}
