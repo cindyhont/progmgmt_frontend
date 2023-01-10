@@ -32,7 +32,7 @@ const WYSIWHYeditor = memo((
         editorIsActive = useRef(false),
         editorOnFocus = () => {
             editorIsActive.current = true
-            setTimeout(()=>window.scrollTo({top:0,behavior:'smooth'}),1000)
+            setTimeout(()=>window.scrollTo({top:0,behavior:'smooth'}),100)
         },
         editorRef = useRef<HTMLDivElement>(),
         roomIdRef = useRef<EntityId>(),
