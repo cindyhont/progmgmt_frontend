@@ -15,7 +15,7 @@ const StartUpAddTask = memo(()=>{
             container
             direction='column'
             sx={{
-                height:'calc(100vh - 95px)',
+                height:'calc(var(--viewport-height) - 95px)',
                 justifyContent:'center',
                 pb:'100px'
             }}

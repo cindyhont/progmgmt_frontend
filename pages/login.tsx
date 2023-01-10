@@ -124,7 +124,7 @@ const
                     display: 'flex',
                     flexDirection: 'column',
                     justifyContent: 'center',
-                    height:'100vh'
+                    height:'var(--viewport-height)'
                 }}
                 onSubmit={handleSubmit}
             >

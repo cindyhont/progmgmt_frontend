@@ -29,7 +29,6 @@ import { useTheme } from "@mui/material";
 import { useRouter } from 'next/router';
 import NarrowAppBarContent from './narrow-app-bar-content';
 import WebsocketOfflineTooLongDialog from './ws-offline-too-long-dialog';
-import useViewportHeight from '@hooks/theme/viewport-height';
 
 const drawerWidth: number = 240;
 
@@ -206,8 +205,7 @@ const
             onClose = useCallback(() => {
                 if (matchesSM) localStorage.setItem('menuOpen',(false).toString())
                 dispatch(openSidebar(false))
-            },[matchesSM]),
-            viewportHeight = useViewportHeight()
+            },[matchesSM])
 
         return (
             <>
@@ -290,7 +288,7 @@ const
                     component="main"
                     sx={{
                         flexGrow: 1,
-                        height: viewportHeight,
+                        height: 'var(--viewport-height)',
                         overflow: 'auto',
                         backgroundColor: mode === 'light'
                                 ? grey[100]
@@ -333,23 +331,20 @@ const
             </>
         )
     }),
-    DrawerContent = memo(({userRight}:{userRight:number})=>{
-        const viewportHeight = useViewportHeight()
-        return (
-            <Grid
-                container
-                direction='column'
-                sx={{
-                    justifyContent:'space-between',
-                    height:viewportHeight,
-                    overflowX:'hidden'
-                }}
-            >
-                <TopSideBarButtons {...{userRight}} />
-                <BottomSidebarButtons />
-            </Grid>
-        )
-    })
+    DrawerContent = memo(({userRight}:{userRight:number})=>(
+        <Grid
+            container
+            direction='column'
+            sx={{
+                justifyContent:'space-between',
+                height:'100%',
+                overflowX:'hidden'
+            }}
+        >
+            <TopSideBarButtons {...{userRight}} />
+            <BottomSidebarButtons />
+        </Grid>
+    ))
 Layout.displayName = 'Layout'
 LayoutWrapper.displayName = 'LayoutWrapper'
 LayoutContent.displayName = 'LayoutContent'

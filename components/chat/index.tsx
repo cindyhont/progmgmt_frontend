@@ -13,7 +13,6 @@ import { Iactions, initialState, openContextMenuAction, reducer } from './reduce
 import { updateContextMenuID } from './reducers/slice';
 import { useRouter } from 'next/router';
 import useNarrowBody from 'hooks/theme/narrow-body';
-import useViewportHeight from '@hooks/theme/viewport-height';
 
 const 
     ToggleMenuDialogContext = createContext<{toggleMenuDialogDispatch:Dispatch<Iactions>}>({toggleMenuDialogDispatch:()=>{}}),
@@ -62,8 +61,7 @@ const
             },
             {query} = useRouter(),
             roomID = query.roomid as string,
-            userID = query.userid as string,
-            viewportHeight = useViewportHeight()
+            userID = query.userid as string
 
         useEffect(()=>{
             if (narrowBody) convoRef.current.style.left = (!!roomID || !!userID) ? '0%' : '100%'
@@ -77,7 +75,7 @@ const
                 direction='row'
                 mt={1}
                 sx={{
-                    height:`calc(${viewportHeight} - 79px)`,
+                    height:`calc(var(--viewport-height) - 79px)`,
                     position:'relative',
                     overflowX:'hidden'
                 }}
@@ -89,7 +87,7 @@ const
                     sm={sidebarOpen ? 12 : 5} 
                     xs={12} 
                     sx={{
-                        height:`calc(${viewportHeight} - 79px)`,
+                        height:`calc(var(--viewport-height) - 79px)`,
                         position:'relative',
                         overflow:'hidden',
                         '&:hover .MuiButtonBase-root':{
@@ -108,7 +106,7 @@ const
                     sm={sidebarOpen ? 12 : 7} 
                     xs={12} 
                     sx={{
-                        height:`calc(${viewportHeight} - 79px)`,
+                        height:`calc(var(--viewport-height) - 79px)`,
                         ...(narrowBody ? {
                             position:'absolute',
                             zIndex:2,

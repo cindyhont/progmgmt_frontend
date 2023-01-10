@@ -43,7 +43,7 @@ const
         )
             
         return (
-            <Grid p={2} sx={{minHeight:'calc(100vh - 64px)'}}>
+            <Grid p={2} sx={{minHeight:'calc(var(--viewport-height) - 64px)'}}>
                 <WysiwygPreload />
                 <DashboardColumn>
                     <>

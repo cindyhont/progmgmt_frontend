@@ -25,7 +25,7 @@ const
             >
                 <TableContainer
                     sx={{
-                        maxHeight: 'calc(100vh - 180px)',
+                        maxHeight: 'calc(var(--viewport-height) - 180px)',
                         '& .MuiTableCell-head':{
                             py:0.3
                         },

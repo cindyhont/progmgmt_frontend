@@ -83,7 +83,7 @@ const
                                 ml:2,
                                 pr:2,
                                 pt:2,
-                                height:`calc(100vh - 64px)`,
+                                height:`calc(var(--viewport-height) - 64px)`,
                                 overflow:'auto',
                             }
                             
@@ -94,7 +94,7 @@ const
                             md:sidebarOpen ? 8 : 9,
                             lg:9,
                             sx:{
-                                height:`calc(100vh - 64px)`,
+                                height:`calc(var(--viewport-height) - 64px)`,
                                 overflow:'auto',
                                 pr:2,
                                 ml:2,
@@ -119,7 +119,7 @@ const
                                 left:'100%',
                                 width:'100%',
                                 backgroundColor:grey[mode==='light' ? 100 : 900],
-                                height:`calc(100vh - 64px)`,
+                                height:`calc(var(--viewport-height) - 64px)`,
                                 overflow:'auto',
                                 transition:'left 0.3s'
                             }
@@ -130,7 +130,7 @@ const
                             md:sidebarOpen ? 4 : 3,
                             lg:3,
                             sx:{
-                                height:`calc(100vh - 64px)`,
+                                height:`calc(var(--viewport-height) - 64px)`,
                                 overflow:'auto',
                                 pr:2
                             }

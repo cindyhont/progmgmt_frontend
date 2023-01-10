@@ -87,7 +87,7 @@ const
                         direction='column'
                         sx={{
                             justifyContent:'center',
-                            height:'calc(100vh - 114px)',
+                            height:'calc(var(--viewport-height) - 114px)',
                             width:300,
                             maxWidth:'80vw'
                         }}

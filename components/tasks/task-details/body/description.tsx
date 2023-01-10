@@ -92,7 +92,7 @@ const
                     value,
                     handleUpdate,
                     placeholder:`Edit description ...`,
-                    height:'calc(100vh - 150px)',
+                    height:'calc(var(--viewport-height) - 150px)',
                 }} />
                 <Stack direction='row' spacing={3} sx={{justifyContent:'flex-start'}}>
                     <Button variant="contained" onClick={onSubmit}>OK</Button>

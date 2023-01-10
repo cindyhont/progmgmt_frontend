@@ -346,7 +346,7 @@ const
                     </Stack>
                 <Box
                     sx={{
-                        height:blankAreaVisible ? '100vh' : '0px',
+                        height:blankAreaVisible ? 'var(--viewport-height)' : '0px',
                     }}
                     onDragEnter={onDragEnter}
                 ></Box>

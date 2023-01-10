@@ -51,6 +51,10 @@ const
             bcReceiveMessage = (e:MessageEvent) => {
                 if (e.data===logoutMsg) logout()
                 else if (e.data===loginMsg) login()
+            },
+            onResize = () => {
+                const htmlTag = document.getElementsByTagName('html')[0]
+                htmlTag.style.setProperty('--viewport-height',`${window.visualViewport.height}px`)
             }
 
         useEffect(()=>{
@@ -62,6 +66,7 @@ const
 
         useEffect(()=>{
             onVisibilityChange()
+            if ('visualViewport' in window) onResize()
             
             const isTouchScreen = window.matchMedia("(pointer: coarse)").matches
             dispatch(updateTouchScreen(isTouchScreen))
@@ -79,9 +84,11 @@ const
 
             window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', systemThemeOnChange,{passive:true});
             document.addEventListener('visibilitychange',onVisibilityChange,{passive:true})
+            if ('visualViewport' in window) window.visualViewport.addEventListener('resize',onResize,{passive:true})
             return () => {
                 window.matchMedia('(prefers-color-scheme: dark)').removeEventListener('change', systemThemeOnChange);
                 document.removeEventListener('visibilitychange',onVisibilityChange)
+                if ('visualViewport' in window) window.visualViewport.removeEventListener('resize',onResize)
             }
         },[router.pathname])
 

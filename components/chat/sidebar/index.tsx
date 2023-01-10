@@ -16,7 +16,7 @@ const
         return (
             <TableContainer 
                 sx={{
-                    maxHeight:'calc(100vh - 95px)',
+                    maxHeight:'calc(var(--viewport-height) - 95px)',
                     overflowY:'scroll',
                 }}
             >
