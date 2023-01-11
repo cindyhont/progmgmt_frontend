@@ -114,8 +114,8 @@ const
                 taskDragStart(f.pageX,f.pageY,columnIdx,taskIdx)
             },
             onTouchEnd = () => {
-                if (touchMoving.current) dragEnd()
-                else onClick()
+                dragEnd()
+                if (!touchMoving.current) setTimeout(onClick,10)
                 touchMoving.current = false
             },
             onTouchCancel = () => {
