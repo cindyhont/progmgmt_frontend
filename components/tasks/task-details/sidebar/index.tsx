@@ -83,8 +83,8 @@ const
                     originalModule = document.getElementById(getTaskDetailsSidebarModuleID(sidebarState.fields[i])),
                     {left,top,width,height} = originalModule.getBoundingClientRect()
 
-                clonedElem.current = originalModule.cloneNode(true) as HTMLElement
                 handleDragStart(i,{...{left,top,width,height}})
+                clonedElem.current = originalModule.cloneNode(true) as HTMLElement
                 containerRef.current.appendChild(clonedElem.current)
                 startingPoint.current = {touchX:x,touchY:y,rectLeft:left,rectTop:top}
 
@@ -259,14 +259,12 @@ const
             visible = useAppSelector(state => visibilitySelector(state)),
             onTouchStart = (e:TouchEvent<HTMLTableCellElement>) => {
                 e.preventDefault()
-                e.stopPropagation()
+                // e.stopPropagation()
                 if (e.touches.length !== 1) return
                 const f = e.touches[0]
                 dragStart(f.pageX,f.pageY)
             },
             onTouchMove = (e:TouchEvent<HTMLTableCellElement>) => {
-                // e.preventDefault()
-                // e.stopPropagation()
                 const f = e.touches[0]
                 dragMove(f.pageX,f.pageY)
             },
