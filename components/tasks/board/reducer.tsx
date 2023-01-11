@@ -94,6 +94,7 @@ const
                                     if (taskIdx===0) newTaskIDs = [state.taskMoving,...newTaskIDs]
                                     else if (taskIdx===originalTaskIDs.length-1 && originalTaskIDs.length!==newTaskIDs.length || taskIdx===originalTaskIDs.length && originalTaskIDs.length===newTaskIDs.length) newTaskIDs = [...newTaskIDs,state.taskMoving]
                                     else newTaskIDs = [...newTaskIDs.slice(0,taskIdx),state.taskMoving,...newTaskIDs.slice(taskIdx)]
+                                    
                                     return {[e]:newTaskIDs}
                                 }
                             }),

@@ -1,4 +1,4 @@
-import React, { createContext, Dispatch, memo, useContext, useMemo, useReducer, useEffect, useRef } from "react";
+import React, { createContext, Dispatch, memo, MouseEvent as ReactMouseEvent, useContext, useEffect, useMemo, useReducer, useRef } from "react";
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -8,19 +8,17 @@ import TableRow from '@mui/material/TableRow';
 import Grid from '@mui/material/Grid'
 import Box from '@mui/material/Box'
 import { createSelector, EntityId } from "@reduxjs/toolkit";
-import { ReduxState, useAppDispatch, useAppSelector } from "@reducers";
-import { taskFieldSelector, taskSelector } from "../reducers/slice";
-import { useStore } from "react-redux";
+import { ReduxState, useAppSelector } from "@reducers";
+import { taskFieldSelector } from "../reducers/slice";
 import { useTheme } from "@mui/material";
 import AddRoundedIcon from '@mui/icons-material/AddRounded';
 import { addTaskAction } from "../reducers/dialog-ctxmenu-status";
-import { columnStartMoving, Iaction, init, initialState, moving, reducer } from "./reducer";
-import taskApi, { useTaskMovedInBoardMutation } from "../reducers/api";
+import { columnStartMoving, Iaction, initialState, moving, reducer, taskStartMoving } from "./reducer";
 import { DialogCtxMenuDispatchContext } from "../contexts";
 import TaskItem from "./task-item";
 import useNarrowBody from "hooks/theme/narrow-body";
-import useFuncWithTimeout from "hooks/counter/function-with-timeout";
 import useStateManager from "./hooks/state-manager";
+import useTwoDimensionalDrag from "./hooks/two-d-drag";
 
 export interface Ioption {
     id:EntityId;
@@ -29,17 +27,164 @@ export interface Ioption {
 }
 
 const 
-    BoardViewDispatchContext = createContext<{boardViewDispatch:Dispatch<Iaction>}>({boardViewDispatch:()=>{}}),
+    BoardViewDispatchContext = createContext<{
+        boardViewDispatch:Dispatch<Iaction>,
+        handleTaskMouseDown:(x:number,y:number,i:number,j:number)=>void;
+        taskDragStart:(x:number,y:number,i:number,j:number)=>void;
+        dragMove:(x:number,y:number)=>void;
+        dragEnd:()=>void;
+    }>({
+        boardViewDispatch:()=>{},
+        handleTaskMouseDown:()=>{},
+        taskDragStart:()=>{},
+        dragMove:()=>{},
+        dragEnd:()=>{},
+    }),
     BoardView = () => {
         const
             [boardViewState,boardViewDispatch] = useReducer(reducer,initialState),
-            boardColumnFieldID = useAppSelector(state=>taskFieldSelector.selectAll(state).find(e=>e.fieldType==='board_column').id)
+            boardColumnFieldID = useAppSelector(state=>taskFieldSelector.selectAll(state).find(e=>e.fieldType==='board_column').id),
+            tableID = useRef('task-board-table').current,
+            containerTable = useRef<HTMLTableElement>(),
+            tablebody = useRef<HTMLTableSectionElement>(),
+            onColumnDragStart = (id:EntityId) => boardViewDispatch(columnStartMoving(id)),
+            onTaskDragStart = (taskID:EntityId) => boardViewDispatch(taskStartMoving(taskID)),
+            onDragEnter = (columnIdx:number,taskIdx:number) => boardViewDispatch(moving({columnIdx,taskIdx})),
+            clonedElem = useRef<HTMLElement>(null),
+            {
+                handleColumnDragStart,
+                handleTaskDragStart,
+                handleDragMove,
+                handleDragEnd,
+            } = useTwoDimensionalDrag(
+                onColumnDragStart,
+                onTaskDragStart,
+                onDragEnter,
+                tableID,
+                boardViewState.columnIDs,
+                boardViewState.itemsEachColumn,
+                clonedElem
+            ),
+            startingPoint = useRef({touchX:0,touchY:0,rectLeft:0,rectTop:0}),
+            columnDragStart = (x:number,y:number,i:number) => {
+                const 
+                    columnID = boardViewState.columnIDs[i],
+                    originalModule = document.getElementById(columnID.toString()),
+                    {left,top,width,height} = originalModule.getBoundingClientRect()
+
+                clonedElem.current = document.createElement('table')
+
+                const 
+                    thead = document.createElement('thead'),
+                    headTr = document.createElement('tr'),
+                    newTh = originalModule.cloneNode(true) as HTMLTableCellElement
+
+                headTr.style.cssText = originalModule.parentElement.style.cssText
+                thead.style.cssText = originalModule.parentElement.parentElement.style.cssText
+                clonedElem.current.style.cssText = originalModule.parentElement.parentElement.parentElement.style.cssText
+
+                newTh.style.width = `${width}px`
+                newTh.style.height = `${height}px`
+                newTh.style.cursor = 'grabbing'
+                headTr.appendChild(newTh)
+                thead.appendChild(headTr)
+
+                const 
+                    plusCell = document.getElementById(`task-board-add-column-task-${columnID}`).cloneNode(true),
+                    plusRow = document.createElement('tr')
+
+                plusRow.appendChild(plusCell)
+                thead.appendChild(plusRow)
+                
+                clonedElem.current.appendChild(thead)
+
+                const 
+                    tbody = document.getElementById(`task-board-table-body-column-${columnID}`).cloneNode(true),
+                    newTr = document.createElement('tr')
+                newTr.appendChild(tbody)
+                clonedElem.current.appendChild(newTr)
+                
+                clonedElem.current.style.left = `${left}px`
+                clonedElem.current.style.top = `${top}px`
+
+                handleColumnDragStart(columnID)
+                containerTable.current.appendChild(clonedElem.current)
+                startingPoint.current = {touchX:x,touchY:y,rectLeft:left,rectTop:top}
+            },
+            taskDragStart = (x:number,y:number,i:number,j:number) => {
+                const 
+                    columnID = boardViewState.columnIDs[i],
+                    taskID = boardViewState.itemsEachColumn[columnID][j],
+                    originalModule = document.getElementById(`task-board-task-${taskID}`),
+                    {left,top,width,height} = originalModule.getBoundingClientRect()
+                    
+                clonedElem.current = originalModule.cloneNode(true) as HTMLElement
+
+                handleTaskDragStart(taskID,{left,top,width,height})
+
+                containerTable.current.appendChild(clonedElem.current)
+                startingPoint.current = {touchX:x,touchY:y,rectLeft:left,rectTop:top}
+            },
+            dragMove = (x:number,y:number) => {
+                clonedElem.current.style.left = `${x - startingPoint.current.touchX + startingPoint.current.rectLeft}px`
+                clonedElem.current.style.top = `${y - startingPoint.current.touchY + startingPoint.current.rectTop}px`
+                handleDragMove(x,y)
+            },
+            dragEnd = () => {
+                handleDragEnd()
+                if (!!clonedElem.current) {
+                    clonedElem.current.remove()
+                    clonedElem.current = null
+                }
+            },
+            mouseDragging = useRef(false),
+            handleColumnMouseDown = (x:number,y:number,i:number) => {
+                mouseDragging.current = true
+                columnDragStart(x,y,i)
+            },
+            handleTaskMouseDown = (x:number,y:number,i:number,j:number) => {
+                mouseDragging.current = true
+                taskDragStart(x,y,i,j)
+            },
+            onMouseMove = (e:MouseEvent) => {
+                if (mouseDragging.current) dragMove(e.pageX,e.pageY)
+            },
+            onMouseUp = () => {
+                mouseDragging.current = false
+                dragEnd()
+            }
 
         useStateManager(boardViewState,boardViewDispatch,boardColumnFieldID)
 
+        useEffect(()=>{
+            window.addEventListener('touchend',dragEnd,{passive:true})
+            window.addEventListener('touchcancel',dragEnd,{passive:true})
+
+            return () => {
+                window.addEventListener('touchend',dragEnd)
+                window.addEventListener('touchcancel',dragEnd)
+            }
+        },[])
+
+        useEffect(()=>{
+            window.addEventListener('mousemove',onMouseMove,{passive:true})
+            window.addEventListener('mouseup',onMouseUp,{passive:true})
+
+            return () => {
+                window.removeEventListener('mousemove',onMouseMove)
+                window.removeEventListener('mouseup',onMouseUp)
+            }
+        },[boardViewState])
+
         return (
-            <BoardViewDispatchContext.Provider value={{boardViewDispatch}}>
-                <Table stickyHeader size="small">
+            <BoardViewDispatchContext.Provider value={{
+                boardViewDispatch,
+                handleTaskMouseDown,
+                taskDragStart,
+                dragMove,
+                dragEnd,
+            }}>
+                <Table stickyHeader size="small" id={tableID} ref={containerTable}>
                     <TableHead>
                         <TableRow>
                             {boardViewState.columnIDs.map((id,i)=>(
@@ -47,6 +192,7 @@ const
                                     id,
                                     columnCount:boardViewState.columnIDs.length,
                                     columnIdx:i,
+                                    handleColumnMouseDown:(x:number,y:number)=>handleColumnMouseDown(x,y,i),
                                 }} />
                             ))}
                         </TableRow>
@@ -60,7 +206,7 @@ const
                             ))}
                         </TableRow>
                     </TableHead>
-                    <TableBody>
+                    <TableBody ref={tablebody}>
                         <TableRow>
                             {boardViewState.columnIDs.map((columnID,i)=>(
                                 <TableBodyColumn key={columnID} {...{
@@ -81,11 +227,11 @@ const
         {
             id,
             columnCount,
-            columnIdx,
+            handleColumnMouseDown
         }:{
             id:EntityId;
             columnCount:number;
-            columnIdx:number;
+            handleColumnMouseDown:(x:number,y:number)=>void;
         }
     )=>{
         const 
@@ -96,9 +242,7 @@ const
             columnName = useAppSelector(state => columnNameSelector(state)),
             {palette:{mode,grey,background}} = useTheme(),
             narrowBody = useNarrowBody(),
-            {boardViewDispatch} = useContext(BoardViewDispatchContext),
-            onDragStart = () => boardViewDispatch(columnStartMoving(id)),
-            onDragEnter = () => boardViewDispatch(moving({columnIdx,taskIdx:0}))
+            onMouseDown = (e:ReactMouseEvent<HTMLTableCellElement>) => handleColumnMouseDown(e.pageX,e.pageY)
 
         return (
             <>
@@ -108,10 +252,10 @@ const
                     width:`${100/columnCount}%`,
                     border:'none',
                     p:'3px',
+                    cursor:'grab'
                 }}
-                draggable
-                onDragStart={onDragStart}
-                onDragEnter={onDragEnter}
+                onMouseDown={onMouseDown}
+                id={`${id}`}
                 data-boardcolumnid={id}
             >
                 <Box
@@ -157,6 +301,7 @@ const
                     border:'none',
                 }}
                 onDragEnter={onDragEnter}
+                id={`task-board-add-column-task-${id}`}
             >
                 <Grid
                     container
@@ -207,6 +352,7 @@ const
                     p:'3px',
                     verticalAlign:'top',
                 }}
+                id={`task-board-table-body-column-${columnID}`}
             >
                     <Stack direction='column' spacing={1}>
                         {taskIDs.map((taskID,i)=>(

@@ -9,11 +9,10 @@ import { ReduxState, useAppDispatch, useAppSelector } from "@reducers";
 import { updateRouterHistory } from "@reducers/misc";
 import { createSelector, EntityId } from "@reduxjs/toolkit";
 import { useRouter } from "next/router";
-import React, { memo, useContext, useMemo } from "react";
+import React, { memo, useContext, useMemo, MouseEvent, TouchEvent as ReactTouchEvent, useEffect, useRef } from "react";
 import { BoardViewDispatchContext } from ".";
 import { Task } from "../interfaces";
 import { taskSelector } from "../reducers/slice";
-import { drop, moving, taskStartMoving } from "./reducer";
 import CalendarMonthRoundedIcon from '@mui/icons-material/CalendarMonthRounded';
 import { userDetailsSelector } from "@reducers/user-details/slice";
 import PeopleAltRoundedIcon from '@mui/icons-material/PeopleAltRounded';
@@ -74,6 +73,7 @@ const
         }
     )=>{
         const
+            ref = useRef<HTMLDivElement>(),
             {palette:{primary,error}} = useTheme(),
             statusColorSelector = useMemo(()=>createSelector(
                 (state:ReduxState)=>taskSelector.selectById(state,taskID),
@@ -87,10 +87,10 @@ const
             deadline = useAppSelector(state => taskSelector.selectById(state,taskID)?.deadlineDT || 0),
             isGroupTask = useAppSelector(state => taskSelector.selectById(state,taskID)?.isGroupTask || false),
             task = useAppSelector(state => taskSelector.selectById(state,taskID)),
-            {boardViewDispatch} = useContext(BoardViewDispatchContext),
-            onDragStart = () => boardViewDispatch(taskStartMoving(taskID)),
-            onDragEnter = () => boardViewDispatch(moving({columnIdx,taskIdx})),
-            onDrop = () => boardViewDispatch(drop),
+            {handleTaskMouseDown,taskDragStart,dragMove,dragEnd} = useContext(BoardViewDispatchContext),
+            onMouseDown = (e:MouseEvent<HTMLDivElement>) => {
+                handleTaskMouseDown(e.pageX,e.pageY,columnIdx,taskIdx)
+            },
             router = useRouter(),
             dispatch = useAppDispatch(),
             onClick = () => {
@@ -100,17 +100,38 @@ const
                     queryString:JSON.stringify(router.query)
                 }))
                 router.push({query:{page:'tasks',taskid:taskID}},`/tasks/t/${taskID}`,{shallow:true})
+            },
+            touchMoving = useRef(false),
+            onTouchMove = (e:ReactTouchEvent<HTMLDivElement>) => {
+                const f = e.touches[0]
+                dragMove(f.pageX,f.pageY)
+                touchMoving.current = true
+            },
+            onTouchStart = (e:TouchEvent) => {
+                e.preventDefault()
+                if (e.touches.length !== 1) return
+                const f = e.touches[0]
+                taskDragStart(f.pageX,f.pageY,columnIdx,taskIdx)
+            },
+            onTouchEnd = () => {
+                if (!touchMoving.current) onClick()
+                touchMoving.current = false
             }
+
+        useEffect(()=>{
+            ref.current?.addEventListener('touchstart',onTouchStart,{passive:false})
+            return () => ref.current?.removeEventListener('touchstart',onTouchStart)
+        },[])
 
         return (
             <Paper 
+                ref={ref}
                 elevation={3}
-                draggable
-                onDragStart={onDragStart}
-                onDragEnter={onDragEnter}
-                onDrop={onDrop}
-                onDragEnd={onDrop}
+                onMouseDown={onMouseDown}
+                onTouchMove={onTouchMove}
+                onTouchEnd={onTouchEnd}
                 square
+                id={`task-board-task-${taskID}`}
                 sx={{
                     p:1,
                     cursor:'pointer',

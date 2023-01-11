@@ -11,7 +11,7 @@ import taskApi, { useTaskMovedInBoardMutation } from "@components/tasks/reducers
 const useStateManager = (
     boardViewState:IboardView,
     boardViewDispatch:Dispatch<Iaction>,
-    boardColumnFieldID:EntityId,
+    boardColumnFieldID:EntityId
 ) => {
     const 
         boardColumnOrderFieldID = useAppSelector(state=>taskFieldSelector.selectAll(state).find(e=>e.fieldType==='order_in_board_column').id),
