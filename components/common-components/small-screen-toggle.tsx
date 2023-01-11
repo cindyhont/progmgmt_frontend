@@ -97,7 +97,10 @@ const SmallScreenToggle = memo(forwardRef((
             }
         },
         onTouchEnd = () => {
-            if (!touching.current) return
+            if (!touching.current) {
+                onClick()
+                return
+            }
 
             document.body.style.overscrollBehavior = null
             touching.current = false
