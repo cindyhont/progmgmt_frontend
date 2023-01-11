@@ -115,7 +115,7 @@ const
             },
             onTouchEnd = () => {
                 dragEnd()
-                if (!touchMoving.current) setTimeout(onClick,10)
+                if (!touchMoving.current) onClick()
                 touchMoving.current = false
             },
             onTouchCancel = () => {

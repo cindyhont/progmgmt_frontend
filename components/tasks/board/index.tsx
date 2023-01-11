@@ -46,7 +46,6 @@ const
             boardColumnFieldID = useAppSelector(state=>taskFieldSelector.selectAll(state).find(e=>e.fieldType==='board_column').id),
             tableID = useRef('task-board-table').current,
             containerTable = useRef<HTMLTableElement>(),
-            tablebody = useRef<HTMLTableSectionElement>(),
             onColumnDragStart = (id:EntityId) => boardViewDispatch(columnStartMoving(id)),
             onTaskDragStart = (taskID:EntityId) => boardViewDispatch(taskStartMoving(taskID)),
             onDragEnter = (columnIdx:number,taskIdx:number) => boardViewDispatch(moving({columnIdx,taskIdx})),
@@ -206,7 +205,7 @@ const
                             ))}
                         </TableRow>
                     </TableHead>
-                    <TableBody ref={tablebody}>
+                    <TableBody>
                         <TableRow>
                             {boardViewState.columnIDs.map((columnID,i)=>(
                                 <TableBodyColumn key={columnID} {...{

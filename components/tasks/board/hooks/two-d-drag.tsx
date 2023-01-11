@@ -1,4 +1,6 @@
 import useFuncWithTimeout from "@hooks/counter/function-with-timeout";
+import useNarrowBody from "@hooks/theme/narrow-body";
+import { useAppSelector } from "@reducers";
 import { EntityId } from "@reduxjs/toolkit";
 import { MutableRefObject, useRef } from "react";
 
@@ -57,46 +59,70 @@ const useTwoDimensionalDrag = (
             clonedElem.current.style.cursor = 'grabbing'
         },
         [execDragEnter] = useFuncWithTimeout(onDragEnter,20),
+        narrowBody = useNarrowBody(),
+        boardViewSmallScreenColumn = useAppSelector(state => state.taskMgmt.boardViewSmallScreenColumn),
         handleDragMove = (x:number,y:number) => {
-            const 
-                table = document.getElementById(tableID),
-                {left:tableLeft,right:tableRight,top:tableTop,bottom:tableBottom} = table.getBoundingClientRect()
+            if (narrowBody){
+                const 
+                    columnIdx = columnIDs.indexOf(boardViewSmallScreenColumn),
+                    taskIDs = itemsEachColumn[boardViewSmallScreenColumn],
+                    taskCount = taskIDs.length
 
-            if (x < tableLeft || x > tableRight) return
+                for (let j=0; j<taskCount; j++){
+                    const
+                        taskID = taskIDs[j],
+                        taskCell = document.getElementById(`task-board-task-${taskID}`), 
+                        {top:taskTop,bottom:taskBottom} = taskCell.getBoundingClientRect()
 
-            const columnCount = columnIDs.length
-
-            for (let i=0; i<columnCount; i++){
-                const
-                    columnID = columnIDs[i],
-                    column = document.getElementById(columnID.toString()), 
-                    {left:columnLeft,right:columnRight} = column.getBoundingClientRect()
-                if (x >= columnLeft && x <= columnRight) {
-                    if (!!columnIdDragging.current) {
-                        execDragEnter(i,0)
+                    if (j===taskCount - 1 && y > taskBottom) {
+                        execDragEnter(columnIdx,taskIDs.includes(taskIdDragging.current) ? taskCount - 1 : taskCount)
                         return
-                    } else if (!!taskIdDragging.current && y >= tableTop && y <= tableBottom){
-                        const 
-                            taskIDs = itemsEachColumn[columnID],
-                            taskCount = taskIDs.length
+                    } else if (y >= taskTop && y <= taskBottom){
+                        execDragEnter(columnIdx,j)
+                        return
+                    }
+                }
+            } else {
+                const 
+                    table = document.getElementById(tableID),
+                    {left:tableLeft,right:tableRight,top:tableTop,bottom:tableBottom} = table.getBoundingClientRect()
 
-                        if (!taskCount) {
+                if (x < tableLeft || x > tableRight) return
+
+                const columnCount = columnIDs.length
+
+                for (let i=0; i<columnCount; i++){
+                    const
+                        columnID = columnIDs[i],
+                        column = document.getElementById(columnID.toString()), 
+                        {left:columnLeft,right:columnRight} = column.getBoundingClientRect()
+                    if (x >= columnLeft && x <= columnRight) {
+                        if (!!columnIdDragging.current) {
                             execDragEnter(i,0)
                             return
-                        }
-    
-                        for (let j=0; j<taskCount; j++){
-                            const
-                                taskID = taskIDs[j],
-                                taskCell = document.getElementById(`task-board-task-${taskID}`), 
-                                {top:taskTop,bottom:taskBottom} = taskCell.getBoundingClientRect()
+                        } else if (!!taskIdDragging.current && y >= tableTop && y <= tableBottom){
+                            const 
+                                taskIDs = itemsEachColumn[columnID],
+                                taskCount = taskIDs.length
 
-                            if (j===taskCount - 1 && y > taskBottom) {
-                                execDragEnter(i,taskIDs.includes(taskIdDragging.current) ? taskCount - 1 : taskCount)
+                            if (!taskCount) {
+                                execDragEnter(i,0)
                                 return
-                            } else if (y >= taskTop && y <= taskBottom){
-                                execDragEnter(i,j)
-                                return
+                            }
+        
+                            for (let j=0; j<taskCount; j++){
+                                const
+                                    taskID = taskIDs[j],
+                                    taskCell = document.getElementById(`task-board-task-${taskID}`), 
+                                    {top:taskTop,bottom:taskBottom} = taskCell.getBoundingClientRect()
+
+                                if (j===taskCount - 1 && y > taskBottom) {
+                                    execDragEnter(i,taskIDs.includes(taskIdDragging.current) ? taskCount - 1 : taskCount)
+                                    return
+                                } else if (y >= taskTop && y <= taskBottom){
+                                    execDragEnter(i,j)
+                                    return
+                                }
                             }
                         }
                     }
