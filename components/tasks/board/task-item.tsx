@@ -114,10 +114,14 @@ const
                 taskDragStart(f.pageX,f.pageY,columnIdx,taskIdx)
             },
             onTouchEnd = () => {
-                if (!touchMoving.current) onClick()
+                if (touchMoving.current) dragEnd()
+                else onClick()
                 touchMoving.current = false
             },
-            onTouchCancel = () => touchMoving.current = false
+            onTouchCancel = () => {
+                dragEnd()
+                touchMoving.current = false
+            }
 
         useEffect(()=>{
             ref.current?.addEventListener('touchstart',onTouchStart,{passive:false})
