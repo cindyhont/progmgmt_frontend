@@ -1,4 +1,4 @@
-import React, { memo, MouseEvent as ReactMouseEvent, TouchEvent, useCallback, useContext, useEffect, useMemo, useReducer, useRef } from "react";
+import React, { memo, MouseEvent as ReactMouseEvent, TouchEvent as ReactTouchEvent, useCallback, useContext, useEffect, useMemo, useReducer, useRef } from "react";
 import Stack from '@mui/material/Stack'
 import { ReduxState, useAppDispatch, useAppSelector } from "@reducers";
 import { grey } from '@mui/material/colors';
@@ -83,8 +83,10 @@ const
                     originalModule = document.getElementById(getTaskDetailsSidebarModuleID(sidebarState.fields[i])),
                     {left,top,width,height} = originalModule.getBoundingClientRect()
 
-                handleDragStart(i,{...{left,top,width,height}})
                 clonedElem.current = originalModule.cloneNode(true) as HTMLElement
+
+                handleDragStart(i,{...{left,top,width,height}})
+                
                 containerRef.current.appendChild(clonedElem.current)
                 startingPoint.current = {touchX:x,touchY:y,rectLeft:left,rectTop:top}
 
@@ -223,6 +225,7 @@ const
             expanded = useAppSelector(state => taskFieldSelector.selectById(state,fieldID)?.detailsSidebarExpand || false),
             dispatch = useAppDispatch(),
             {palette:{grey}} = useTheme(),
+            dragHandle = useRef<HTMLTableCellElement>(),
             store = useStore(),
             {layoutOrderDispatch} = useContext(LayoutOrderDispatchContext),
             idb = useRef<IndexedDB>(),
@@ -257,14 +260,14 @@ const
                 }
             ),[fieldID,taskID]),
             visible = useAppSelector(state => visibilitySelector(state)),
-            onTouchStart = (e:TouchEvent<HTMLTableCellElement>) => {
+            onTouchStart = (e:TouchEvent) => {
                 e.preventDefault()
                 // e.stopPropagation()
                 if (e.touches.length !== 1) return
                 const f = e.touches[0]
                 dragStart(f.pageX,f.pageY)
             },
-            onTouchMove = (e:TouchEvent<HTMLTableCellElement>) => {
+            onTouchMove = (e:ReactTouchEvent<HTMLTableCellElement>) => {
                 const f = e.touches[0]
                 dragMove(f.pageX,f.pageY)
             },
@@ -273,6 +276,8 @@ const
         useEffect(()=>{
             const state = store.getState() as ReduxState
             idb.current = new IndexedDB(state.misc.uid.toString(),1)
+            dragHandle.current.addEventListener('touchstart',onTouchStart,{passive:false})
+            return () => dragHandle.current.removeEventListener('touchstart',onTouchStart)
         },[])
     
         if (visible && fieldType==='checkbox') return <CheckboxElem {...{fieldName,fieldID,onDragEnter,onDragStart}} />
@@ -301,7 +306,8 @@ const
                             <TableRow sx={{'.MuiTableCell-root':{p:0,border:'none',py:1}}}>
                                 <TableCell 
                                     sx={{width:0,cursor:'move'}} 
-                                    onTouchStart={onTouchStart}
+                                    // onTouchStart={onTouchStart}
+                                    ref={dragHandle}
                                     onTouchMove={onTouchMove}
                                     onTouchEnd={dragEnd}
                                     onTouchCancel={dragEnd}
