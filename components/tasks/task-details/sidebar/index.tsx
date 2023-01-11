@@ -90,13 +90,17 @@ const
 
                 if (window.matchMedia('(hover:none)').matches){
                     let thisElem = containerRef.current as HTMLElement
-                    thisElem.style.overflowY = 'hidden'
-                    thisElem.style.overscrollBehaviorY = 'none'
 
-                    while (!!thisElem.parentElement){
-                        thisElem.parentElement.style.overflowY = 'hidden'
-                        thisElem.parentElement.style.overscrollBehaviorY = 'none'
-                        thisElem = thisElem.parentElement
+                    while (!!thisElem){
+                        const {left,top,width,height} = thisElem.getBoundingClientRect()
+                        thisElem.style.overflowY = 'hidden'
+                        thisElem.style.overscrollBehaviorY = 'none'
+                        thisElem.style.position = 'fixed'
+                        thisElem.style.top = `${top}px`
+                        thisElem.style.left = `${left}px`
+                        thisElem.style.width = `${width}px`
+                        thisElem.style.height = `${height}px`
+                        thisElem = thisElem?.parentElement || null
                     }
 
                     // const {left,top,width,height} = containerRef.current.getBoundingClientRect()
@@ -123,13 +127,16 @@ const
 
                 if (window.matchMedia('(hover:none)').matches){
                     let thisElem = containerRef.current as HTMLElement
-                    thisElem.style.overflowY = null
-                    thisElem.style.overscrollBehaviorY = null
 
-                    while (!!thisElem.parentElement){
-                        thisElem.parentElement.style.overflowY = null
-                        thisElem.parentElement.style.overscrollBehaviorY = null
-                        thisElem = thisElem.parentElement
+                    while (!!thisElem){
+                        thisElem.style.overflowY = null
+                        thisElem.style.overscrollBehaviorY = null
+                        thisElem.style.position = null
+                        thisElem.style.top = null
+                        thisElem.style.left = null
+                        thisElem.style.width = null
+                        thisElem.style.height = null
+                        thisElem = thisElem?.parentElement || null
                     }
 
                     // containerRef.current.style.position = null
