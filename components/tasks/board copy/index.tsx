@@ -20,7 +20,6 @@ import { DialogCtxMenuDispatchContext } from "../contexts";
 import TaskItem from "./task-item";
 import useNarrowBody from "hooks/theme/narrow-body";
 import useFuncWithTimeout from "hooks/counter/function-with-timeout";
-import useStateManager from "./hooks/state-manager";
 
 export interface Ioption {
     id:EntityId;
@@ -32,26 +31,154 @@ const
     BoardViewDispatchContext = createContext<{boardViewDispatch:Dispatch<Iaction>}>({boardViewDispatch:()=>{}}),
     BoardView = () => {
         const
-            [boardViewState,boardViewDispatch] = useReducer(reducer,initialState),
-            boardColumnFieldID = useAppSelector(state=>taskFieldSelector.selectAll(state).find(e=>e.fieldType==='board_column').id)
+            boardColumnFieldID = useAppSelector(state=>taskFieldSelector.selectAll(state).find(e=>e.fieldType==='board_column').id),
+            boardColumnOrderFieldID = useAppSelector(state=>taskFieldSelector.selectAll(state).find(e=>e.fieldType==='order_in_board_column').id),
+            boardColumnIDsSelector = useMemo(()=>createSelector(
+                (state:ReduxState)=>taskFieldSelector.selectAll(state).find(e=>e.fieldType==='board_column').details.options as Ioption[],
+                (options:Ioption[])=>{
+                    const len = options.length
+                    if (!len) return []
+                    else if (len===1) return [options[0].id]
+                    else return Array.from(options).sort((a,b)=>a.order - b.order).map(({id})=>id)
+                }
+            ),[]),
+            boardColumnIDs = useAppSelector(state => boardColumnIDsSelector(state)),
+            columnTaskIdSelector = useMemo(()=>createSelector(
+                (state:ReduxState)=>state,
+                (state:ReduxState)=>{
+                    if (!boardColumnIDs.length) return '{}'
+                    const 
+                        tasks = taskSelector.selectAll(state),
+                        uid = state.misc.uid,
+                        objs = boardColumnIDs.map(e=>{
+                            const 
+                                tasksOfThisColumn = tasks.filter(t=>{
+                                    const {isGroupTask} = t
+                                    return t[boardColumnFieldID]===e && (isGroupTask ? [...t.supervisors,...t.participants,...t.viewers,t.owner,t.assignee].includes(uid) : t.owner===uid)
+                                }),
+                                len = tasksOfThisColumn.length,
+                                value = !len ? [] : len===1 ? [tasksOfThisColumn[0].id] : tasksOfThisColumn.sort((a,b)=>a[boardColumnOrderFieldID] - b[boardColumnOrderFieldID]).map(({id})=>id)
+                            return {[e]:value}
+                        })
+                    return boardColumnIDs.length===1 ? JSON.stringify(objs[0]) : JSON.stringify(objs.reduce((a,b)=>({...a,...b})))
+                }
+            ),[boardColumnFieldID,boardColumnIDs,boardColumnOrderFieldID]),
+            columnTaskIDs = useAppSelector(state => columnTaskIdSelector(state)),
+            [state,boardViewDispatch] = useReducer(reducer,initialState),
+            store = useStore(),
+            dispatch = useAppDispatch(),
+            [taskMovedInBoard] = useTaskMovedInBoardMutation(),
+            dispatchTaskMovedInBoard = (taskID:EntityId,newColumnID:EntityId,newIdxInColumn:number) => {
+                taskMovedInBoard({taskID,newColumnID,newIdxInColumn,active:true})
+            },
+            [updateTaskInBoard] = useFuncWithTimeout(dispatchTaskMovedInBoard,1000),
+            taskJustMoved = () => updateTaskInBoard(
+                state.taskMoving,
+                state.columnIDs[state.columnIdx],
+                state.taskIdx,
+            ),
+            dispatchColumnIDs = () => {
+                const 
+                    s = store.getState() as ReduxState,
+                    fieldType = 'board_column',
+                    boardColumnFieldObj = taskFieldSelector.selectAll(s).find(e=>e.fieldType===fieldType),
+                    details = boardColumnFieldObj.details,
+                    options = details.options as Ioption[],
+                    len = options.length,
+                    originalIDs = !len ? [] : len===1 ? [options[0].id] : Array.from(options).sort((a,b)=>a.order - b.order).map(({id})=>id)
 
-        useStateManager(boardViewState,boardViewDispatch,boardColumnFieldID)
+                if (state.columnIDs.length === len && state.columnIDs.every((e,i)=>originalIDs.indexOf(e)===i)) return
+
+                const newOptions:Ioption[] = state.columnIDs.map((columnID,i)=>({
+                    id:columnID,
+                    name:options.find(opt=>opt.id===columnID).name,
+                    order:i
+                }))
+
+                dispatch(taskApi.endpoints.editCustomField.initiate({
+                    id:boardColumnFieldID,
+                    f:{
+                        name:boardColumnFieldObj.fieldName,
+                        fieldType,
+                        defaultValues:{[fieldType]:details.default},
+                        options:{[fieldType]:newOptions}
+                    }
+                }))
+            },
+            [updateColumnChange] = useFuncWithTimeout(dispatchColumnIDs,500),
+            checkSameOrderFromState = () => {
+                const 
+                    s = store.getState() as ReduxState,
+                    uid = s.misc.uid,
+                    columns = taskFieldSelector.selectAll(s).find(e=>e.fieldType==='board_column').details.options as Ioption[]
+                if (columns.length !== state.columnIDs.length) return false
+                const sameColumnOrder = columns.every((e,i)=>state.columnIDs.indexOf(e.id)==i)
+                if (!sameColumnOrder) return false
+
+                const 
+                    len = columns.length,
+                    tasks = taskSelector.selectAll(s)
+                for (let i=0; i<len; i++){
+                    const 
+                        thisColumnID = columns[i].id,
+                        tasksOfThisColumn = tasks.filter(t=>{
+                            const {isGroupTask} = t
+                            return t[boardColumnFieldID]===thisColumnID && (isGroupTask ? [...t.supervisors,...t.participants,...t.viewers,t.owner,t.assignee].includes(uid) : t.owner===uid)
+                        }),
+                        l = tasksOfThisColumn.length
+                    if (l !== state.itemsEachColumn[thisColumnID].length) return false
+                    const
+                        sortedTaskIDs = !l ? [] : l===1 ? [tasksOfThisColumn[0].id] : Array.from(tasksOfThisColumn).sort((a,b)=>a[boardColumnOrderFieldID] - b[boardColumnOrderFieldID]).map(({id})=>id),
+                        allTasksSameOrder = sortedTaskIDs.every((e,j)=>state.itemsEachColumn[thisColumnID].indexOf(e)===j)
+                    if (!allTasksSameOrder) return false
+                }
+                return true
+            }
+
+        useEffect(()=>{
+            if (!!state.columnIDs.length) updateColumnChange()
+        },[state.columnIDs])
+        
+        useEffect(()=>{
+            const sameAsPrev = checkSameOrderFromState()
+            if (!sameAsPrev){
+                boardViewDispatch(init({
+                    columnIDs:boardColumnIDs,
+                    taskMoving:state.taskMoving,
+                    columnMoving:state.columnMoving,
+                    itemsEachColumn:JSON.parse(columnTaskIDs),
+                    columnIdx:state.columnIdx,
+                    taskIdx:state.taskIdx
+                }))
+            }
+        },[
+            columnTaskIDs,
+            boardColumnIDs
+        ])
+
+        useEffect(()=>{
+            if (!!state.taskMoving && state.columnIdx !== -1 && state.taskIdx !== -1) taskJustMoved()
+        },[
+            state.taskMoving,
+            state.columnIdx,
+            state.taskIdx
+        ])
 
         return (
             <BoardViewDispatchContext.Provider value={{boardViewDispatch}}>
                 <Table stickyHeader size="small">
                     <TableHead>
                         <TableRow>
-                            {boardViewState.columnIDs.map((id,i)=>(
+                            {state.columnIDs.map((id,i)=>(
                                 <ColumnName key={id} {...{
                                     id,
-                                    columnCount:boardViewState.columnIDs.length,
+                                    columnCount:state.columnIDs.length,
                                     columnIdx:i,
                                 }} />
                             ))}
                         </TableRow>
                         <TableRow>
-                            {boardViewState.columnIDs.map((id,i)=>(
+                            {state.columnIDs.map((id,i)=>(
                                 <ColumnAddItem key={id} {...{
                                     id,
                                     boardColumnFieldID,
@@ -62,13 +189,13 @@ const
                     </TableHead>
                     <TableBody>
                         <TableRow>
-                            {boardViewState.columnIDs.map((columnID,i)=>(
+                            {state.columnIDs.map((columnID,i)=>(
                                 <TableBodyColumn key={columnID} {...{
-                                    taskIDs:boardViewState.itemsEachColumn[columnID],
+                                    taskIDs:state.itemsEachColumn[columnID],
                                     columnIdx:i,
                                     columnID,
-                                    taskMoving:boardViewState.taskMoving,
-                                    blankAreaVisible:!!boardViewState.columnMoving || !!boardViewState.taskMoving,
+                                    taskMoving:state.taskMoving,
+                                    blankAreaVisible:!!state.columnMoving || !!state.taskMoving,
                                 }} />
                             ))}
                         </TableRow>

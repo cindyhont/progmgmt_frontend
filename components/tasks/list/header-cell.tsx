@@ -1,4 +1,4 @@
-import React, { memo, MouseEvent, TouchEvent } from "react";
+import React, { memo, MouseEvent, TouchEvent as ReactTouchEvent, useEffect, useRef } from "react";
 import TableCell from '@mui/material/TableCell';
 import { useAppSelector } from "@reducers";
 import { EntityId } from "@reduxjs/toolkit";
@@ -24,7 +24,9 @@ const HeaderCell = memo((
         fieldName = useAppSelector(state=>taskFieldSelector.selectById(state,field)?.fieldName || ''),
         indexeddbOK = useAppSelector(state => state.misc.indexeddbOK),
         isTouchScreen = useAppSelector(state => state.misc.isTouchScreen),
-        onTouchStart = (e:TouchEvent<HTMLTableCellElement>) => {
+        ref = useRef<HTMLTableCellElement>(),
+        onTouchStart = (e:TouchEvent) => {
+            e.preventDefault()
             if (e.touches.length !== 1) return
             const f = e.touches[0]
             dragStart(f.pageX,f.pageY)
@@ -32,20 +34,24 @@ const HeaderCell = memo((
         onMouseDown = (e:MouseEvent<HTMLTableCellElement>) => { 
             if (indexeddbOK) handleMouseDown(e.pageX,e.pageY)
         },
-        onTouchMove = (e:TouchEvent<HTMLTableCellElement>) => {
+        onTouchMove = (e:ReactTouchEvent<HTMLTableCellElement>) => {
             const f = e.touches[0]
             dragMove(f.pageX,f.pageY)
         }
 
+    useEffect(()=>{
+        ref.current?.addEventListener('touchstart',onTouchStart,{passive:false})
+        return () => ref.current?.removeEventListener('touchstart',onTouchStart)
+    },[])
 
     return (
         <>
         <TableCell 
+            ref={ref}
             className={`${field}`}
             id={`task-list-table-${field}`}
             sx={{cursor:'move'}}
             data-field={field}
-            onTouchStart={onTouchStart}
             onTouchMove={onTouchMove}
             onTouchEnd={dragEnd}
             onMouseDown={onMouseDown}
