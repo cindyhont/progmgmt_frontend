@@ -85,7 +85,6 @@ const
             dragStart = (x:number,y:number,i:number) => {
                 if (!indexeddbOK) return
 
-                document.body.style.overscrollBehavior = 'none'
                 clonedElem.current = document.createElement('table')
                 const 
                     field = columnState.fields[i],

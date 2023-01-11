@@ -91,9 +91,11 @@ const
                 if (window.matchMedia('(hover:none)').matches){
                     let thisElem = containerRef.current as HTMLElement
                     thisElem.style.overflowY = 'hidden'
+                    thisElem.style.overscrollBehaviorY = 'none'
 
                     while (!!thisElem.parentElement){
                         thisElem.parentElement.style.overflowY = 'hidden'
+                        thisElem.parentElement.style.overscrollBehaviorY = 'none'
                         thisElem = thisElem.parentElement
                     }
 
@@ -122,9 +124,11 @@ const
                 if (window.matchMedia('(hover:none)').matches){
                     let thisElem = containerRef.current as HTMLElement
                     thisElem.style.overflowY = null
+                    thisElem.style.overscrollBehaviorY = null
 
                     while (!!thisElem.parentElement){
                         thisElem.parentElement.style.overflowY = null
+                        thisElem.parentElement.style.overscrollBehaviorY = null
                         thisElem = thisElem.parentElement
                     }
 
