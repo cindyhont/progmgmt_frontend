@@ -20,6 +20,7 @@ const useDragManager = (
             },
         ) => {
             document.body.style.overscrollBehavior = 'none'
+            document.body.style.webkitUserSelect = 'none'
             document.body.style.userSelect = 'none'
             
             onDragStart(i)
@@ -67,6 +68,7 @@ const useDragManager = (
         },
         handleDragEnd = () => {
             document.body.style.overscrollBehavior = null
+            document.body.style.webkitUserSelect = null
             document.body.style.userSelect = null
         }
 
