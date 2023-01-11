@@ -225,12 +225,15 @@ const
             ),[fieldID,taskID]),
             visible = useAppSelector(state => visibilitySelector(state)),
             onTouchStart = (e:TouchEvent<HTMLTableCellElement>) => {
+                e.preventDefault()
+                e.stopPropagation()
                 if (e.touches.length !== 1) return
                 const f = e.touches[0]
                 dragStart(f.pageX,f.pageY)
             },
             onTouchMove = (e:TouchEvent<HTMLTableCellElement>) => {
                 e.preventDefault()
+                e.stopPropagation()
                 const f = e.touches[0]
                 dragMove(f.pageX,f.pageY)
             },
