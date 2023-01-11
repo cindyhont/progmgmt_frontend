@@ -91,15 +91,15 @@ const
                 if (window.matchMedia('(hover:none)').matches){
                     let thisElem = containerRef.current as HTMLElement
 
-                    while (!!thisElem){
-                        const {left,top,width,height} = thisElem.getBoundingClientRect()
+                    while (!!thisElem && thisElem.tagName.toLowerCase() !== 'html'){
+                        // const {left,top,width,height} = thisElem.getBoundingClientRect()
                         thisElem.style.overflowY = 'hidden'
                         thisElem.style.overscrollBehaviorY = 'none'
-                        thisElem.style.position = 'fixed'
-                        thisElem.style.top = `${top}px`
-                        thisElem.style.left = `${left}px`
-                        thisElem.style.width = `${width}px`
-                        thisElem.style.height = `${height}px`
+                        // thisElem.style.position = 'fixed'
+                        // thisElem.style.top = `${top}px`
+                        // thisElem.style.left = `${left}px`
+                        // thisElem.style.width = `${width}px`
+                        // thisElem.style.height = `${height}px`
                         thisElem = thisElem?.parentElement || null
                     }
 
@@ -128,14 +128,14 @@ const
                 if (window.matchMedia('(hover:none)').matches){
                     let thisElem = containerRef.current as HTMLElement
 
-                    while (!!thisElem){
+                    while (!!thisElem && thisElem.tagName.toLowerCase() !== 'html'){
                         thisElem.style.overflowY = null
                         thisElem.style.overscrollBehaviorY = null
-                        thisElem.style.position = null
-                        thisElem.style.top = null
-                        thisElem.style.left = null
-                        thisElem.style.width = null
-                        thisElem.style.height = null
+                        // thisElem.style.position = null
+                        // thisElem.style.top = null
+                        // thisElem.style.left = null
+                        // thisElem.style.width = null
+                        // thisElem.style.height = null
                         thisElem = thisElem?.parentElement || null
                     }
 
