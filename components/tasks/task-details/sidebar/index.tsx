@@ -81,12 +81,12 @@ const
             dragStart = (x:number,y:number,i:number) => {
                 const 
                     originalModule = document.getElementById(getTaskDetailsSidebarModuleID(sidebarState.fields[i])),
-                    rect = originalModule.getBoundingClientRect()
+                    {left,top,width,height} = originalModule.getBoundingClientRect()
 
                 clonedElem.current = originalModule.cloneNode(true) as HTMLElement
-                handleDragStart(i,{...rect})
+                handleDragStart(i,{...{left,top,width,height}})
                 containerRef.current.appendChild(clonedElem.current)
-                startingPoint.current = {touchX:x,touchY:y,rectLeft:rect.left,rectTop:rect.top}
+                startingPoint.current = {touchX:x,touchY:y,rectLeft:left,rectTop:top}
             },
             dragMove = (x:number,y:number)=>{
                 clonedElem.current.style.left = `${x - startingPoint.current.touchX + startingPoint.current.rectLeft}px`
@@ -111,6 +111,10 @@ const
             onMouseUp = () => {
                 mouseDragging.current = false
                 dragEnd()
+            },
+            touchMoveSTopNativeScroll = (e:Event) => {
+                e.preventDefault()
+                e.stopPropagation()
             }
 
         useUpdateSidebarState(sidebarState.fields,sidebarDispatch)
@@ -118,9 +122,11 @@ const
         useEffect(()=>{
             window.addEventListener('mousemove',onMouseMove,{passive:true})
             window.addEventListener('mouseup',onMouseUp,{passive:true})
+            window.addEventListener('touchmove',touchMoveSTopNativeScroll)
             return () => {
                 window.removeEventListener('mousemove',onMouseMove)
                 window.removeEventListener('mouseup',onMouseUp)
+                window.removeEventListener('touchmove',touchMoveSTopNativeScroll)
             }
         },[sidebarState.fields])
 
