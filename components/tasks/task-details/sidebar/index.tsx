@@ -130,10 +130,6 @@ const
             onMouseUp = () => {
                 mouseDragging.current = false
                 dragEnd()
-            },
-            touchMoveSTopNativeScroll = (e:Event) => {
-                e.preventDefault()
-                e.stopPropagation()
             }
 
         useUpdateSidebarState(sidebarState.fields,sidebarDispatch)
@@ -141,11 +137,9 @@ const
         useEffect(()=>{
             window.addEventListener('mousemove',onMouseMove,{passive:true})
             window.addEventListener('mouseup',onMouseUp,{passive:true})
-            document.body.addEventListener('touchmove',touchMoveSTopNativeScroll)
             return () => {
                 window.removeEventListener('mousemove',onMouseMove)
                 window.removeEventListener('mouseup',onMouseUp)
-                document.body.removeEventListener('touchmove',touchMoveSTopNativeScroll)
             }
         },[sidebarState.fields])
 
@@ -236,6 +230,7 @@ const
                 dragStart(f.pageX,f.pageY)
             },
             onTouchMove = (e:TouchEvent<HTMLTableCellElement>) => {
+                e.preventDefault()
                 const f = e.touches[0]
                 dragMove(f.pageX,f.pageY)
             },
