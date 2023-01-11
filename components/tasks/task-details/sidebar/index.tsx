@@ -115,6 +115,7 @@ const
             touchMoveSTopNativeScroll = (e:Event) => {
                 e.preventDefault()
                 e.stopPropagation()
+                e.stopImmediatePropagation()
             }
 
         useUpdateSidebarState(sidebarState.fields,sidebarDispatch)
@@ -122,11 +123,11 @@ const
         useEffect(()=>{
             window.addEventListener('mousemove',onMouseMove,{passive:true})
             window.addEventListener('mouseup',onMouseUp,{passive:true})
-            window.addEventListener('touchmove',touchMoveSTopNativeScroll)
+            document.body.addEventListener('touchmove',touchMoveSTopNativeScroll)
             return () => {
                 window.removeEventListener('mousemove',onMouseMove)
                 window.removeEventListener('mouseup',onMouseUp)
-                window.removeEventListener('touchmove',touchMoveSTopNativeScroll)
+                document.body.removeEventListener('touchmove',touchMoveSTopNativeScroll)
             }
         },[sidebarState.fields])
 
