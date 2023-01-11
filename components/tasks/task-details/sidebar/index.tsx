@@ -115,7 +115,6 @@ const
             touchMoveSTopNativeScroll = (e:Event) => {
                 e.preventDefault()
                 e.stopPropagation()
-                e.stopImmediatePropagation()
             }
 
         useUpdateSidebarState(sidebarState.fields,sidebarDispatch)
