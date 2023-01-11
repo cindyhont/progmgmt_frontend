@@ -116,7 +116,8 @@ const
             onTouchEnd = () => {
                 if (!touchMoving.current) onClick()
                 touchMoving.current = false
-            }
+            },
+            onTouchCancel = () => touchMoving.current = false
 
         useEffect(()=>{
             ref.current?.addEventListener('touchstart',onTouchStart,{passive:false})
@@ -130,6 +131,7 @@ const
                 onMouseDown={onMouseDown}
                 onTouchMove={onTouchMove}
                 onTouchEnd={onTouchEnd}
+                onTouchCancel={onTouchCancel}
                 square
                 id={`task-board-task-${taskID}`}
                 sx={{
