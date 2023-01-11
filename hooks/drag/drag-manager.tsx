@@ -20,6 +20,8 @@ const useDragManager = (
             },
         ) => {
             document.body.style.overscrollBehavior = 'none'
+            document.body.style.userSelect = 'none'
+            
             onDragStart(i)
 
             clonedElem.current.style.position = 'fixed'
@@ -28,8 +30,6 @@ const useDragManager = (
             if ('width' in measurement) clonedElem.current.style.width = `${measurement.width}px`
             if ('height' in measurement) clonedElem.current.style.height = `${measurement.height}px`
             clonedElem.current.style.opacity = '0.7'
-
-            document.body.style.userSelect = 'none'
         },
         [execDragEnter] = useFuncWithTimeout(onDragEnter,20),
         handleDragMove = (
