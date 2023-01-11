@@ -276,8 +276,8 @@ const
         useEffect(()=>{
             const state = store.getState() as ReduxState
             idb.current = new IndexedDB(state.misc.uid.toString(),1)
-            dragHandle.current.addEventListener('touchstart',onTouchStart,{passive:false})
-            return () => dragHandle.current.removeEventListener('touchstart',onTouchStart)
+            dragHandle.current?.addEventListener('touchstart',onTouchStart,{passive:false})
+            return () => dragHandle.current?.removeEventListener('touchstart',onTouchStart)
         },[])
     
         if (visible && fieldType==='checkbox') return <CheckboxElem {...{fieldName,fieldID,onDragEnter,onDragStart}} />
