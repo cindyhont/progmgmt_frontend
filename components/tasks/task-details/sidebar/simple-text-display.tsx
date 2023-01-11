@@ -12,7 +12,7 @@ const SimpleTextDisplay = memo((
         nilTextColor:boolean
     }
 ) => (
-    <TableCell>
+    <TableCell sx={{width:'100%'}}>
         <Typography
             sx={{...(nilTextColor && {color:grey[500]}),py:1}}
         >{content}</Typography>

@@ -257,7 +257,7 @@ const
                                         <DragIndicatorIcon fontSize="small" sx={{mx:1}} htmlColor={grey[500]} />
                                     </Box>
                                 </TableCell>
-                                <TableCell>
+                                <TableCell sx={{width:'100%'}}>
                                     <Typography sx={sideBarHeadStyle}>{fieldName}</Typography>
                                 </TableCell>
                             </TableRow>

@@ -379,7 +379,7 @@ const
                 <TableCell sx={{width:0}}>
                     <Avatar src={avatar} sx={{mr:1,width:30,height:30,my:0.5}} />
                 </TableCell>
-                <TableCell colSpan={canShowDeleteButton ? 1 : 2}>
+                <TableCell colSpan={canShowDeleteButton ? 1 : 2} sx={{width:'100%'}}>
                     <Typography variant='body2'>{`${firstName} ${lastName}`.trim()}</Typography>
                 </TableCell>
                 {canShowDeleteButton && <TableCell sx={{width:0}}>
