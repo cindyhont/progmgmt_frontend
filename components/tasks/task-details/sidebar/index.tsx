@@ -88,6 +88,7 @@ const
                 containerRef.current.appendChild(clonedElem.current)
                 startingPoint.current = {touchX:x,touchY:y,rectLeft:left,rectTop:top}
 
+                /*
                 if (window.matchMedia('(hover:none)').matches){
                     let thisElem = containerRef.current as HTMLElement
 
@@ -112,6 +113,7 @@ const
                     // containerRef.current.style.width = `${width}px`
                     // containerRef.current.style.height = `${height}px`
                 }
+                */
             },
             dragMove = (x:number,y:number)=>{
                 clonedElem.current.style.left = `${x - startingPoint.current.touchX + startingPoint.current.rectLeft}px`
@@ -125,6 +127,7 @@ const
                     clonedElem.current = null
                 }
 
+                /*
                 if (window.matchMedia('(hover:none)').matches){
                     let thisElem = containerRef.current as HTMLElement
 
@@ -147,6 +150,7 @@ const
                     // containerRef.current.style.width = null
                     // containerRef.current.style.height = null
                 }
+                */
             },
             mouseDragging = useRef(false),
             handleMouseDown = (x:number,y:number,i:number) => {
@@ -261,8 +265,8 @@ const
                 dragStart(f.pageX,f.pageY)
             },
             onTouchMove = (e:TouchEvent<HTMLTableCellElement>) => {
-                e.preventDefault()
-                e.stopPropagation()
+                // e.preventDefault()
+                // e.stopPropagation()
                 const f = e.touches[0]
                 dragMove(f.pageX,f.pageY)
             },
