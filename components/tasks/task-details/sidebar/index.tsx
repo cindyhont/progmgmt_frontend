@@ -88,15 +88,15 @@ const
                 containerRef.current.appendChild(clonedElem.current)
                 startingPoint.current = {touchX:x,touchY:y,rectLeft:left,rectTop:top}
 
-                if (window.matchMedia('(hover:none)').matches){
-                    const {left,top,width,height} = containerRef.current.getBoundingClientRect()
-                    containerRef.current.style.position = 'fixed'
-                    containerRef.current.style.overflowY = 'hidden'
-                    containerRef.current.style.top = `${top}px`
-                    containerRef.current.style.left = `${left}px`
-                    containerRef.current.style.width = `${width}px`
-                    containerRef.current.style.height = `${height}px`
-                }
+                // if (window.matchMedia('(hover:none)').matches){
+                //     const {left,top,width,height} = containerRef.current.getBoundingClientRect()
+                //     containerRef.current.style.position = 'fixed'
+                //     containerRef.current.style.overflowY = 'hidden'
+                //     containerRef.current.style.top = `${top}px`
+                //     containerRef.current.style.left = `${left}px`
+                //     containerRef.current.style.width = `${width}px`
+                //     containerRef.current.style.height = `${height}px`
+                // }
             },
             dragMove = (x:number,y:number)=>{
                 clonedElem.current.style.left = `${x - startingPoint.current.touchX + startingPoint.current.rectLeft}px`
@@ -110,14 +110,14 @@ const
                     clonedElem.current = null
                 }
 
-                if (window.matchMedia('(hover:none)').matches){
-                    containerRef.current.style.position = null
-                    containerRef.current.style.overflowY = null
-                    containerRef.current.style.top = null
-                    containerRef.current.style.left = null
-                    containerRef.current.style.width = null
-                    containerRef.current.style.height = null
-                }
+                // if (window.matchMedia('(hover:none)').matches){
+                //     containerRef.current.style.position = null
+                //     containerRef.current.style.overflowY = null
+                //     containerRef.current.style.top = null
+                //     containerRef.current.style.left = null
+                //     containerRef.current.style.width = null
+                //     containerRef.current.style.height = null
+                // }
             },
             mouseDragging = useRef(false),
             handleMouseDown = (x:number,y:number,i:number) => {
