@@ -1,4 +1,4 @@
-import React, { DragEvent, ForwardedRef, forwardRef, memo, TouchEvent, useEffect, useRef } from "react";
+import React, { DragEvent, ForwardedRef, forwardRef, memo, TouchEvent as ReactTouchEvent, useEffect, useRef } from "react";
 import { useTheme } from "@mui/material";
 import IconButton from '@mui/material/IconButton'
 import { v4 as uuidv4 } from 'uuid'
@@ -82,7 +82,8 @@ const SmallScreenToggle = memo(forwardRef((
             localStorage.setItem(localStorageLeftKey,((finalLeft + offsetWidth * 0.5) / innerWidth).toString())
             localStorage.setItem(localStorageTopKey,((finalTop + offsetHeight * 0.5) / height).toString())
         },
-        onTouchStart = (e:TouchEvent<HTMLButtonElement>) => {
+        onTouchStart = (e:TouchEvent) => {
+            e.preventDefault()
             if (e.touches.length !== 1) return
             document.body.style.overscrollBehavior = 'none'
             const 
@@ -117,7 +118,7 @@ const SmallScreenToggle = memo(forwardRef((
             localStorage.setItem(localStorageLeftKey,((finalLeft + offsetWidth * 0.5) / innerWidth).toString())
             localStorage.setItem(localStorageTopKey,((finalTop + offsetHeight * 0.5) / height).toString())
         },
-        onTouchMove = (e:TouchEvent<HTMLButtonElement>) => {
+        onTouchMove = (e:ReactTouchEvent<HTMLButtonElement>) => {
             touching.current = true
             const 
                 f = e.touches[0],
@@ -125,6 +126,12 @@ const SmallScreenToggle = memo(forwardRef((
             button.style.left = `${f.pageX - moveStart.current.touchLeft + moveStart.current.btnLeft}px`
             button.style.top = `${f.pageY - moveStart.current.touchTop + moveStart.current.btnTop}px`
         }
+
+    useEffect(()=>{
+        const btn = document.getElementById(buttonID)
+        btn?.addEventListener('touchstart',onTouchStart,{passive:false})
+        return () => btn?.removeEventListener('touchstart',onTouchStart)
+    },[])
 
     useEffect(()=>{
         updateTogglePosition()
@@ -153,7 +160,7 @@ const SmallScreenToggle = memo(forwardRef((
             onDragStart={onDragStart}
             onDrag={onDrag}
             onDragEnd={onDragEnd}
-            onTouchStart={onTouchStart}
+            // onTouchStart={onTouchStart}
             onTouchEnd={onTouchEnd}
             onTouchCancel={onTouchEnd}
             onTouchMove={onTouchMove}

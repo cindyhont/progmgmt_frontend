@@ -89,33 +89,6 @@ const
                 
                 containerRef.current.appendChild(clonedElem.current)
                 startingPoint.current = {touchX:x,touchY:y,rectLeft:left,rectTop:top}
-
-                /*
-                if (window.matchMedia('(hover:none)').matches){
-                    let thisElem = containerRef.current as HTMLElement
-
-                    while (!!thisElem && thisElem.tagName.toLowerCase() !== 'html'){
-                        // const {left,top,width,height} = thisElem.getBoundingClientRect()
-                        thisElem.style.overflowY = 'hidden'
-                        thisElem.style.overscrollBehaviorY = 'none'
-                        // thisElem.style.position = 'fixed'
-                        // thisElem.style.top = `${top}px`
-                        // thisElem.style.left = `${left}px`
-                        // thisElem.style.width = `${width}px`
-                        // thisElem.style.height = `${height}px`
-                        thisElem = thisElem?.parentElement || null
-                    }
-
-                    // const {left,top,width,height} = containerRef.current.getBoundingClientRect()
-                    // containerRef.current.style.position = 'fixed'
-                    // document.body.style.overflowY = 'hidden'
-                    // containerRef.current.style.overflowY = 'hidden'
-                    // containerRef.current.style.top = `${top}px`
-                    // containerRef.current.style.left = `${left}px`
-                    // containerRef.current.style.width = `${width}px`
-                    // containerRef.current.style.height = `${height}px`
-                }
-                */
             },
             dragMove = (x:number,y:number)=>{
                 clonedElem.current.style.left = `${x - startingPoint.current.touchX + startingPoint.current.rectLeft}px`
@@ -128,31 +101,6 @@ const
                     clonedElem.current.remove()
                     clonedElem.current = null
                 }
-
-                /*
-                if (window.matchMedia('(hover:none)').matches){
-                    let thisElem = containerRef.current as HTMLElement
-
-                    while (!!thisElem && thisElem.tagName.toLowerCase() !== 'html'){
-                        thisElem.style.overflowY = null
-                        thisElem.style.overscrollBehaviorY = null
-                        // thisElem.style.position = null
-                        // thisElem.style.top = null
-                        // thisElem.style.left = null
-                        // thisElem.style.width = null
-                        // thisElem.style.height = null
-                        thisElem = thisElem?.parentElement || null
-                    }
-
-                    // containerRef.current.style.position = null
-                    // document.body.style.overflowY = null
-                    // containerRef.current.style.overflowY = null
-                    // containerRef.current.style.top = null
-                    // containerRef.current.style.left = null
-                    // containerRef.current.style.width = null
-                    // containerRef.current.style.height = null
-                }
-                */
             },
             mouseDragging = useRef(false),
             handleMouseDown = (x:number,y:number,i:number) => {
@@ -262,7 +210,6 @@ const
             visible = useAppSelector(state => visibilitySelector(state)),
             onTouchStart = (e:TouchEvent) => {
                 e.preventDefault()
-                // e.stopPropagation()
                 if (e.touches.length !== 1) return
                 const f = e.touches[0]
                 dragStart(f.pageX,f.pageY)
