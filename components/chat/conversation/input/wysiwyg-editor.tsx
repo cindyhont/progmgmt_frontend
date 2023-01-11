@@ -15,6 +15,8 @@ import { ActionTypes } from '../../reducers/ws-message-types';
 import { useCreateConvoInExistingRoomMutation, useCreateRoomNoConvoMutation, useCreateRoomWithFirstConvoMutation } from '@components/chat/reducers/api';
 import scrollToBottom from '../functions/to-bottom';
 import { ChatEventDispatchContext, ChatEventStateContext, updateEditorLoadStatus } from '../functions/reducer-context';
+import { ChatPageDialogContext } from '@components/chat';
+// import useMobileViewportSizeChange from './mobile-viewport-size-change';
 
 const WYSIWYGeditor = memo((
     {
@@ -30,7 +32,11 @@ const WYSIWYGeditor = memo((
         userID = router.query.userid as string,
         editorID = useRef('chat-input').current,
         editorIsActive = useRef(false),
-        editorOnFocus = () => editorIsActive.current = true,
+        {dialogOpen} = useContext(ChatPageDialogContext),
+        editorOnFocus = () => {
+            editorIsActive.current = true
+            if (!dialogOpen) setTimeout(()=>window.scrollTo({top:0,behavior:'smooth'}),100)
+        },
         editorRef = useRef<HTMLDivElement>(),
         roomIdRef = useRef<EntityId>(),
         userIdRef = useRef<EntityId>(),
@@ -133,6 +139,8 @@ const WYSIWYGeditor = memo((
                 }
             } else onChange(e)
         }
+
+    // useMobileViewportSizeChange()
 
     useEffect(()=>{
         modeRef.current = mode

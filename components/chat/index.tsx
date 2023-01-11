@@ -16,6 +16,7 @@ import useNarrowBody from 'hooks/theme/narrow-body';
 
 const 
     ToggleMenuDialogContext = createContext<{toggleMenuDialogDispatch:Dispatch<Iactions>}>({toggleMenuDialogDispatch:()=>{}}),
+    ChatPageDialogContext = createContext<{dialogOpen:boolean}>({dialogOpen:false}),
     ChatPanel = () => {
         const 
             convoRef = useRef<HTMLDivElement>(),
@@ -117,7 +118,11 @@ const
                             transition:'left 0.3s'
                         } : {})
                     }}
-                ><Conversation /></Grid>
+                >
+                    <ChatPageDialogContext.Provider value={{dialogOpen:menuDialogState.openNewGroupDialog || menuDialogState.openForwardDialog}}>
+                        <Conversation />
+                    </ChatPageDialogContext.Provider>
+                </Grid>
             </Grid>
             <ToggleMenuDialogContext.Provider value={{toggleMenuDialogDispatch}}>
                 <RoomContextMenu {...{open:menuDialogState.openRoomContextMenu,anchorPosition:menuDialogState.contextMenuPosition}} />
@@ -131,4 +136,4 @@ const
     }
 
 export default ChatPanel
-export { ToggleMenuDialogContext }
+export { ToggleMenuDialogContext, ChatPageDialogContext }
