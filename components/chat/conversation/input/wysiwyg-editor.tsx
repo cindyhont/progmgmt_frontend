@@ -31,7 +31,11 @@ const WYSIWYGeditor = memo((
         userID = router.query.userid as string,
         editorID = useRef('chat-input').current,
         editorIsActive = useRef(false),
-        editorOnFocus = () => editorIsActive.current = true,
+        setFocused = useMobileViewportSizeChange(),
+        editorOnFocus = () => {
+            setFocused(true)
+            editorIsActive.current = true
+        },
         editorRef = useRef<HTMLDivElement>(),
         roomIdRef = useRef<EntityId>(),
         userIdRef = useRef<EntityId>(),
@@ -134,8 +138,6 @@ const WYSIWYGeditor = memo((
                 }
             } else onChange(e)
         }
-
-    useMobileViewportSizeChange()
 
     useEffect(()=>{
         modeRef.current = mode

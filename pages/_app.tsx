@@ -92,7 +92,6 @@ const
             return () => {
                 window.matchMedia('(prefers-color-scheme: dark)').removeEventListener('change', systemThemeOnChange);
                 document.removeEventListener('visibilitychange',onVisibilityChange)
-                if ('visualViewport' in window) window.visualViewport.removeEventListener('resize',onResize)
             }
         },[router.pathname])
 

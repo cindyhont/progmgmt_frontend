@@ -1,12 +1,16 @@
-import { ChatPageDialogContext } from "@components/chat"
+// import { ChatPageDialogContext } from "@components/chat"
 import useFuncWithTimeout from "@hooks/counter/function-with-timeout"
-import { useContext, useEffect } from "react"
+import { useEffect, useState } from "react"
 
 const useMobileViewportSizeChange = () => {
     const 
-        {dialogOpen} = useContext(ChatPageDialogContext),
+        [focused,setFocused] = useState(false),
+        // {dialogOpen} = useContext(ChatPageDialogContext),
         scrollToTop = () => {
-            if (!dialogOpen) window.scrollTo({top:0,behavior:'smooth'})
+            if (focused) {
+                window.scrollTo({top:0,behavior:'smooth'})
+                setFocused(false)
+            }
         },
         [onResize] = useFuncWithTimeout(scrollToTop,100)
 
@@ -15,7 +19,9 @@ const useMobileViewportSizeChange = () => {
         return () => {
             if ('visualViewport' in window) window.visualViewport.removeEventListener('resize',onResize)
         }
-    },[])
+    },[focused])
+
+    return setFocused
 }
 
 export default useMobileViewportSizeChange
