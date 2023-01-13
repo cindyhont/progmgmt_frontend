@@ -72,7 +72,7 @@ const
 
                 try {
                     const 
-                        res = await fetch('/api/first-user', {
+                        res = await fetch('/pm-api/first-user', {
                             method: 'POST',
                             body: JSON.stringify({username,password}),
                             headers: { 'Content-Type': 'application/json' },

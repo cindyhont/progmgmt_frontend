@@ -34,7 +34,7 @@ const useConnection = () => {
             if (!!lastWebsocketOfflineTime){
                 try {
                     const 
-                        res = await fetch('/api/ws/fetch',{
+                        res = await fetch('/pm-api/ws/fetch',{
                             headers: { 
                                 'Content-Type': 'application/json',
                                 sMethod:'ck',

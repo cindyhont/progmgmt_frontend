@@ -34,7 +34,7 @@ import { fileInputSelector } from "@components/functions";
 import websocketApi from "websocket/api";
 
 const
-    PATH = '/api',
+    PATH = '/pm-api',
     chatApi = apiSlice.injectEndpoints({
         endpoints:(build)=>({
             searchChatrooms:build.mutation<Ioption[],string>({

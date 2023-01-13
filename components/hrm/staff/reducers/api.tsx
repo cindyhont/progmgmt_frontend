@@ -10,7 +10,7 @@ enum ListTypes {
 }
 
 const 
-    PATH = '/api',
+    PATH = '/pm-api',
     frontendStaffFilters = (state:Istore):IstaffFilterCollection => ({
         filterMode: state.hrmStaff.filterMode,
         sortBy: state.hrmStaff.sortBy,

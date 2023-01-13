@@ -98,7 +98,7 @@ const
                 setShowPwd(false)
                 
                 const
-                    res = await fetch('/api/create-visitor', {
+                    res = await fetch('/pm-api/create-visitor', {
                         method: 'POST',
                         body: JSON.stringify({
                             username:usernameRef.current.value.trim(),

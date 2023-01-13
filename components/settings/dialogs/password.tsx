@@ -47,7 +47,7 @@ const PasswordDialog = memo((
                     newPassword:newPasswordRef.current.value.trim(),
                     currentPassword:currentPasswordRef.current.value.trim()
                 },
-                result = await fetch('/api/settings/update-password',{
+                result = await fetch('/pm-api/settings/update-password',{
                     method:'POST',
                     body: JSON.stringify(payload),
                     headers: { 

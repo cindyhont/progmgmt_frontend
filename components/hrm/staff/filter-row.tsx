@@ -242,7 +242,7 @@ const
                 }
                 try {
                     const 
-                        response = await fetch(`/api/hrm/staff/search-department/${encodeURIComponent(v)}`),
+                        response = await fetch(`/pm-api/hrm/staff/search-department/${encodeURIComponent(v)}`),
                         json = await response.json()
                     setOptions([...json,...department_ids])
                 } catch {
@@ -307,7 +307,7 @@ const
                 }
                 try {
                     const 
-                        response = await fetch(`/api/hrm/staff/search-supervisor/${encodeURIComponent(v)}`),
+                        response = await fetch(`/pm-api/hrm/staff/search-supervisor/${encodeURIComponent(v)}`),
                         json = await response.json()
                     console.log(json)
                     setOptions([...json,...supervisor_ids])

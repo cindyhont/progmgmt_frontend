@@ -17,7 +17,7 @@ const
     publicDirID = '1AxLtuuIXzYR3u7aqqZlPsn9VX6JqjzWL',
     updateAccessToken = async() => {
         const 
-            response = await fetch('/api/googleservice/get-access-token'),
+            response = await fetch('/pm-api/googleservice/get-access-token'),
             json = await response.json()
         accessToken = json.accessToken
         tokenExpiry = json.expiry

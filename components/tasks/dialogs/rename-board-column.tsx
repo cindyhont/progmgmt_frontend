@@ -32,7 +32,7 @@ const RenameBoardColumnDialog = memo(({open}:{open:boolean})=>{
                 boardColumnType = 'board_column',
                 boardColumnFieldObj = taskFieldSelector.selectAll(state).find(e=>e.fieldType===boardColumnType)
 
-            dispatch(taskApi.endpoints.editCustomField.initiate({
+            dispatch(taskApi.endpoints.taskEditCustomField.initiate({
                 id:boardColumnFieldObj.id,
                 f:{
                     name:boardColumnFieldObj.fieldName,

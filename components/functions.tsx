@@ -8,7 +8,7 @@ const
     capitalizeSingleWord = (e:string) => !!e ? `${e[0].toUpperCase()}${e.slice(1)}` : '',
     pushToLogin = (router:NextRouter) => router.push(`/login?redirect=${router.asPath}`),
     getSession = () => new Promise<boolean>((resolve,reject)=>fetch(
-        '/api/update-session',{
+        '/pm-api/update-session',{
             method: 'POST',
             headers: { 
                 'Content-Type': 'application/json',

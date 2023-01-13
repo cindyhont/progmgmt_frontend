@@ -87,7 +87,7 @@ const
                 }
                 try {
                     const 
-                        response = await fetch(`/api/hrm/staff/search-${label.toLowerCase()}/${encodeURIComponent(v)}`),
+                        response = await fetch(`/pm-api/hrm/staff/search-${label.toLowerCase()}/${encodeURIComponent(v)}`),
                         json = await response.json()
                     setOptions([...json,value])
                 } catch {

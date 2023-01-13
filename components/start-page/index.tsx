@@ -190,7 +190,7 @@ const
                     const 
                         [depts,staffDetails] = await Promise.all([getDeptList(),getStaffList()]),
                         thePack = {depts,staffDetails,adminStaffID},
-                        res = await fetch('/api/start/submit',{
+                        res = await fetch('/pm-api/start/submit',{
                             method: 'POST',
                             body: JSON.stringify(thePack),
                             headers: { 

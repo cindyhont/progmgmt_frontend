@@ -5,7 +5,7 @@ import { userDetailsUpdateOne } from "@reducers/user-details/slice";
 import websocketApi from "websocket/api";
 
 const 
-    PATH = '/api',
+    PATH = '/pm-api',
     settingsApi = apiSlice.injectEndpoints({
         endpoints:build=>({
             updateUsername:build.mutation<any,{

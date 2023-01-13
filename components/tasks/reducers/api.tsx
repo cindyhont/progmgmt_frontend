@@ -37,7 +37,7 @@ import { addUserDetailsStatusUnknown } from "@reducers/user-details/slice";
 import { Ioption as IboardColumn } from "../board";
 
 const
-    PATH = '/api',
+    PATH = '/pm-api',
     getBlobUrlFromText = async(text:string,fieldID:EntityId) => {
         const 
             parser = new DOMParser(),
@@ -573,7 +573,7 @@ const
                     return {data:null}
                 }
             }),
-            editCustomField:build.mutation<any,{
+            taskEditCustomField:build.mutation<any,{
                 f:IcustomField;
                 id:EntityId
             }>({
@@ -1073,5 +1073,6 @@ export const {
     useTaskEditCommentMutation,
     useTaskMovedInBoardMutation,
     useTaskUpdateParentsMutation,
+    useTaskEditCustomFieldMutation,
 } = taskApi
 export default taskApi

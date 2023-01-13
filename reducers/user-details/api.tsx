@@ -5,7 +5,7 @@ import { EntityId } from "@reduxjs/toolkit";
 import { IoptionRawUser } from "./interfaces";
 
 const
-    PATH = '/api',
+    PATH = '/pm-api',
     userDetailsApi = apiSlice.injectEndpoints({
         endpoints:(build)=>({
             searchUser:build.mutation<string[],{

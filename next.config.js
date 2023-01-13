@@ -2,7 +2,7 @@ module.exports = {
   assetPrefix:process.env.NODE_ENV === 'production' ? 'https://pm-cdn.cindyhodev.com' : undefined,
   async rewrites() {
     return [
-      {source: '/api/:slug*',destination: `${process.env.API_URL}/:slug*`},
+      {source: '/pm-api/:slug*',destination: `${process.env.API_URL}/:slug*`},
       {source: '/',destination: '/?page=dashboard'},
       ...[
         'chat',

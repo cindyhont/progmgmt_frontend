@@ -191,8 +191,8 @@ const
             [layoutOrderState,layoutOrderDispatch] = useReducer(layoutOrderReducer,layoutOrderInitialState),
             show = useInitIDB(router.query.page !== 'tasks')
 
-        useConnection()
-        useAutoRenewSession()
+        // useConnection()
+        // useAutoRenewSession()
 
         useEffect(()=>{
             if (show) dispatchBcMessage(layoutOrderState.list)

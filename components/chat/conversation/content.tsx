@@ -1,4 +1,4 @@
-import React, { ForwardedRef, forwardRef, memo, useEffect, useMemo, useRef } from 'react';
+import React, { memo, useEffect, useMemo } from 'react';
 import { useTheme } from '@mui/material/styles';
 import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
@@ -97,7 +97,7 @@ const
                 })
             ),[userID,roomID]),
             {name,typing} = useAppSelector(state=>selector(state)),
-            theme = useTheme()
+            {palette:{mode,grey}} = useTheme()
 
         return (
             <Typography
@@ -106,7 +106,7 @@ const
                     fontStyle:'italic',
                     overflow:'hidden',
                     lineHeight:'1rem',
-                    color:theme.palette.mode === 'light' ? theme.palette.grey[600] : theme.palette.grey[500],
+                    color:grey[mode === 'light' ? 600 : 500],
                     height:typing ? '1rem':'0rem',
                     transition:'all 0.3s'
                 }}

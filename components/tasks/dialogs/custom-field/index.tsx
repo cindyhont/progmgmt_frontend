@@ -111,7 +111,7 @@ const
             },
             onSubmit = (e:FormEvent) => {
                 e.preventDefault()
-                dispatch(taskApi.endpoints.editCustomField.initiate({id:fieldID,f:state}))
+                dispatch(taskApi.endpoints.taskEditCustomField.initiate({id:fieldID,f:state}))
                 onClose()
             }
 

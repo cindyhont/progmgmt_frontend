@@ -19,7 +19,7 @@ import {
 import { IeditConvoPayload, IlastSeenPayload, ImarkAsReadPayload, InewConvoPayload, InewGroupPayload, InewRoomNoConvoPayload, InewRoomWithConvoPayload, IpinnedPayload, ItypingPayload } from "./ws-message-types";
 
 const 
-    PATH = '/api',
+    PATH = '/pm-api',
     chatWsHandlerApi = apiSlice.injectEndpoints({
         endpoints:build=>({
             roomTyping:build.mutation<any,ItypingPayload>({

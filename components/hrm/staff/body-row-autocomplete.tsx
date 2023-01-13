@@ -85,7 +85,7 @@ const
 
                 try {
                     const 
-                        response = await fetch(`/api/hrm/staff/search-${field.replace('_id','')}/${encodeURIComponent(v)}`),
+                        response = await fetch(`/pm-api/hrm/staff/search-${field.replace('_id','')}/${encodeURIComponent(v)}`),
                         json = await response.json()
                     // console.log(json)
                     setOptions([...json,value])

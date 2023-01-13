@@ -1,5 +1,5 @@
-import { Task, TaskField } from "@components/tasks/interfaces";
-import { taskEditMultipleFields, taskFieldSelector, taskSelector } from "@components/tasks/reducers/slice";
+import { TaskField } from "@components/tasks/interfaces";
+import { taskEditMultipleFields, taskFieldSelector } from "@components/tasks/reducers/slice";
 import useFuncWithTimeout from "@hooks/counter/function-with-timeout";
 import useNarrowBody from "@hooks/theme/narrow-body";
 import IndexedDB from "@indexeddb";
@@ -27,21 +27,6 @@ const
             idb = useRef<IndexedDB>(),
             store = useStore(),
             {layoutOrderDispatch} = useContext(LayoutOrderDispatchContext),
-            idsSelector = useMemo(()=>createSelector(
-                (state:ReduxState)=>taskSelector.selectAll(state),
-                (state:ReduxState)=>state.misc.uid,
-                (tasks:Task[],uid:EntityId)=>{
-                    const filteredTasks = tasks.filter(t=>{
-                        const 
-                            {isGroupTask} = t,
-                            allRights = [t.owner],
-                            arr = isGroupTask ? [...t.supervisors,...allRights,...t.participants,...t.viewers,t.assignee,t.owner] : allRights
-                        return arr.includes(uid)
-                    })
-                    return filteredTasks.map(({id})=>id)
-                }
-            ),[]),
-            ids = useAppSelector(state => idsSelector(state)),
             wideScreenColumnListSelector = useMemo(()=>createColumnListSelector(true),[]),
             narrowScreenColumnListSelector = useMemo(()=>createColumnListSelector(false),[]),
             listColumnsWideScreen = useAppSelector(state => wideScreenColumnListSelector(state)),

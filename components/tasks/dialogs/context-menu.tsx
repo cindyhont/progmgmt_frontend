@@ -273,7 +273,7 @@ const
                     boardColumnType = 'board_column',
                     boardColumnFieldObj = taskFieldSelector.selectAll(state).find(e=>e.fieldType==='board_column')
 
-                dispatch(taskApi.endpoints.editCustomField.initiate({
+                dispatch(taskApi.endpoints.taskEditCustomField.initiate({
                     id:boardColumnFieldObj.id,
                     f:{
                         name:boardColumnFieldObj.fieldName,
