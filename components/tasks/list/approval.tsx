@@ -11,11 +11,9 @@ import EditRoundedIcon from '@mui/icons-material/EditRounded';
 const Approval = (
     {
         id,
-        onDragEnter,
         hasEditRight,
     }:{
         id:EntityId;
-        onDragEnter:()=>void;
         hasEditRight:boolean;
     }
 )=>{
@@ -41,7 +39,6 @@ const Approval = (
     return (
         <TableCell 
             className={`approval task-list-body-cell`}
-            onDragEnter={onDragEnter}
             data-field='approval'
             data-taskid={id}
             sx={{p:0,pl:2}}

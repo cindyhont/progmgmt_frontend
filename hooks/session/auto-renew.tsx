@@ -12,23 +12,33 @@ const useAutoRenewSession = () => {
     const
         router = useRouter(),
         dispatch = useAppDispatch(),
-        fiftyNineMinutes = useRef(3540000).current,
         fileTransmittingSelector = useMemo(()=>createSelector(
             (state:ReduxState)=>googleFileSelector.selectAll(state).filter(e=>!!e.downloading).length !== 0,
             (state:ReduxState)=>googleFilePrelimSelector.selectAll(state).filter(e=>!e.googleFileID).length !== 0,
             (downloading:boolean,uploading:boolean) => downloading || uploading
         ),[]),
+        targetRenewTime = useRef(0),
         fileTransmitting = useAppSelector(state => fileTransmittingSelector(state)),
-        renewSessionInterval = useRef<NodeJS.Timer>(),
+        pageVisibility = useAppSelector(state => state.misc.pageVisibility),
+        renewSessionTimeout = useRef<NodeJS.Timeout>(),
         renewSession = () => updateSession(router,dispatch)
 
     useEffect(()=>{
         if (fileTransmitting) {
             renewSession()
-            renewSessionInterval.current = setInterval(renewSession,fiftyNineMinutes)
+            targetRenewTime.current = Date.now() + 3540000
+            renewSessionTimeout.current = setTimeout(renewSession,3540000)
         }
-        return () => clearInterval(renewSessionInterval.current)
+        return () => clearTimeout(renewSessionTimeout.current)
     },[fileTransmitting])
+
+    useEffect(()=>{
+        const now = Date.now()
+        if (pageVisibility && fileTransmitting && targetRenewTime.current > now){
+            renewSessionTimeout.current = setTimeout(renewSession,targetRenewTime.current - now)
+        }
+        return () => clearTimeout(renewSessionTimeout.current)
+    },[pageVisibility])
 }
 
 export default useAutoRenewSession

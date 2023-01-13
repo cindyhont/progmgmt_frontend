@@ -18,18 +18,15 @@ const
         {
             id,
             field,
-            onDragEnter,
             hasEditRight,
         }:{
             id:EntityId;
             field:EntityId;
-            onDragEnter:()=>void;
             hasEditRight:boolean;
         }
     ) => (
         <TableCell
             className={`${field.toString()} task-list-body-cell`}
-            onDragEnter={onDragEnter}
             data-field={field}
             data-taskid={id}
             sx={{...(hasEditRight && {p:0})}}

@@ -1,4 +1,4 @@
-import React, { memo, MouseEvent as ReactMouseEvent, TouchEvent as ReactTouchEvent, useCallback, useContext, useEffect, useMemo, useReducer, useRef } from "react";
+import React, { createContext, memo, MouseEvent as ReactMouseEvent, TouchEvent as ReactTouchEvent, useCallback, useContext, useEffect, useMemo, useReducer, useRef } from "react";
 import Stack from '@mui/material/Stack'
 import { ReduxState, useAppDispatch, useAppSelector } from "@reducers";
 import { grey } from '@mui/material/colors';
@@ -36,7 +36,9 @@ import IndexedDB from "@indexeddb";
 import Parent from "./parent";
 import useDragContainsFiles from "@hooks/drag/drag-contains-files";
 import useUpdateSidebarState from "./hooks/update-state";
-import useDragManager from "@hooks/drag/drag-manager";
+import useOneDimensionalDrag from "@hooks/drag/one-dimensional-drag";
+import DragHandle from "./drag-handle";
+import useWindowEventListeners from "@hooks/event-listeners/window";
 
 export const sideBarHeadStyle = {
     textTransform:'uppercase',
@@ -58,6 +60,17 @@ export const createEditRightSelector = (fieldID:EntityId,taskID:string) => creat
 )
 
 export const getTaskDetailsSidebarModuleID = (fieldID:EntityId | string) => `task-details-sidebar-module-${fieldID}`
+export const TaskDetailsSidebarDragContext = createContext<{
+    dragStart:(x:number,y:number,i:number)=>void;
+    dragMove:(x:number,y:number)=>void;
+    dragEnd:()=>void;
+    handleMouseDown:(x:number,y:number,i:number)=>void;
+}>({
+    dragStart:()=>{},
+    dragMove:()=>{},
+    dragEnd:()=>{},
+    handleMouseDown:()=>{},
+})
 
 const 
     Sidebar = memo(()=>{
@@ -70,7 +83,7 @@ const
                 if (!dragHasFiles) sidebarDispatch(movingAction(idx))
             },[dragHasFiles]),
             clonedElem = useRef<HTMLElement>(null),
-            {handleDragStart,handleDragMove,handleDragEnd} = useDragManager(
+            {handleDragStart,handleDragMove,handleDragEnd} = useOneDimensionalDrag(
                 onDragStart,
                 onDragEnter,
                 sidebarState.fields,
@@ -84,9 +97,7 @@ const
                     {left,top,width,height} = originalModule.getBoundingClientRect()
 
                 clonedElem.current = originalModule.cloneNode(true) as HTMLElement
-
                 handleDragStart(i,{...{left,top,width,height}})
-                
                 containerRef.current.appendChild(clonedElem.current)
                 startingPoint.current = {touchX:x,touchY:y,rectLeft:left,rectTop:top}
             },
@@ -117,14 +128,10 @@ const
 
         useUpdateSidebarState(sidebarState.fields,sidebarDispatch)
 
-        useEffect(()=>{
-            window.addEventListener('mousemove',onMouseMove,{passive:true})
-            window.addEventListener('mouseup',onMouseUp,{passive:true})
-            return () => {
-                window.removeEventListener('mousemove',onMouseMove)
-                window.removeEventListener('mouseup',onMouseUp)
-            }
-        },[sidebarState.fields])
+        useWindowEventListeners([
+            {evt:'mousemove',func:onMouseMove},
+            {evt:'mouseup',func:onMouseUp},
+        ],[sidebarState.fields])
 
         return (
             <Stack 
@@ -134,37 +141,29 @@ const
                 ref={containerRef}
                 id='task-details-side-container'
             >
-                {sidebarState.fields.map((fieldID,i)=>(
-                    <Module {...{
-                        fieldID,
-                        onDragStart:()=>onDragStart(i),
-                        onDragEnter:()=>onDragEnter(i),
-                        dragStart:(x:number,y:number)=>dragStart(x,y,i),
-                        dragMove,
-                        dragEnd,
-                        handleMouseDown:(x:number,y:number)=>handleMouseDown(x,y,i),
-                    }} key={fieldID} />
-                ))}
+                <TaskDetailsSidebarDragContext.Provider value={{
+                    dragStart,
+                    dragMove,
+                    dragEnd,
+                    handleMouseDown,
+                }}>
+                    <>
+                    {sidebarState.fields.map((fieldID,i)=>(
+                        <Module {...{fieldID,idx:i}} key={fieldID} />
+                    ))}
+                    </>
+                </TaskDetailsSidebarDragContext.Provider>
             </Stack>
         )
     }),
     Module = memo((
         {
             fieldID,
-            onDragStart,
-            onDragEnter,
-            dragStart,
-            dragMove,
-            dragEnd,
-            handleMouseDown,
+            idx,
+
         }:{
             fieldID:EntityId;
-            onDragStart:()=>void;
-            onDragEnter:()=>void;
-            dragStart:(x:number,y:number)=>void;
-            dragMove:(x:number,y:number)=>void;
-            dragEnd:()=>void;
-            handleMouseDown:(x:number,y:number)=>void;
+            idx:number;
         }
     ) => {
         const 
@@ -173,7 +172,6 @@ const
             expanded = useAppSelector(state => taskFieldSelector.selectById(state,fieldID)?.detailsSidebarExpand || false),
             dispatch = useAppDispatch(),
             {palette:{grey}} = useTheme(),
-            dragHandle = useRef<HTMLTableCellElement>(),
             store = useStore(),
             {layoutOrderDispatch} = useContext(LayoutOrderDispatchContext),
             idb = useRef<IndexedDB>(),
@@ -207,27 +205,16 @@ const
                     return true
                 }
             ),[fieldID,taskID]),
-            visible = useAppSelector(state => visibilitySelector(state)),
-            onTouchStart = (e:TouchEvent) => {
-                e.preventDefault()
-                if (e.touches.length !== 1) return
-                const f = e.touches[0]
-                dragStart(f.pageX,f.pageY)
-            },
-            onTouchMove = (e:ReactTouchEvent<HTMLTableCellElement>) => {
-                const f = e.touches[0]
-                dragMove(f.pageX,f.pageY)
-            },
-            onMouseStart = (e:ReactMouseEvent<HTMLTableCellElement>) => handleMouseDown(e.pageX,e.pageY)
+            visible = useAppSelector(state => visibilitySelector(state))
 
         useEffect(()=>{
             const state = store.getState() as ReduxState
             idb.current = new IndexedDB(state.misc.uid.toString(),1)
-            dragHandle.current?.addEventListener('touchstart',onTouchStart,{passive:false})
-            return () => dragHandle.current?.removeEventListener('touchstart',onTouchStart)
         },[])
     
-        if (visible && fieldType==='checkbox') return <CheckboxElem {...{fieldName,fieldID,onDragEnter,onDragStart}} />
+        if (visible && fieldType==='checkbox') return (
+            <CheckboxElem {...{fieldName,fieldID,idx}} />
+        )
         
         if (visible) return (
             <Accordion
@@ -251,19 +238,7 @@ const
                     <Table>
                         <TableBody>
                             <TableRow sx={{'.MuiTableCell-root':{p:0,border:'none',py:1}}}>
-                                <TableCell 
-                                    sx={{width:0,cursor:'move'}} 
-                                    // onTouchStart={onTouchStart}
-                                    ref={dragHandle}
-                                    onTouchMove={onTouchMove}
-                                    onTouchEnd={dragEnd}
-                                    onTouchCancel={dragEnd}
-                                    onMouseDown={onMouseStart}
-                                >
-                                    <Box sx={{display:'flex',justifyContent:'center'}}>
-                                        <DragIndicatorIcon fontSize="small" sx={{mx:1}} htmlColor={grey[500]} />
-                                    </Box>
-                                </TableCell>
+                                <DragHandle {...{idx}} />
                                 <TableCell sx={{width:'100%'}}>
                                     <Typography sx={sideBarHeadStyle}>{fieldName}</Typography>
                                 </TableCell>
@@ -291,7 +266,7 @@ const
                 </AccordionDetails>
             </Accordion>
         )
-        else return <></>
+        return <></>
     })
 
 Sidebar.displayName = 'Sidebar'

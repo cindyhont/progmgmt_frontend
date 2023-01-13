@@ -14,13 +14,11 @@ const
         {
             id,
             field,
-            onDragEnter,
             hasEditRight,
             editMode,
         }:{
             id:EntityId;
             field:EntityId;
-            onDragEnter:()=>void;
             hasEditRight:boolean;
             editMode:boolean;
         }
@@ -33,7 +31,6 @@ const
         return (
             <TableCell 
                 className={`${field.toString()} task-list-body-cell`}
-                onDragEnter={onDragEnter}
                 data-field={field}
                 data-taskid={id}
                 sx={{

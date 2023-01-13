@@ -87,7 +87,12 @@ const
             deadline = useAppSelector(state => taskSelector.selectById(state,taskID)?.deadlineDT || 0),
             isGroupTask = useAppSelector(state => taskSelector.selectById(state,taskID)?.isGroupTask || false),
             task = useAppSelector(state => taskSelector.selectById(state,taskID)),
-            {handleTaskMouseDown,taskDragStart,dragMove,dragEnd} = useContext(BoardViewDispatchContext),
+            {
+                handleTaskMouseDown,
+                taskDragStart,
+                dragMove,
+                dragEnd
+            } = useContext(BoardViewDispatchContext),
             onMouseDown = (e:MouseEvent<HTMLDivElement>) => {
                 handleTaskMouseDown(e.pageX,e.pageY,columnIdx,taskIdx)
             },

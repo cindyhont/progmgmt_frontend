@@ -11,10 +11,8 @@ const
     TimeAccumulated = (
         {
             id,
-            onDragEnter,
         }:{
             id:EntityId;
-            onDragEnter:()=>void;
         }
     ) => {
         const 
@@ -32,7 +30,6 @@ const
         return (
             <TableCell
                 className={`timer task-list-body-cell`}
-                onDragEnter={onDragEnter} 
                 data-field='timer'
                 data-taskid={id}
             >

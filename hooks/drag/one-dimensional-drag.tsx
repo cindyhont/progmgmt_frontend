@@ -2,7 +2,7 @@ import useFuncWithTimeout from "@hooks/counter/function-with-timeout"
 import { EntityId } from "@reduxjs/toolkit"
 import { MutableRefObject } from "react"
 
-const useDragManager = (
+const useOneDimensionalDrag = (
     onDragStart:(_i:number)=>void,
     onDragEnter:(_j:number)=>void,
     fields:EntityId[],
@@ -79,4 +79,4 @@ const useDragManager = (
     }
 }
 
-export default useDragManager
+export default useOneDimensionalDrag

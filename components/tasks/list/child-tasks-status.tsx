@@ -16,10 +16,8 @@ const
     ChildTasksStatus = (
         {
             id,
-            onDragEnter
         }:{
             id:EntityId;
-            onDragEnter:()=>void;
         }
     ) => {
         const 
@@ -44,7 +42,6 @@ const
                 sx={{...(content.length !== 0 && {p:0,position:'relative'})}}
                 data-field='child-status'
                 data-taskid={id}
-                onDragEnter={onDragEnter}
             >
                 {content.length===0 ? <Typography sx={{color:grey[500],fontSize:'0.9rem'}}>(No Childrem)</Typography> : <Stack 
                     direction='row'

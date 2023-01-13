@@ -6,6 +6,8 @@ import { useStore } from "react-redux"
 import websocketApi, { IwsAction, processWsMessage, useSendWsMessageMutation } from "websocket/api"
 import { ActionTypes as UserDetailsActionTypes } from '@reducers/user-details/ws-message-types';
 import googleDownloadApi from "@reducers/google-download-api"
+import { QueryActionCreatorResult } from "@reduxjs/toolkit/dist/query/core/buildInitiate"
+import useWindowEventListeners from "@hooks/event-listeners/window"
 
 const useConnection = () => {
     const
@@ -13,7 +15,7 @@ const useConnection = () => {
         onOnline = ()=> setOnline(true),
         onOffline = ()=> setOnline(false),
         store = useStore(),
-        wsService = useRef<any>(),
+        wsService = useRef<QueryActionCreatorResult<any>>(),
         dispatch = useAppDispatch(),
         [sendWsMessage] = useSendWsMessageMutation(),
         websocketWorking = useAppSelector(state => state.misc.websocketWorking),
@@ -69,14 +71,12 @@ const useConnection = () => {
         setOnline(navigator.onLine)
         dispatch(googleUploadApi.endpoints.initGoogleUpload.initiate())
         dispatch(googleDownloadApi.endpoints.initGoogleDownload.initiate())
-        window.addEventListener('online',onOnline,{passive:true})
-        window.addEventListener('offline',onOffline,{passive:true})
-
-        return () => {
-            window.removeEventListener('online',onOnline)
-            window.removeEventListener('offline',onOffline)
-        }
     },[])
+
+    useWindowEventListeners([
+        {evt:'online',func:onOnline},
+        {evt:'offline',func:onOffline},
+    ])
 
     useEffect(()=>{
         if (online && pageVisibility) subscribeWebsocket()

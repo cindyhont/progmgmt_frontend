@@ -15,6 +15,7 @@ import { Task } from "@components/tasks/interfaces";
 import { useTaskAddFilesMutation, useTaskUpdateOneFieldMutation } from "@components/tasks/reducers/api";
 import { useRouter } from "next/router";
 import { GoogleFilePrelim, googleFilePrelimSelector } from "@reducers/google-upload-api/slice";
+import useWindowEventListeners from "@hooks/event-listeners/window";
 
 const 
     Files = memo(()=>{
@@ -98,10 +99,9 @@ const
             },
             checkDragHasFiles = (e:DragEvent) => dragHasFiles.current = e.dataTransfer.types.includes('Files')
 
-        useEffect(()=>{
-            window.addEventListener('dragover',checkDragHasFiles,{passive:true})
-            return () => window.removeEventListener('dragover',checkDragHasFiles)
-        },[])
+        useWindowEventListeners([
+            {evt:'dragover',func:checkDragHasFiles},
+        ])
 
         return (
             <Grid

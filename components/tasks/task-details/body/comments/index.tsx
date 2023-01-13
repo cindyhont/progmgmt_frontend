@@ -10,6 +10,7 @@ import { TaskComment } from '@components/tasks/interfaces'
 import CommentBox from './comment-box'
 import Comment from './comment'
 import { BlankMessage } from '@components/common-components'
+import useWindowEventListeners from '@hooks/event-listeners/window'
 
 const
     entriesPerPage = 10,
@@ -93,9 +94,11 @@ const
 
         useEffect(()=>{
             updateScreen()
-            window.addEventListener('resize',updateScreen,{passive:true})
-            return () => window.removeEventListener('resize',updateScreen)
         },[])
+
+        useWindowEventListeners([
+            {evt:'resize',func:updateScreen},
+        ])
 
         return (
             <>

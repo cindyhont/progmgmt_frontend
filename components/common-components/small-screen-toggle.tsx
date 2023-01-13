@@ -3,6 +3,7 @@ import { useTheme } from "@mui/material";
 import IconButton from '@mui/material/IconButton'
 import { v4 as uuidv4 } from 'uuid'
 import useNarrowBody from "hooks/theme/narrow-body";
+import useWindowEventListeners from "@hooks/event-listeners/window";
 
 const SmallScreenToggle = memo(forwardRef((
     {
@@ -138,11 +139,11 @@ const SmallScreenToggle = memo(forwardRef((
 
     useEffect(()=>{
         updateTogglePosition()
-        window.addEventListener('resize',updateTogglePosition,{passive:true})
-        return () => {
-            window.removeEventListener('resize',updateTogglePosition)
-        }
     },[narrowBody])
+
+    useWindowEventListeners([
+        {evt:'resize',func:updateTogglePosition}
+    ])
 
     return (
         <IconButton

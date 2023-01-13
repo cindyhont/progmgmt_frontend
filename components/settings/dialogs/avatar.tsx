@@ -15,6 +15,7 @@ import Button from '@mui/material/Button';
 import { useUdpateAvatarMutation } from '../reducers/api';
 import Typography from '@mui/material/Typography'
 import RefreshRoundedIcon from '@mui/icons-material/RefreshRounded';
+import useWindowEventListeners from '@hooks/event-listeners/window';
 
 const 
     AvatarDialog = memo((
@@ -218,22 +219,16 @@ const
 
         useEffect(()=>{
             setTimeout(init,1)
-            window.addEventListener('resize',onResize,{passive:true})
-            window.addEventListener('mousemove',onMouseMovement,{passive:true})
-            window.addEventListener('mouseup',onMovtEnd,{passive:true})
-            window.addEventListener('touchmove',onTouchMovement,{passive:true})
-            window.addEventListener('touchend',onMovtEnd,{passive:true})
-            window.addEventListener('touchcancel',onMovtEnd,{passive:true})
-
-            return () => {
-                window.removeEventListener('resize',onResize)
-                window.removeEventListener('mousemove',onMouseMovement)
-                window.removeEventListener('mouseup',onMovtEnd)
-                window.removeEventListener('touchmove',onTouchMovement)
-                window.removeEventListener('touchend',onMovtEnd)
-                window.removeEventListener('touchcancel',onMovtEnd)
-            }
         },[])
+
+        useWindowEventListeners([
+            {evt:'resize',func:onResize},
+            {evt:'mousemove',func:onMouseMovement},
+            {evt:'mouseup',func:onMovtEnd},
+            {evt:'touchmove',func:onTouchMovement},
+            {evt:'touchend',func:onMovtEnd},
+            {evt:'touchcancel',func:onMovtEnd},
+        ])
 
         useEffect(()=>{
             if (!!avatarTempUrl) initNewCanvas()

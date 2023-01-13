@@ -1,4 +1,4 @@
-import React, { createContext, Dispatch, memo, useCallback, useEffect, useMemo, useReducer, useRef, useState, MouseEvent as ReactMouseEvent } from "react";
+import React, { createContext, memo, useCallback, useEffect, useMemo, useReducer, useRef, MouseEvent as ReactMouseEvent } from "react";
 import Grid from '@mui/material/Grid';
 import TableContainer from '@mui/material/TableContainer';
 import Table from '@mui/material/Table';
@@ -26,7 +26,7 @@ import TagsElem from "./tags";
 import { useStore } from "react-redux";
 import Approval from "./approval";
 import { useRouter } from "next/router";
-import { Iaction, initialState, movingAction, reducer, startMovingAction } from "./column-reducer";
+import { initialState, movingAction, reducer, startMovingAction } from "./column-reducer";
 import TableCell from "@mui/material/TableCell";
 import { useTheme } from "@mui/material";
 import { updateSession } from "@components/functions";
@@ -36,113 +36,63 @@ import TimeAccumulated from "./timer";
 import Parent from "./parent";
 import useNarrowBody from "hooks/theme/narrow-body";
 import useUpdateListColumnState from "./hooks/update-state";
-import useDragManager from "@hooks/drag/drag-manager";
+import useOneDimensionalDrag from "@hooks/drag/one-dimensional-drag";
+import useCloneSingleTableColumn from "./hooks/clone-single-table-column";
+import useResizerDrag from "./hooks/resizer-drag";
+import useSelectTaskIDs from "./hooks/select-task-ids";
+import useFuncWithTimeout from "@hooks/counter/function-with-timeout";
+import useWindowEventListeners from "@hooks/event-listeners/window";
 
 const 
     ResizerDragContent = createContext<{resizerDragAction:(dragging:boolean)=>void;}>({resizerDragAction:()=>{}}),
     getFieldID = (id:string) => `task-list-table-${id}`,
     ListView = () => {
         const 
-            {palette:{grey,background}} = useTheme(),
+            router = useRouter(),
+            taskView = router.query.view as string,
+            {palette:{grey}} = useTheme(),
             narrowBody = useNarrowBody(),
-            [resizerDragging,setResizerDragging] = useState(false),
-            dragTimer = useRef<NodeJS.Timeout>(),
-            resizerDragAction = useCallback((dragging:boolean)=>{
-                clearTimeout(dragTimer.current)
-                if (dragging) setResizerDragging(true)
-                else dragTimer.current = setTimeout(()=>setResizerDragging(false),100)
-            },[]),
-            idsSelector = useMemo(()=>createSelector(
-                (state:ReduxState)=>taskSelector.selectAll(state),
-                (state:ReduxState)=>state.misc.uid,
-                (tasks:Task[],uid:EntityId)=>{
-                    const filteredTasks = tasks.filter(t=>{
-                        const 
-                            {isGroupTask} = t,
-                            allRights = [t.owner],
-                            arr = isGroupTask ? [...t.supervisors,...allRights,...t.participants,...t.viewers,t.assignee,t.owner] : allRights
-                        return arr.includes(uid)
-                    })
-                    return filteredTasks.map(({id})=>id)
-                }
-            ),[]),
-            ids = useAppSelector(state => idsSelector(state)),
+            {resizerDragging,resizerDragAction} = useResizerDrag(),
+            taskIDs = useSelectTaskIDs(),
+            indexeddbOK = useAppSelector(state => state.misc.indexeddbOK),
+
+            // below for dragging columns
             [columnState,columnDispatch] = useReducer(reducer,initialState),
             onDragStart = useCallback((idx:number) => columnDispatch(startMovingAction(columnState.fields[idx])),[columnState.fields]),
             onDragEnter = useCallback((idx:number) => columnDispatch(movingAction(idx)),[]),
             startingPoint = useRef({touchX:-1,touchY:-1,rectLeft:-1,rectTop:-1}),
-            tablebody = useRef<HTMLTableSectionElement>(),
             clonedElem = useRef<HTMLElement>(null),
             containerRef = useRef<HTMLDivElement>(),
-            indexeddbOK = useAppSelector(state => state.misc.indexeddbOK),
-            {handleDragStart,handleDragMove,handleDragEnd} = useDragManager(
+            containerMeasurement = useRef({t:0,b:0}),
+            updateContainerMeasurement = () => {
+                if (taskView === 'list'){
+                    const {top,bottom} = containerRef.current.getBoundingClientRect()
+                    containerMeasurement.current = {t:top,b:bottom}
+                }
+            },
+            [onResize] = useFuncWithTimeout(updateContainerMeasurement,100),
+            {handleDragStart,handleDragMove,handleDragEnd} = useOneDimensionalDrag(
                 onDragStart,
                 onDragEnter,
                 columnState.fields,
                 getFieldID,
                 clonedElem,
             ),
+            cloneColumn = useCloneSingleTableColumn(),
             dragStart = (x:number,y:number,i:number) => {
                 if (!indexeddbOK) return
 
-                clonedElem.current = document.createElement('table')
-                const 
-                    field = columnState.fields[i],
-                    thead = document.createElement('thead'),
-                    headTr = document.createElement('tr'),
-                    th = document.querySelector(`th.${field}`) as HTMLTableCellElement,
-                    newTh = th.cloneNode(true) as HTMLTableCellElement,
-                    {left,top} = th.getBoundingClientRect()
-
-                headTr.style.cssText = th.parentElement.style.cssText
-                thead.style.cssText = th.parentElement.parentElement.style.cssText
-                clonedElem.current.style.cssText = th.parentElement.parentElement.parentElement.style.cssText
-
-                newTh.style.width = `${th.getBoundingClientRect().width}px`
-
-                headTr.appendChild(newTh)
-                thead.appendChild(headTr)
-                clonedElem.current.appendChild(thead)
-
-                const tbody = document.createElement('tbody')
-                tbody.style.cssText = tablebody.current.style.cssText
-
-                const 
-                    bodyTr = document.createElement('tr'),
-                    tableRow = tablebody.current.querySelector('tr')
-                bodyTr.style.cssText = tableRow.style.cssText
-
-                const cells = tablebody.current.querySelectorAll(`.${field}`)
-                cells.forEach(e=>{
-                    const 
-                        cell = e.cloneNode(true) as HTMLTableCellElement,
-                        rowTr = bodyTr.cloneNode(true)
-
-                    cell.style.cssText = (e as HTMLTableCellElement).style.cssText
-                    cell.style.height = `${e.getBoundingClientRect().height}px`
-
-                    rowTr.appendChild(cell)
-                    tbody.appendChild(rowTr)
-                })
-
-                clonedElem.current.style.zIndex = '3'
-                clonedElem.current.style.backgroundColor = background.default
-                clonedElem.current.appendChild(tbody)
-
+                const field = columnState.fields[i]
+                clonedElem.current = cloneColumn(field)
+                const {left,top} = document.querySelector(`th.${field}`).getBoundingClientRect()
                 handleDragStart(i,{left,top})
-
                 containerRef.current.appendChild(clonedElem.current)
-
                 startingPoint.current = {touchX:x,touchY:y,rectLeft:left,rectTop:top}
-
-                onDragStart(i)
             },
             dragMove = (x:number,y:number) => {
                 clonedElem.current.style.left = `${x - startingPoint.current.touchX + startingPoint.current.rectLeft}px`
                 clonedElem.current.style.top = `${y - startingPoint.current.touchY + startingPoint.current.rectTop}px`
-
-                const {top,bottom} = containerRef.current.getBoundingClientRect()
-                handleDragMove(x,y,{top,bottom})
+                handleDragMove(x,y,{top:containerMeasurement.current.t,bottom:containerMeasurement.current.b})
             },
             dragEnd = () => {
                 handleDragEnd()
@@ -167,17 +117,15 @@ const
         useUpdateListColumnState(columnState.fields,columnDispatch)
 
         useEffect(()=>{
-            return () => clearTimeout(dragTimer.current)
-        },[])
+            onResize()
+            window.addEventListener('resize',onResize,{passive:true})
+            return () => window.removeEventListener('resize',onResize)
+        },[taskView])
 
-        useEffect(()=>{
-            window.addEventListener('mousemove',onMouseMove,{passive:true})
-            window.addEventListener('mouseup',onMouseUp,{passive:true})
-            return () => {
-                window.removeEventListener('mousemove',onMouseMove)
-                window.removeEventListener('mouseup',onMouseUp)
-            }
-        },[columnState.fields])
+        useWindowEventListeners([
+            {evt:'mousemove',func:onMouseMove},
+            {evt:'mouseup',func:onMouseUp},
+        ],[columnState.fields])
 
         return (
             <Grid
@@ -187,9 +135,6 @@ const
                 <TableContainer
                     sx={{
                         maxHeight: `calc(var(--viewport-height) - ${!narrowBody ? 80 : 56}px)`,
-                        '& .MuiTableCell-head':{
-                            // py:0.3
-                        },
                         '& .MuiTableCell-root:first-of-type':{
                             borderLeft:`1px dotted ${grey[500]}`
                         },
@@ -222,8 +167,8 @@ const
                                     <TableCell sx={{width:0,p:0}} />
                                 </TableRow>
                             </TableHead>
-                            <TableBody ref={tablebody}>
-                                {ids.map(id=>(<ListViewRow key={id} {...{id,fields:columnState.fields,columnDispatch,resizerDragging}} />))}
+                            <TableBody id='task-list-table-body'>
+                                {taskIDs.map(id=>(<ListViewRow key={id} {...{id,fields:columnState.fields,resizerDragging}} />))}
                             </TableBody>
                         </Table>
                     </ResizerDragContent.Provider>
@@ -235,17 +180,14 @@ const
         {
             id,
             fields,
-            columnDispatch,
             resizerDragging,
         }:{
             id:EntityId;
             fields:EntityId[];
-            columnDispatch:Dispatch<Iaction>;
             resizerDragging:boolean;
         }
     )=>{
         const 
-            onDragEnter = useCallback((idx:number)=>columnDispatch(movingAction(idx)),[]),
             editOn = useAppSelector(state => state.taskMgmt.editField),
             store = useStore(),
             timerRef = useRef<NodeJS.Timeout>(),
@@ -285,12 +227,11 @@ const
 
         return (
             <TableRow onClick={onClick}>
-                {fields.map((field,i)=>(
+                {fields.map(field=>(
                     <CellDivert 
                         {...{
                             id,
                             field,
-                            onDragEnter:()=>onDragEnter(i)
                         }} 
                         key={field} 
                     />
@@ -303,11 +244,9 @@ const
         {
             id,
             field,
-            onDragEnter
         }:{
             id:EntityId;
             field:EntityId;
-            onDragEnter:()=>void;
         }
     )=>{
         const 
@@ -331,19 +270,19 @@ const
 
         return (
             <>
-            {field==='approval' && <Approval {...{id,onDragEnter,hasEditRight}} />}
-            {fieldType==='single_person' && <SinglePerson {...{id,field,onDragEnter,hasEditRight,editMode}} />}
-            {fieldType==='date' && <DateElem {...{id,field,onDragEnter,hasEditRight,editMode}} />}
-            {fieldType==='short_text' && <StringElem {...{id,field,onDragEnter,hasEditRight,editMode}} />}
-            {fieldType==='people' && <People {...{id,field,onDragEnter,hasEditRight,editMode}} />}
-            {fieldType==='number' && <NumberElem {...{id,field,onDragEnter,hasEditRight,editMode}} />}
-            {fieldType==='link' && <LinkElem {...{id,field,onDragEnter,hasEditRight,editMode}} />}
-            {fieldType==='checkbox' && <CheckboxElem {...{id,field,onDragEnter,hasEditRight}} />}
-            {fieldType==='dropdown' && <DropdownElem {...{id,field,onDragEnter,hasEditRight}} />}
-            {fieldType==='tags' && <TagsElem {...{id,field,onDragEnter,hasEditRight,editMode}} />}
-            {fieldType==='child_status' && <ChildTasksStatus {...{id,onDragEnter}} />}
-            {fieldType==='timer' && <TimeAccumulated {...{id,onDragEnter}} />}
-            {fieldType==='parents' && <Parent {...{id,onDragEnter,editMode}} />}
+            {field==='approval' && <Approval {...{id,hasEditRight}} />}
+            {fieldType==='single_person' && <SinglePerson {...{id,field,editMode}} />}
+            {fieldType==='date' && <DateElem {...{id,field,hasEditRight,editMode}} />}
+            {fieldType==='short_text' && <StringElem {...{id,field,editMode}} />}
+            {fieldType==='people' && <People {...{id,field,editMode}} />}
+            {fieldType==='number' && <NumberElem {...{id,field,hasEditRight,editMode}} />}
+            {fieldType==='link' && <LinkElem {...{id,field,editMode}} />}
+            {fieldType==='checkbox' && <CheckboxElem {...{id,hasEditRight,field}} />}
+            {fieldType==='dropdown' && <DropdownElem {...{id,hasEditRight,field}} />}
+            {fieldType==='tags' && <TagsElem {...{id,field,editMode}} />}
+            {fieldType==='child_status' && <ChildTasksStatus {...{id}} />}
+            {fieldType==='timer' && <TimeAccumulated {...{id}} />}
+            {fieldType==='parents' && <Parent {...{id,editMode}} />}
             {!isTouchScreen && <Resizer field={field} id={id} />}
             </>
         )

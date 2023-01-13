@@ -18,11 +18,9 @@ const
     Parent = (
         {
             id,
-            onDragEnter,
             editMode
         }:{
             id:EntityId;
-            onDragEnter:()=>void;
             editMode:boolean;
         }
     ) => {
@@ -41,7 +39,6 @@ const
         return (
             <TableCell 
                 className={`$parents task-list-body-cell`}
-                onDragEnter={onDragEnter}
                 data-field='parents'
                 data-taskid={id}
                 sx={{

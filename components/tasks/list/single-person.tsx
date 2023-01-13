@@ -1,4 +1,4 @@
-import React, { useMemo, useCallback, useEffect } from "react";
+import React, { useMemo, useCallback } from "react";
 import Grid from '@mui/material/Grid';
 import TableCell from '@mui/material/TableCell';
 import { ReduxState, useAppDispatch, useAppSelector } from "@reducers";
@@ -15,14 +15,10 @@ const
         {
             id,
             field,
-            onDragEnter,
-            hasEditRight,
             editMode,
         }:{
             id:EntityId;
             field:EntityId;
-            onDragEnter:()=>void;
-            hasEditRight:boolean;
             editMode:boolean;
         }
     ) => {
@@ -35,29 +31,12 @@ const
             avatar = useAppSelector(state=>personSelector(state) ? personSelector(state).avatar : ''),
             firstName = useAppSelector(state=>personSelector(state) ? personSelector(state).firstName : ''),
             lastName = useAppSelector(state=>personSelector(state) ? personSelector(state).lastName : ''),
-            /*
-            [editMode,setEditMode] = useState(false),
-            onDoubleClick = () => {
-                if (hasEditRight && !editMode) setEditMode(true)
-            },
-            timeRef = useRef(0),
-            onTouchStart = () => {
-                const now = Date.now()
-                if (now - timeRef.current > 500) timeRef.current = now
-                else onDoubleClick()
-            },
-            */
             dispatch = useAppDispatch(),
             editModeOff = useCallback(()=>dispatch(taskEditSingleField(false)),[])
-
-        // useEffect(()=>console.log(editMode),[editMode])
 
         return (
             <TableCell 
                 className={`${field.toString()} task-list-body-cell`}
-                onDragEnter={onDragEnter}
-                // onDoubleClick={onDoubleClick}
-                // onTouchStart={onTouchStart}
                 data-field={field}
                 data-taskid={id}
                 sx={{

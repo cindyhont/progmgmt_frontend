@@ -1,4 +1,4 @@
-import React, { createContext, Dispatch, memo, MouseEvent as ReactMouseEvent, useContext, useEffect, useMemo, useReducer, useRef } from "react";
+import React, { createContext, Dispatch, memo, MouseEvent as ReactMouseEvent, useContext, useMemo, useReducer, useRef } from "react";
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -19,6 +19,8 @@ import TaskItem from "./task-item";
 import useNarrowBody from "hooks/theme/narrow-body";
 import useStateManager from "./hooks/state-manager";
 import useTwoDimensionalDrag from "./hooks/two-d-drag";
+import useCloneSingleTableColumn from "./hooks/clone-single-table-column";
+import useWindowEventListeners from "@hooks/event-listeners/window";
 
 export interface Ioption {
     id:EntityId;
@@ -42,9 +44,12 @@ const
     }),
     BoardView = () => {
         const
+            narrowBody = useNarrowBody(),
             [boardViewState,boardViewDispatch] = useReducer(reducer,initialState),
             boardColumnFieldID = useAppSelector(state=>taskFieldSelector.selectAll(state).find(e=>e.fieldType==='board_column').id),
             tableID = useRef('task-board-table').current,
+
+            // functions below for drag and drop
             containerTable = useRef<HTMLTableElement>(),
             onColumnDragStart = (id:EntityId) => boardViewDispatch(columnStartMoving(id)),
             onTaskDragStart = (taskID:EntityId) => boardViewDispatch(taskStartMoving(taskID)),
@@ -65,47 +70,14 @@ const
                 clonedElem
             ),
             startingPoint = useRef({touchX:0,touchY:0,rectLeft:0,rectTop:0}),
+            cloneColumn = useCloneSingleTableColumn(),
             columnDragStart = (x:number,y:number,i:number) => {
                 const 
                     columnID = boardViewState.columnIDs[i],
-                    originalModule = document.getElementById(columnID.toString()),
-                    {left,top,width,height} = originalModule.getBoundingClientRect()
+                    originalModule = document.getElementById(`${columnID}`),
+                    {left,top} = originalModule.getBoundingClientRect()
 
-                clonedElem.current = document.createElement('table')
-
-                const 
-                    thead = document.createElement('thead'),
-                    headTr = document.createElement('tr'),
-                    newTh = originalModule.cloneNode(true) as HTMLTableCellElement
-
-                headTr.style.cssText = originalModule.parentElement.style.cssText
-                thead.style.cssText = originalModule.parentElement.parentElement.style.cssText
-                clonedElem.current.style.cssText = originalModule.parentElement.parentElement.parentElement.style.cssText
-
-                newTh.style.width = `${width}px`
-                newTh.style.height = `${height}px`
-                newTh.style.cursor = 'grabbing'
-                headTr.appendChild(newTh)
-                thead.appendChild(headTr)
-
-                const 
-                    plusCell = document.getElementById(`task-board-add-column-task-${columnID}`).cloneNode(true),
-                    plusRow = document.createElement('tr')
-
-                plusRow.appendChild(plusCell)
-                thead.appendChild(plusRow)
-                
-                clonedElem.current.appendChild(thead)
-
-                const 
-                    tbody = document.getElementById(`task-board-table-body-column-${columnID}`).cloneNode(true),
-                    newTr = document.createElement('tr')
-                newTr.appendChild(tbody)
-                clonedElem.current.appendChild(newTr)
-                
-                clonedElem.current.style.left = `${left}px`
-                clonedElem.current.style.top = `${top}px`
-
+                clonedElem.current = cloneColumn(columnID)
                 handleColumnDragStart(columnID)
                 containerTable.current.appendChild(clonedElem.current)
                 startingPoint.current = {touchX:x,touchY:y,rectLeft:left,rectTop:top}
@@ -118,9 +90,7 @@ const
                     {left,top,width,height} = originalModule.getBoundingClientRect()
                     
                 clonedElem.current = originalModule.cloneNode(true) as HTMLElement
-
                 handleTaskDragStart(taskID,{left,top,width,height})
-
                 containerTable.current.appendChild(clonedElem.current)
                 startingPoint.current = {touchX:x,touchY:y,rectLeft:left,rectTop:top}
             },
@@ -155,25 +125,15 @@ const
 
         useStateManager(boardViewState,boardViewDispatch,boardColumnFieldID)
 
-        useEffect(()=>{
-            window.addEventListener('touchend',dragEnd,{passive:true})
-            window.addEventListener('touchcancel',dragEnd,{passive:true})
+        useWindowEventListeners([
+            {evt:'touchend',func:dragEnd},
+            {evt:'touchcancel',func:dragEnd},
+        ])
 
-            return () => {
-                window.addEventListener('touchend',dragEnd)
-                window.addEventListener('touchcancel',dragEnd)
-            }
-        },[])
-
-        useEffect(()=>{
-            window.addEventListener('mousemove',onMouseMove,{passive:true})
-            window.addEventListener('mouseup',onMouseUp,{passive:true})
-
-            return () => {
-                window.removeEventListener('mousemove',onMouseMove)
-                window.removeEventListener('mouseup',onMouseUp)
-            }
-        },[boardViewState])
+        useWindowEventListeners([
+            {evt:'mousemove',func:onMouseMove},
+            {evt:'mouseup',func:onMouseUp},
+        ],[boardViewState])
 
         return (
             <BoardViewDispatchContext.Provider value={{
@@ -184,7 +144,7 @@ const
                 dragEnd,
             }}>
                 <Table stickyHeader size="small" id={tableID} ref={containerTable}>
-                    <TableHead>
+                    {!narrowBody && <TableHead>
                         <TableRow>
                             {boardViewState.columnIDs.map((id,i)=>(
                                 <ColumnName key={id} {...{
@@ -204,7 +164,7 @@ const
                                 }} />
                             ))}
                         </TableRow>
-                    </TableHead>
+                    </TableHead>}
                     <TableBody>
                         <TableRow>
                             {boardViewState.columnIDs.map((columnID,i)=>(
@@ -240,12 +200,11 @@ const
             ),[id]),
             columnName = useAppSelector(state => columnNameSelector(state)),
             {palette:{mode,grey,background}} = useTheme(),
-            narrowBody = useNarrowBody(),
             onMouseDown = (e:ReactMouseEvent<HTMLTableCellElement>) => handleColumnMouseDown(e.pageX,e.pageY)
 
         return (
             <>
-            {!!columnName && !narrowBody && <TableCell 
+            {!!columnName && <TableCell 
                 sx={{
                     backgroundColor:'transparent',
                     width:`${100/columnCount}%`,
@@ -284,16 +243,14 @@ const
         }
     ) => {
         const 
-            theme = useTheme(),
+            {palette:{mode,grey}} = useTheme(),
             {dialogCtxMenuStatusDispatch} = useContext(DialogCtxMenuDispatchContext),
             onClick = () => dialogCtxMenuStatusDispatch(addTaskAction({[boardColumnFieldID]:id})),
             {boardViewDispatch} = useContext(BoardViewDispatchContext),
-            onDragEnter = () => boardViewDispatch(moving({columnIdx,taskIdx:0})),
-            narrowBody = useNarrowBody()
+            onDragEnter = () => boardViewDispatch(moving({columnIdx,taskIdx:0}))
 
         return (
-            <>
-            {!narrowBody && <TableCell
+            <TableCell
                 sx={{
                     padding:'3px',
                     backgroundColor:'transparent',
@@ -307,19 +264,18 @@ const
                     direction='row'
                     sx={{
                         justifyContent:'center',
-                        border:`3px dashed ${theme.palette.grey[theme.palette.mode==='light' ? 300 : 700]}`,
+                        border:`3px dashed ${grey[mode==='light' ? 300 : 700]}`,
                         cursor:'pointer',
                         '&:hover':{
-                            borderColor:theme.palette.grey[500],
-                            '.MuiSvgIcon-root':{fill:theme.palette.grey[500]}
+                            borderColor:grey[500],
+                            '.MuiSvgIcon-root':{fill:grey[500]}
                         }
                     }}
                     onClick={onClick}
                 >
-                    <AddRoundedIcon htmlColor={theme.palette.grey[theme.palette.mode==='light' ? 400 : 600]} sx={{width:'1.8rem',height:'1.8rem',transition:'none'}} />
+                    <AddRoundedIcon htmlColor={grey[mode==='light' ? 400 : 600]} sx={{width:'1.8rem',height:'1.8rem',transition:'none'}} />
                 </Grid>
-            </TableCell>}
-            </>
+            </TableCell>
         )
     }),
     TableBodyColumn = memo((

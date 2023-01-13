@@ -12,6 +12,7 @@ import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody'
 import DialogActions from '@mui/material/DialogActions';
 import Button from '@mui/material/Button'
+import useWindowEventListeners from '@hooks/event-listeners/window';
 
 export const FileDispatchContext = createContext<{fileDispatch:Dispatch<Iaction>}>({fileDispatch:()=>{}})
 
@@ -40,9 +41,11 @@ const
 
         useEffect(()=>{
             updateOrientation()
-            window.addEventListener('resize',updateOrientation,{passive:true})
-            return () => window.removeEventListener('resize',updateOrientation)
         },[])
+
+        useWindowEventListeners([
+            {evt:'resize',func:updateOrientation}
+        ])
 
         useEffect(()=>{
             if (open) fileDispatch(setAllAction(files))

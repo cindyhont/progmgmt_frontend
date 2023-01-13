@@ -1,14 +1,14 @@
-import { useEffect, useState } from "react"
+import useWindowEventListeners from "@hooks/event-listeners/window"
+import { useState } from "react"
 
 const useDragContainsFiles = () => {
     const 
         [dragHasFiles,setDragHasFiles] = useState(false),
         handleDragOver = (e:DragEvent) => setDragHasFiles(e.dataTransfer.types.includes('Files'))
 
-    useEffect(()=>{
-        window.addEventListener('dragover',handleDragOver,{passive:true})
-        return () => window.removeEventListener('dragover',handleDragOver)
-    },[])
+    useWindowEventListeners([
+        {evt:'dragover',func:handleDragOver},
+    ])
 
     return dragHasFiles
 }

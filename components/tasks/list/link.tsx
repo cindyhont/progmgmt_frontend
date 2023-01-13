@@ -11,11 +11,9 @@ const
         {
             id,
             field,
-            onDragEnter,
         }:{
             id:EntityId;
             field:EntityId;
-            onDragEnter:()=>void;
         }
     ) => {
         const 
@@ -26,7 +24,6 @@ const
         return (
             <TableCell
                 className={`${field.toString()} task-list-body-cell`}
-                onDragEnter={onDragEnter}
                 data-field={field}
                 data-taskid={id}
                 sx={{

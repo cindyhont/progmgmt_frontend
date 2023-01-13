@@ -14,12 +14,10 @@ const CheckboxElem = (
     {
         id,
         field,
-        onDragEnter,
         hasEditRight,
     }:{
         id:EntityId;
         field:EntityId;
-        onDragEnter:()=>void;
         hasEditRight:boolean;
     }
 ) => {
@@ -32,7 +30,6 @@ const CheckboxElem = (
     return (
         <TableCell 
             className={`${field.toString()} task-list-body-cell`}
-            onDragEnter={onDragEnter}
             data-field={field}
             data-taskid={id}
             sx={{

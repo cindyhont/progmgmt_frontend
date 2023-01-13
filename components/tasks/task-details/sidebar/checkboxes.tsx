@@ -12,29 +12,25 @@ import Table from '@mui/material/Table'
 import TableBody from '@mui/material/TableBody'
 import TableRow from '@mui/material/TableRow'
 import TableCell from '@mui/material/TableCell'
-import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
 import Box from '@mui/material/Box'
-import { useTheme } from '@mui/material'
 import { taskFieldSelector, taskSelector, taskTimeRecordsSelector } from '@components/tasks/reducers/slice'
 import { Task, TaskField } from '@components/tasks/interfaces'
 import { useTaskUpdateMyTimerMutation, useTaskUpdateOneFieldMutation } from '@components/tasks/reducers/api'
 import { useRouter } from 'next/router'
+import DragHandle from './drag-handle'
 
 const CheckboxElem = memo((
     {
         fieldName,
         fieldID,
-        onDragStart,
-        onDragEnter,
+        idx,
     }:{
         fieldName:string;
         fieldID:EntityId;
-        onDragStart:()=>void;
-        onDragEnter:()=>void;
+        idx:number;
     }
 )=>{
     const 
-        {palette:{grey}} = useTheme(),
         router = useRouter(),
         taskID = router.query.taskid as string,
         editRightSelector = useMemo(()=>createSelector(
@@ -45,7 +41,7 @@ const CheckboxElem = memo((
                 && (!field.details 
                     || !!field.details && (
                         task.isGroupTask && [...task.supervisors,task.owner].includes(uid)
-                        || !task.isGroupTask && [task.owner].includes(uid)
+                        || !task.isGroupTask && task.owner === uid
                     )
                 )
         ),[fieldID,taskID]),
@@ -73,9 +69,6 @@ const CheckboxElem = memo((
 
     return (
         <Paper
-            draggable
-            onDragStart={onDragStart}
-            onDragEnter={onDragEnter}
             id={getTaskDetailsSidebarModuleID(fieldID)}
         >
             <Table 
@@ -91,11 +84,7 @@ const CheckboxElem = memo((
             >
                 <TableBody>
                     <TableRow>
-                        <TableCell sx={{width:0,cursor:'move'}}>
-                            <Box sx={{display:'flex',justifyContent:'center'}}>
-                                <DragIndicatorIcon fontSize="small" sx={{mx:1}} htmlColor={grey[500]} />
-                            </Box>
-                        </TableCell>
+                        <DragHandle {...{idx}} />
                         <TableCell sx={{width:'100%'}}>
                             <Typography sx={sideBarHeadStyle}>{fieldName}</Typography>
                         </TableCell>

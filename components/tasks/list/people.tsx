@@ -32,18 +32,13 @@ const
         {
             id,
             field,
-            onDragEnter,
         }:{
             id:EntityId;
             field:EntityId;
-            onDragEnter:()=>void;
         }
     ) => (
         <TableCell 
             className={`${field.toString()} task-list-body-cell`}
-            onDragEnter={onDragEnter}
-            // onDoubleClick={onDoubleClick}
-            // onTouchStart={onTouchStart}
             data-field={field}
             data-taskid={id}
         >
