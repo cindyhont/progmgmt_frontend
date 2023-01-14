@@ -7,7 +7,7 @@ import { addNewGroupUser, closeError, deleteNewGroupUser, Iactions, initialState
 import { ReduxState, useAppDispatch, useAppSelector } from '@reducers';
 import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
-import chatApi from '../reducers/api';
+import { useCreateChatGroupMutation } from '../reducers/api';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -28,7 +28,7 @@ import Snackbar from '@mui/material/Snackbar';
 import Alert from '@mui/material/Alert';
 import { ToggleMenuDialogContext } from '..';
 import { toggleDialogAction } from '../reducers/toggle-context-menu-dialog';
-import userDetailsApi from '@reducers/user-details/api';
+import { useSearchUserMutation } from '@reducers/user-details/api';
 import { userDetailsSelector } from '@reducers/user-details/slice';
 import { AutocompleteUserOption } from '@components/common-components';
 import { useRouter } from 'next/router';
@@ -93,7 +93,6 @@ const
             {toggleMenuDialogDispatch} = useContext(ToggleMenuDialogContext),
             theme = useTheme(),
             matchesSM = useMediaQuery(theme.breakpoints.up('sm')),
-            dispatch = useAppDispatch(),
             [options,setOptions] = useState<string[]>([]),
             autoCompleteRef = useRef<HTMLDivElement>(),
             onChange = (
@@ -104,6 +103,7 @@ const
                 newGroupDispatch(addNewGroupUser(v))
             },
             store = useStore(),
+            [searchUser] = useSearchUserMutation(),
             onInputChange = async(_:ChangeEvent<HTMLInputElement>,v:string) => {
                 const elem = autoCompleteRef.current.getElementsByTagName('input')[0]
                 if (v !== elem.value) elem.value = ''
@@ -116,9 +116,7 @@ const
                 try {
                     const 
                         state = store.getState() as ReduxState,
-                        result = await dispatch(
-                            userDetailsApi.endpoints.searchUser.initiate({query:v,exclude:[...users,state.misc.uid]})
-                        ).unwrap()
+                        result = await searchUser({query:v,exclude:[...users,state.misc.uid]}).unwrap()
 
                     setOptions([...result])
                 } catch (error) {
@@ -254,6 +252,7 @@ const
             },
             onStepBack = () => newGroupDispatch(newGroupMoveToStep(0)),
             router = useRouter(),
+            [createChatGroup] = useCreateChatGroupMutation(),
             uploadImage = async(e:FormEvent) => {
                 e.preventDefault()
                 dispatch(updateLoading(true))
@@ -277,11 +276,11 @@ const
 
                     avatar = canvas.toDataURL(fileInputRef.current.files[0].type,0.7)
                 }
-                const apiResponse = await dispatch(chatApi.endpoints.createGroup.initiate({
+                const apiResponse = await createChatGroup({
                     uids:users,
                     avatar,
                     name:nameRef.current.value
-                })).unwrap()
+                }).unwrap()
                 if (!apiResponse) {
                     newGroupDispatch(popError('Connection error. Please try again later.'))
                     dispatch(updateLoading(false))

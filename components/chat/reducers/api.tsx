@@ -31,7 +31,7 @@ import { addUserDetailsStatusUnknown, userDetailsUpsertMany } from "@reducers/us
 import { UserDetails } from "@reducers/user-details/interfaces";
 import { FileDraft } from "@components/interfaces";
 import { fileInputSelector } from "@components/functions";
-import websocketApi from "websocket/api";
+import websocketApi from "@websocket/api";
 
 const
     PATH = '/pm-api',
@@ -632,18 +632,7 @@ const
                     return {data:null}
                 }
             }),
-            // createChatConvo:build.mutation<any,{
-            //     msg:string;
-            //     roomID?:EntityId;
-            //     userID?:EntityId;
-            // }>({
-            //     queryFn({msg,roomID,userID}, {dispatch}) {
-            //         if (!!roomID) dispatch(chatApi.endpoints.createConvoInExistingRoom.initiate({msg,roomID}))
-            //         else dispatch(chatApi.endpoints.createRoomWithFirstConvo.initiate({msg,userID}))
-            //         return {data:null}
-            //     },
-            // }),
-            createGroup:build.mutation<any,{
+            createChatGroup:build.mutation<any,{
                 name:string;
                 avatar:string;
                 uids:EntityId[];
@@ -766,5 +755,6 @@ export const {
     useFetchMoreConvosMutation,
     useFetchRepliedConvosAtInitMutation,
     useFetchRepliedConvosMutation,
+    useCreateChatGroupMutation,
 } = chatApi
 export default chatApi

@@ -2,7 +2,7 @@ import { ReduxState } from "@reducers";
 import apiSlice, { fetchConfig } from "@reducers/api";
 import { isSignedOut, sessionRenewTime, updateMaxChildTaskLvl, updateUsername } from "@reducers/misc";
 import { userDetailsUpdateOne } from "@reducers/user-details/slice";
-import websocketApi from "websocket/api";
+import websocketApi from "@websocket/api";
 
 const 
     PATH = '/pm-api',

@@ -141,6 +141,7 @@ const
                 onTouchMove={onTouchMove}
                 onTouchEnd={onTouchEnd}
                 onTouchCancel={onTouchCancel}
+                aria-label={`${taskID}`}
                 square
                 id={`task-board-task-${taskID}`}
                 sx={{

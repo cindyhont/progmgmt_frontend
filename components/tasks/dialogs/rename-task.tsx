@@ -8,8 +8,7 @@ import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import { DialogCtxMenuDispatchContext } from '../contexts';
 import { toggleDialogAction } from "../reducers/dialog-ctxmenu-status";
-import { useAppDispatch } from "@reducers";
-import taskApi from "../reducers/api";
+import { useTaskUpdateOneFieldMutation } from "../reducers/api";
 import { useRouter } from "next/router";
 
 const RenameTaskDialog = memo(({open}:{open:boolean})=>{
@@ -19,17 +18,17 @@ const RenameTaskDialog = memo(({open}:{open:boolean})=>{
         textRef = useRef<HTMLInputElement>(),
         submitRef = useRef<HTMLInputElement>(),
         submitOnClick = () => submitRef.current.click(),
-        dispatch = useAppDispatch(),
         router = useRouter(),
         taskID = router.query.taskid as string,
+        [taskUpdateOneField] = useTaskUpdateOneFieldMutation(),
         onSubmit = (e:FormEvent) => {
             e.preventDefault()
             onClose()
-            dispatch(taskApi.endpoints.taskUpdateOneField.initiate({
+            taskUpdateOneField({
                 id:taskID,
                 field:'name',
                 value:textRef.current.value
-            }))
+            })
         }
 
     useEffect(()=>{

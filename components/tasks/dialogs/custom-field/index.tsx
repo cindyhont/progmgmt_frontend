@@ -7,7 +7,7 @@ import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import { toggleDialogAction } from '@components/tasks/reducers/dialog-ctxmenu-status';
-import { ReduxState, useAppDispatch, useAppSelector } from '@reducers';
+import { ReduxState, useAppSelector } from '@reducers';
 import { taskCustomFieldTypesSelector, taskFieldSelector } from '@components/tasks/reducers/slice';
 import { EntityId } from '@reduxjs/toolkit';
 import { editDefaultValueAction, editNameAction, editTypeIdAction, Iaction, IcustomField, initialState, reducer, resetAction } from './reducer';
@@ -27,7 +27,7 @@ import PeopleField from './people-field';
 import DialogActions from '@mui/material/DialogActions';
 import Grid from '@mui/material/Grid';
 import { useTheme } from '@mui/material';
-import taskApi from '@components/tasks/reducers/api';
+import { useTaskAddCustomFieldMutation, useTaskEditCustomFieldMutation } from '@components/tasks/reducers/api';
 import { useStore } from 'react-redux';
 import { DialogCtxMenuDispatchContext } from '@components/tasks/contexts';
 import IndexedDB from '@indexeddb';
@@ -37,7 +37,6 @@ const
     Context = createContext<{customFieldDispatch:Dispatch<Iaction>}>({customFieldDispatch:()=>{}}),
     AddCustomFieldDialog = memo(({open}:{open:boolean}) => {
         const
-            dispatch = useAppDispatch(),
             idb = useRef<IndexedDB>(),
             {dialogCtxMenuStatusDispatch} = useContext(DialogCtxMenuDispatchContext),
             onClose = useCallback(()=>dialogCtxMenuStatusDispatch(toggleDialogAction({dialog:'addCustomField',open:false})),[]),
@@ -48,6 +47,7 @@ const
                 setTimeout(()=>customFieldDispatch(resetAction(initialState)),200)
             },
             narrowBody = useNarrowBody(),
+            [taskAddCustomField] = useTaskAddCustomFieldMutation(),
             onSubmit = (e:FormEvent) => {
                 e.preventDefault()
                 closeOnClick()
@@ -56,7 +56,7 @@ const
                     fieldID = uuidv4(),
                     s = store.getState() as ReduxState,
                     existingFields = taskFieldSelector.selectAll(s)
-                dispatch(taskApi.endpoints.taskAddCustomField.initiate({f:JSON.parse(JSON.stringify(state)),fieldID,wideScreen:!narrowBody}))
+                taskAddCustomField({f:JSON.parse(JSON.stringify(state)),fieldID,wideScreen:!narrowBody})
 
                 idb.current.addMulitpleEntries(
                     idb.current.storeNames.taskFields,
@@ -89,7 +89,6 @@ const
     }),
     EditCustomFieldDialog = memo(({open}:{open:boolean}) => {
         const
-            dispatch = useAppDispatch(),
             {dialogCtxMenuStatusDispatch} = useContext(DialogCtxMenuDispatchContext),
             onClose = useCallback(()=>dialogCtxMenuStatusDispatch(toggleDialogAction({dialog:'editCustomField',open:false})),[]),
             fieldID = useAppSelector(state=>state.taskMgmt.ctxMenuFieldID),
@@ -109,9 +108,10 @@ const
                 }
                 customFieldDispatch(resetAction(obj))
             },
+            [taskEditCustomField] = useTaskEditCustomFieldMutation(),
             onSubmit = (e:FormEvent) => {
                 e.preventDefault()
-                dispatch(taskApi.endpoints.taskEditCustomField.initiate({id:fieldID,f:state}))
+                taskEditCustomField({id:fieldID,f:state})
                 onClose()
             }
 

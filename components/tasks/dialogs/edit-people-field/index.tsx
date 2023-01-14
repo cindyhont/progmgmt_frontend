@@ -14,7 +14,7 @@ import TableCell from '@mui/material/TableCell';
 import TableBody from '@mui/material/TableBody';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
-import userDetailsApi from "@reducers/user-details/api";
+import { useSearchUserMutation } from "@reducers/user-details/api";
 import Autocomplete from "@mui/material/Autocomplete";
 import TextField from "@mui/material/TextField";
 import { AutocompleteUserOption } from "@components/common-components";
@@ -22,7 +22,7 @@ import Avatar from "@mui/material/Avatar";
 import IconButton from "@mui/material/IconButton";
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 import Button from "@mui/material/Button";
-import taskApi from "@components/tasks/reducers/api";
+import { useTaskUpdateOneFieldMutation } from "@components/tasks/reducers/api";
 
 const
     Context = createContext<{peopleDialogDispatch:Dispatch<Iaction>}>({peopleDialogDispatch:()=>{}}),
@@ -59,12 +59,13 @@ const
             },
             dispatch = useAppDispatch(),
             onClose = useCallback(()=>dispatch(taskEditSingleField(false)),[]),
+            [taskUpdateOneField] = useTaskUpdateOneFieldMutation(),
             submitOnClick = () => {
                 const 
                     reduxState = store.getState() as ReduxState,
                     taskID = reduxState.taskMgmt.ctxMenuTaskID,
                     field = reduxState.taskMgmt.ctxMenuFieldID
-                dispatch(taskApi.endpoints.taskUpdateOneField.initiate({id:taskID,field,value:state.ids}))
+                taskUpdateOneField({id:taskID,field,value:state.ids})
                 onClose()
             }
 
@@ -122,6 +123,7 @@ const
                 e.preventDefault()
                 peopleDialogDispatch(addAction(v))
             },
+            [searchUser] = useSearchUserMutation(),
             onInputChange = async(_:ChangeEvent<HTMLInputElement>,v:string) => {
                 const elem = autoCompleteRef.current.getElementsByTagName('input')[0]
                 if (v !== elem.value) elem.value = ''
@@ -132,10 +134,7 @@ const
                 }
 
                 try {
-                    const 
-                        result = await dispatch(
-                            userDetailsApi.endpoints.searchUser.initiate({query:v,exclude:userIDs})
-                        ).unwrap()
+                    const result = await searchUser({query:v,exclude:userIDs}).unwrap()
 
                     setOptions([...result])
                 } catch (error) {

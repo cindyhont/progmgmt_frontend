@@ -8,9 +8,9 @@ import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import { toggleDialogAction } from '../reducers/dialog-ctxmenu-status';
 import { useStore } from 'react-redux';
-import { ReduxState, useAppDispatch } from '@reducers';
+import { ReduxState } from '@reducers';
 import { taskFieldSelector } from '../reducers/slice';
-import taskApi from '../reducers/api';
+import { useTaskEditCustomFieldMutation } from '../reducers/api';
 import { DialogCtxMenuDispatchContext } from '../contexts';
 
 const RenameBoardColumnDialog = memo(({open}:{open:boolean})=>{
@@ -21,7 +21,7 @@ const RenameBoardColumnDialog = memo(({open}:{open:boolean})=>{
         submitRef = useRef<HTMLInputElement>(),
         submitOnClick = () => submitRef.current.click(),
         store = useStore(),
-        dispatch = useAppDispatch(),
+        [taskEditCustomField] = useTaskEditCustomFieldMutation(),
         onSubmit = (e:FormEvent) => {
             e.preventDefault()
             onClose()
@@ -32,7 +32,7 @@ const RenameBoardColumnDialog = memo(({open}:{open:boolean})=>{
                 boardColumnType = 'board_column',
                 boardColumnFieldObj = taskFieldSelector.selectAll(state).find(e=>e.fieldType===boardColumnType)
 
-            dispatch(taskApi.endpoints.taskEditCustomField.initiate({
+            taskEditCustomField({
                 id:boardColumnFieldObj.id,
                 f:{
                     name:boardColumnFieldObj.fieldName,
@@ -40,7 +40,7 @@ const RenameBoardColumnDialog = memo(({open}:{open:boolean})=>{
                     defaultValues:{[boardColumnType]:boardColumnFieldObj.details.default},
                     options:{[boardColumnType]:boardColumnFieldObj.details.options.map(e=>({...e,...(e.id===boardColumnID && {name:textFieldRef.current.value})}))}
                 }
-            }))
+            })
             
         }
 

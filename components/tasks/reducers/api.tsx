@@ -31,7 +31,7 @@ import googleUploadApi from "@reducers/google-upload-api";
 import { googleFilePrelimSelector } from "@reducers/google-upload-api/slice";
 import { isSignedOut, sessionRenewTime } from "@reducers/misc";
 import { IcustomField } from "../dialogs/custom-field/reducer";
-import websocketApi from "websocket/api";
+import websocketApi from "@websocket/api";
 import { gFilesUpsertMany, googleFileSelector } from "@reducers/google-download-api/slice";
 import { addUserDetailsStatusUnknown } from "@reducers/user-details/slice";
 import { Ioption as IboardColumn } from "../board";
@@ -1065,7 +1065,7 @@ export const {
     useAddTaskMutation,
     useTaskUpdateMyTimerMutation,
     useTaskUpdateOneFieldMutation,
-    // useTaskAddApprovalRecordMutation,
+    useTaskDeleteBoardColumnMutation,
     useTaskAddFilesMutation,
     useTaskDeleteCustomFieldMutation,
     useTaskAddCommentMutation,
@@ -1074,5 +1074,8 @@ export const {
     useTaskMovedInBoardMutation,
     useTaskUpdateParentsMutation,
     useTaskEditCustomFieldMutation,
+    useDeleteTaskMutation,
+    useSearchTasksMutation,
+    useTaskAddCustomFieldMutation,
 } = taskApi
 export default taskApi

@@ -20,7 +20,7 @@ import useMediaQuery from '@mui/material/useMediaQuery';
 import { addNewRoom, deleteRoom, Iactions, initialState, reducer, resetForward } from "../reducers/forward";
 import { Ioption } from "../interfaces";
 import { useAppDispatch } from "@reducers";
-import chatApi, { useForwardConvoMutation } from "../reducers/api";
+import { useForwardConvoMutation, useSearchChatroomsMutation } from "../reducers/api";
 import { EntityId } from "@reduxjs/toolkit";
 import { ToggleMenuDialogContext } from "..";
 import { toggleDialogAction } from "../reducers/toggle-context-menu-dialog";
@@ -100,6 +100,7 @@ const
                 e.preventDefault()
                 forwardDispatch(addNewRoom(v))
             },
+            [searchChatRooms] = useSearchChatroomsMutation(),
             onInputChange = async(_:ChangeEvent<HTMLInputElement>,v:string) => {
                 const elem = autoCompleteRef.current.getElementsByTagName('input')[0]
                 if (v !== elem.value) elem.value = ''
@@ -110,7 +111,7 @@ const
                 }
 
                 try {
-                    const result = await dispatch(chatApi.endpoints.searchChatrooms.initiate(v)).unwrap()
+                    const result = await searchChatRooms(v).unwrap()
                     setOptions([...result.filter(({id})=>!ids.includes(id))])
                 } catch (error) {
                     console.log(error)

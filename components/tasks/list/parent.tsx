@@ -6,7 +6,7 @@ import TableCell from '@mui/material/TableCell';
 import Typography from '@mui/material/Typography';
 import Autocomplete from "@mui/material/Autocomplete";
 import TextField from "@mui/material/TextField";
-import taskApi, { useTaskUpdateParentsMutation } from "../reducers/api";
+import { useSearchTasksMutation, useTaskUpdateParentsMutation } from "../reducers/api";
 import { grey } from '@mui/material/colors';
 
 export interface Ioption {
@@ -84,13 +84,14 @@ const
                 dispatch(taskEditSingleField(false))
             },
             loaded = useRef(false),
+            [searchTasks] = useSearchTasksMutation(),
             onInputChange = async(_:ChangeEvent<HTMLInputElement>,v:string) => {
                 if (['',noParent.label].includes(v.trim())) {
                     setOptions([noParent])
                     return
                 }
                 try {
-                    const response = await dispatch(taskApi.endpoints.searchTasks.initiate({query:v,exclude:[id]})).unwrap()
+                    const response = await searchTasks({query:v,exclude:[id]}).unwrap()
                     setOptions([...response,noParent])
                 } catch (error) {
                     setOptions([noParent])

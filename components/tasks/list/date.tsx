@@ -10,7 +10,7 @@ import { MobileDatePicker } from '@mui/x-date-pickers/MobileDatePicker';
 import { DesktopDatePicker } from '@mui/x-date-pickers/DesktopDatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import taskApi from "../reducers/api";
+import { useTaskUpdateOneFieldMutation } from "../reducers/api";
 import { v4 as uuidv4 } from 'uuid'
 
 const 
@@ -18,12 +18,10 @@ const
         {
             id,
             field,
-            hasEditRight,
             editMode,
         }:{
             id:EntityId;
             field:EntityId;
-            hasEditRight:boolean;
             editMode:boolean;
         }
     ) => {
@@ -83,11 +81,12 @@ const
     ) => {
         const 
             ref = useRef<HTMLInputElement>(),
-            dispatch = useAppDispatch(),
+            [taskUpdateOneField] = useTaskUpdateOneFieldMutation(),
             [dateValue,setDateValue] = useState(value),
             onChange = (e:Dayjs) => setDateValue(e),
+
             onSubmit = () => {
-                dispatch(taskApi.endpoints.taskUpdateOneField.initiate({id,field,value:!!dateValue && dateValue.isValid() ? dateValue.valueOf() : 0}))
+                taskUpdateOneField({id,field,value:!!dateValue && dateValue.isValid() ? dateValue.valueOf() : 0})
                 editModeOff()
             }
 
@@ -132,14 +131,14 @@ const
     ) => {
         const 
             textFieldRef = useRef<HTMLInputElement>(),
-            dispatch = useAppDispatch(),
+            [taskUpdateOneField] = useTaskUpdateOneFieldMutation(),
             [dateValue,setDateValue] = useState(value),
             buttonValueText = useRef(uuidv4()).current,
             onChange = (e:Dayjs) => setDateValue(e),
             onBlur = (e:React.FocusEvent<HTMLInputElement>) => {
                 const elem = e.relatedTarget as HTMLInputElement
                 if (!elem || !elem.ariaValueText || elem.ariaValueText!==buttonValueText) {
-                    dispatch(taskApi.endpoints.taskUpdateOneField.initiate({id,field,value:!!dateValue && dateValue.isValid() ? dateValue.valueOf() : 0}))
+                    taskUpdateOneField({id,field,value:!!dateValue && dateValue.isValid() ? dateValue.valueOf() : 0})
                     editModeOff()
                 }
             },

@@ -6,7 +6,7 @@ import Grid from '@mui/material/Grid';
 import TextField from '@mui/material/TextField';
 import TableCell from '@mui/material/TableCell';
 import Typography from "@mui/material/Typography";
-import taskApi from "../reducers/api";
+import { useTaskUpdateOneFieldMutation } from "../reducers/api";
 import Box from "@mui/material/Box";
 
 const 
@@ -67,12 +67,12 @@ const
         const 
             ref = useRef<HTMLInputElement>(),
             submitBtnRef = useRef<HTMLInputElement>(),
-            dispatch = useAppDispatch(),
+            [taskUpdateOneField] = useTaskUpdateOneFieldMutation(),
             onSubmit = (e:FormEvent) => {
                 e.preventDefault()
                 if (ref.current.value !== value.toString()) {
                     const v = +ref.current.value
-                    dispatch(taskApi.endpoints.taskUpdateOneField.initiate({id,field,value:isNaN(v) ? 0 : v}))
+                    taskUpdateOneField({id,field,value:isNaN(v) ? 0 : v})
                 }
                 editModeOff()
             },

@@ -2,9 +2,9 @@ import React, { ChangeEvent, memo, useContext, useEffect, useRef, useState } fro
 import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
 import { editTextFieldAction } from "./reducer";
-import { useAppDispatch, useAppSelector } from "@reducers";
+import { useAppSelector } from "@reducers";
 import { Context } from ".";
-import taskApi from "@components/tasks/reducers/api";
+import { useSearchTasksMutation } from "@components/tasks/reducers/api";
 import Table from '@mui/material/Table'
 import TableBody from '@mui/material/TableBody'
 import TableRow from '@mui/material/TableRow'
@@ -42,7 +42,7 @@ const ParentSelector = memo((
             else addEditTaskDispatch(editTextFieldAction({key:field,value:''}))
             setValue(v)
         },
-        dispatch = useAppDispatch(),
+        [searchTasks] = useSearchTasksMutation(),
         onInputChange = async(_:ChangeEvent<HTMLInputElement>,v:string) => {
             if (['',noParent.label].includes(v.trim())) {
                 setOptions([noParent])
@@ -50,7 +50,7 @@ const ParentSelector = memo((
             }
 
             try {
-                const response = await dispatch(taskApi.endpoints.searchTasks.initiate({query:v,exclude:[]})).unwrap()
+                const response = await searchTasks({query:v,exclude:[]}).unwrap()
                 setOptions([...response,noParent])
             } catch (error) {
                 setOptions([noParent])

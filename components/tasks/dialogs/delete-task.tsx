@@ -7,8 +7,8 @@ import Dialog from "@mui/material/Dialog";
 import Button from "@mui/material/Button";
 import { DialogCtxMenuDispatchContext } from '../contexts';
 import { toggleDialogAction } from "../reducers/dialog-ctxmenu-status";
-import { ReduxState, useAppDispatch } from "@reducers";
-import taskApi from "../reducers/api";
+import { ReduxState } from "@reducers";
+import { useDeleteTaskMutation } from "../reducers/api";
 import { useRouter } from "next/router";
 import { useStore } from "react-redux";
 
@@ -16,16 +16,16 @@ const DeleteTaskDialog = memo(({open}:{open:boolean})=>{
     const
         {dialogCtxMenuStatusDispatch} = useContext(DialogCtxMenuDispatchContext),
         onClose = () => dialogCtxMenuStatusDispatch(toggleDialogAction({dialog:'deleteTask',open:false})),
-        dispatch = useAppDispatch(),
         router = useRouter(),
         taskID = router.query.taskid as string,
         store = useStore(),
+        [deleteTask] = useDeleteTaskMutation(),
         deleteOnClick = () => {
             onClose()
             const 
                 state = store.getState() as ReduxState,
                 taskIDtoDelete = taskID || state.taskMgmt.ctxMenuTaskID
-            if (!!taskIDtoDelete) dispatch(taskApi.endpoints.deleteTask.initiate(taskIDtoDelete))
+            if (!!taskIDtoDelete) deleteTask(taskIDtoDelete)
         }
 
     return (

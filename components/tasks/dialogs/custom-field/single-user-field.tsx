@@ -2,7 +2,7 @@ import React, { ChangeEvent, memo, useContext, useEffect, useRef, useState } fro
 import TextField from '@mui/material/TextField';
 import Autocomplete, { AutocompleteRenderInputParams } from '@mui/material/Autocomplete';
 import { ReduxState, useAppDispatch } from "@reducers";
-import userDetailsApi from "@reducers/user-details/api";
+import { useSearchUserMutation } from "@reducers/user-details/api";
 import { AutocompleteUserOption } from "@components/common-components";
 import { userDetailsSelector } from "@reducers/user-details/slice";
 import { useStore } from "react-redux";
@@ -22,7 +22,6 @@ const
         }
     ) => {
         const
-            dispatch = useAppDispatch(),
             {customFieldDispatch} = useContext(Context),
             [options,setOptions] = useState<string[]>([]),
             onChange = (
@@ -32,6 +31,7 @@ const
                 e.preventDefault()
                 customFieldDispatch(editDefaultValueAction({key:fieldTypeID,value:v}))
             },
+            [searchUser] = useSearchUserMutation(),
             onInputChange = async(_:ChangeEvent<HTMLInputElement>,v:string) => {
                 if (v.trim()==='') {
                     setOptions([])
@@ -39,10 +39,7 @@ const
                 }
 
                 try {
-                    const 
-                        result = await dispatch(
-                            userDetailsApi.endpoints.searchUser.initiate({query:v,exclude:[]})
-                        ).unwrap()
+                    const result = await searchUser({query:v,exclude:[]}).unwrap()
 
                     setOptions([...result])
                 } catch (error) {

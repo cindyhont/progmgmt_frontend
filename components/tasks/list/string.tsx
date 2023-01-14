@@ -1,4 +1,4 @@
-import React, { DragEvent, useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 import Grid from '@mui/material/Grid';
 import TextField from '@mui/material/TextField';
 import TableCell from '@mui/material/TableCell';
@@ -6,7 +6,7 @@ import { useAppDispatch, useAppSelector } from "@reducers";
 import { taskEditSingleField, taskSelector } from "../reducers/slice";
 import { EntityId } from "@reduxjs/toolkit";
 import Typography from "@mui/material/Typography";
-import taskApi from "../reducers/api";
+import { useTaskUpdateOneFieldMutation } from "../reducers/api";
 
 const 
     StringElem = (
@@ -63,9 +63,9 @@ const
     ) => {
         const 
             ref = useRef<HTMLInputElement>(),
-            dispatch = useAppDispatch(),
+            [taskUpdateOneField] = useTaskUpdateOneFieldMutation(),
             onBlur = () => {
-                if (ref.current.value !== value) dispatch(taskApi.endpoints.taskUpdateOneField.initiate({id,field,value:ref.current.value}))
+                if (ref.current.value !== value) taskUpdateOneField({id,field,value:ref.current.value})
                 editModeOff()
             }
 

@@ -1,5 +1,5 @@
 import { taskSelector } from "@components/tasks/reducers/slice";
-import { ReduxState, useAppDispatch, useAppSelector } from "@reducers";
+import { ReduxState, useAppSelector } from "@reducers";
 import { createSelector } from "@reduxjs/toolkit";
 import { useRouter } from "next/router";
 import React, { ChangeEvent, memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -10,7 +10,7 @@ import TableRow from '@mui/material/TableRow';
 import SimpleTextDisplay from "./simple-text-display";
 import EditModeToggle from "./edit-mode-toggle-button";
 import TextFieldSubmitButton from "./text-field-submit-button";
-import taskApi, { useTaskUpdateParentsMutation } from "@components/tasks/reducers/api";
+import { useSearchTasksMutation, useTaskUpdateParentsMutation } from "@components/tasks/reducers/api";
 import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
 
@@ -98,14 +98,14 @@ const
                 e.preventDefault()
                 setValue(v)
             },
-            dispatch = useAppDispatch(),
+            [searchTasks] = useSearchTasksMutation(),
             onInputChange = async(_:ChangeEvent<HTMLInputElement>,v:string) => {
                 if (['',noParent.label].includes(v.trim())) {
                     setOptions([noParent])
                     return
                 }
                 try {
-                    const response = await dispatch(taskApi.endpoints.searchTasks.initiate({query:v,exclude:[taskID]})).unwrap()
+                    const response = await searchTasks({query:v,exclude:[taskID]}).unwrap()
                     setOptions([...response,noParent])
                 } catch (error) {
                     setOptions([noParent])

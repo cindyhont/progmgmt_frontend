@@ -1,4 +1,4 @@
-import { configureStore, combineReducers, ThunkDispatch, AnyAction, ThunkAction, EntityState } from '@reduxjs/toolkit'
+import { configureStore, combineReducers, ThunkDispatch, AnyAction, ThunkAction, EntityState, PreloadedState } from '@reduxjs/toolkit'
 import { useDispatch, useSelector } from 'react-redux'
 import type { TypedUseSelectorHook } from 'react-redux'
 import startPageReducer, {Istart, sliceName as startPageSliceName} from '../components/start-page/reducer' 
@@ -25,39 +25,29 @@ export interface Istore{
     [taskSliceName]:Itask;
 }
 
-export interface IpreloadedState{
-    [startPageSliceName]?:Istart;
-    [hrmDeptSliceName]?:IhrmDept;
-    [hrmStaffSliceName]?:IhrmStaff;
-    [chatSliceName]?:Ichat;
-    [miscSliceName]?:Imisc;
-    [googleFilePrelimSliceName]?:EntityState<GoogleFilePrelim>;
-    [googleFileSliceName]?:EntityState<GoogleFile>;
-    [userDetailsSliceName]?:EntityState<UserDetails>;
-    [taskSliceName]?:Itask;
-}
+export const rootReducer = combineReducers({
+    [startPageSliceName]:startPageReducer,
+    [hrmDeptSliceName]:hrmDeptReducer,
+    [hrmStaffSliceName]:hrmStaffReducer,
+    [chatSliceName]:chatReducer,
+    [miscSliceName]:miscReducer,
+    [googleFilePrelimSliceName]:googleFilePrelimReducer,
+    [googleFileSliceName]:googleFileReducer,
+    [userDetailsSliceName]:userDetailsReducer,
+    [taskSliceName]:taskReducer,
+    [apiSlice.reducerPath]: apiSlice.reducer,
+})
 
-const 
-    rootReducer = combineReducers({
-        [startPageSliceName]:startPageReducer,
-        [hrmDeptSliceName]:hrmDeptReducer,
-        [hrmStaffSliceName]:hrmStaffReducer,
-        [chatSliceName]:chatReducer,
-        [miscSliceName]:miscReducer,
-        [googleFilePrelimSliceName]:googleFilePrelimReducer,
-        [googleFileSliceName]:googleFileReducer,
-        [userDetailsSliceName]:userDetailsReducer,
-        [taskSliceName]:taskReducer,
-        [apiSlice.reducerPath]: apiSlice.reducer,
-    }),
-    configureAppStore = (preloadedState?:IpreloadedState) => configureStore({
-        reducer:rootReducer,
-        middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(apiSlice.middleware),
-        ...(!!preloadedState && {preloadedState})
-    })
+export type ReduxState = ReturnType<typeof rootReducer>;
+
+const configureAppStore = (preloadedState?:PreloadedState<ReduxState>) => configureStore({
+    reducer:rootReducer,
+    middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(apiSlice.middleware),
+    ...(!!preloadedState && {preloadedState})
+})
 
 export default configureAppStore;
-export type ReduxState = ReturnType<typeof rootReducer>;
+
 export type AppDispatch = ThunkDispatch<ReduxState, any, AnyAction>;
 export type TypedThunk<ReturnType = void> = ThunkAction<
   ReturnType,

@@ -9,7 +9,7 @@ import { taskCustomFieldTypesSelector, taskEditMultipleFields, taskEditSingleFie
 import { createSelector, EntityId, Update } from "@reduxjs/toolkit";
 import { TaskEdit } from "./add-edit-task/reducer";
 import dayjs from "dayjs";
-import taskApi from "../reducers/api";
+import { useTaskEditCustomFieldMutation } from "../reducers/api";
 import { useTheme } from '@mui/material/styles';
 import { DialogCtxMenuDispatchContext } from "../contexts";
 import IndexedDB from "@indexeddb";
@@ -265,6 +265,7 @@ const
             store = useStore(),
             dispatch = useAppDispatch(),
             {dialogCtxMenuStatusDispatch} = useContext(DialogCtxMenuDispatchContext),
+            [taskEditCustomField] = useTaskEditCustomFieldMutation(),
             onClick = () => {
                 dialogCtxMenuStatusDispatch(toggleDialogAction({dialog:'contextMenu',open:false}))
                 const
@@ -273,7 +274,7 @@ const
                     boardColumnType = 'board_column',
                     boardColumnFieldObj = taskFieldSelector.selectAll(state).find(e=>e.fieldType==='board_column')
 
-                dispatch(taskApi.endpoints.taskEditCustomField.initiate({
+                    taskEditCustomField({
                     id:boardColumnFieldObj.id,
                     f:{
                         name:boardColumnFieldObj.fieldName,
@@ -281,7 +282,7 @@ const
                         defaultValues:{[boardColumnType]:defaultBoardColumnID},
                         options:{[boardColumnType]:boardColumnFieldObj.details.options}
                     }
-                }))
+                })
             }
 
         return (

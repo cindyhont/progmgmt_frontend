@@ -16,7 +16,7 @@ import { addTaskAction } from "../reducers/dialog-ctxmenu-status";
 import { columnStartMoving, Iaction, initialState, moving, reducer, taskStartMoving } from "./reducer";
 import { DialogCtxMenuDispatchContext } from "../contexts";
 import TaskItem from "./task-item";
-import useNarrowBody from "hooks/theme/narrow-body";
+import useNarrowBody from "@hooks/theme/narrow-body";
 import useStateManager from "./hooks/state-manager";
 import useTwoDimensionalDrag from "./hooks/two-d-drag";
 import useCloneSingleTableColumn from "./hooks/clone-single-table-column";
@@ -308,6 +308,7 @@ const
                     verticalAlign:'top',
                 }}
                 id={`task-board-table-body-column-${columnID}`}
+                aria-label={`${columnID}`}
             >
                     <Stack direction='column' spacing={1}>
                         {taskIDs.map((taskID,i)=>(

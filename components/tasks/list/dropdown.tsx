@@ -1,4 +1,4 @@
-import { ReduxState, useAppDispatch, useAppSelector } from "@reducers";
+import { ReduxState, useAppSelector } from "@reducers";
 import { createSelector, EntityId } from "@reduxjs/toolkit";
 import React, { useMemo } from "react";
 import { taskFieldSelector, taskSelector } from "../reducers/slice";
@@ -6,7 +6,7 @@ import TableCell from '@mui/material/TableCell';
 import Typography from '@mui/material/Typography';
 import MenuItem from '@mui/material/MenuItem';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
-import taskApi from "../reducers/api";
+import { useTaskUpdateOneFieldMutation } from "../reducers/api";
 
 export interface Ioption {
     id:EntityId;
@@ -68,10 +68,10 @@ const
         const
             options = useAppSelector(state => taskFieldSelector.selectById(state,field).details.options as Ioption[]),
             value = useAppSelector(state => taskSelector.selectById(state,id)[field] ?? null),
-            dispatch = useAppDispatch(),
+            [taskUpdateOneField] = useTaskUpdateOneFieldMutation(),
             handleChange = (e: SelectChangeEvent) => {
                 const newVal = e.target.value
-                if (newVal !== value) dispatch(taskApi.endpoints.taskUpdateOneField.initiate({id,field,value:newVal}))
+                if (newVal !== value) taskUpdateOneField({id,field,value:newVal})
             }
 
         return (

@@ -1,4 +1,4 @@
-import { ReduxState, useAppDispatch, useAppSelector } from "@reducers";
+import { ReduxState, useAppSelector } from "@reducers";
 import { userDetailsSelector } from "@reducers/user-details/slice";
 import { createSelector, EntityId } from "@reduxjs/toolkit";
 import React, { ChangeEvent, HTMLAttributes, memo, useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react";
@@ -22,7 +22,7 @@ import { taskFieldSelector, taskSelector } from "@components/tasks/reducers/slic
 import SimpleTextDisplay from "../simple-text-display";
 import { addAction, deleteAction, reducer, setAllAction } from "./reducer";
 import { AutocompleteUserOption } from "@components/common-components";
-import userDetailsApi from "@reducers/user-details/api";
+import { useSearchUserMutation } from "@reducers/user-details/api";
 import { useTaskUpdateOneFieldMutation } from "@components/tasks/reducers/api";
 import { useRouter } from "next/router";
 import { useStore } from "react-redux";
@@ -266,7 +266,7 @@ const
                 updateUser(v)
                 setInputValue('')
             },
-            dispatch = useAppDispatch(),
+            [searchUser] = useSearchUserMutation(),
             onInputChange = async(_:ChangeEvent<HTMLInputElement>,v:string) => {
                 setInputValue(v)
                 if (v.trim()==='') {
@@ -275,10 +275,7 @@ const
                 }
 
                 try {
-                    const 
-                        result = await dispatch(
-                            userDetailsApi.endpoints.searchUser.initiate({query:v,exclude:userIDs})
-                        ).unwrap()
+                    const result = await searchUser({query:v,exclude:userIDs}).unwrap()
                     setOptions([...result])
                 } catch (error) {
                     console.log(error)

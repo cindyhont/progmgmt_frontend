@@ -2,18 +2,19 @@ import type { AppProps } from 'next/app'
 import '../styles.css'
 import { useEffect, useMemo, useRef } from 'react';
 import { Provider, shallowEqual } from "react-redux";
-import configureAppStore, { IpreloadedState, useAppDispatch, useAppSelector } from '@reducers'
+import configureAppStore, { ReduxState, useAppDispatch, useAppSelector } from '@reducers'
 import { systemIsDark, updateUserMode, updateTouchScreen, updatePageVisibility } from '@reducers/misc'
 import { useRouter } from 'next/router';
 import { pushToLogin } from '@components/functions';
 import Head from 'next/head'
 import useFuncWithTimeout from '@hooks/counter/function-with-timeout';
+import { PreloadedState } from '@reduxjs/toolkit';
 
 const 
     MyApp = ({ Component, pageProps }: AppProps) => {
         const 
             router = useRouter(),
-            store = useMemo(()=>configureAppStore(pageProps?.preloadedState as IpreloadedState),[router.pathname])
+            store = useMemo(()=>configureAppStore(pageProps?.preloadedState as PreloadedState<ReduxState>),[router.pathname])
 
         return (
             <Provider store={store}>

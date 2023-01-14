@@ -3,7 +3,7 @@ import googleUploadApi, { useResumeAllUploadsMutation } from "@reducers/google-u
 import { sessionRenewTime } from "@reducers/misc"
 import { useEffect, useRef, useState } from "react"
 import { useStore } from "react-redux"
-import websocketApi, { IwsAction, processWsMessage, useSendWsMessageMutation } from "websocket/api"
+import websocketApi, { IwsAction, processWsMessage, useSendWsMessageMutation } from "@websocket/api"
 import { ActionTypes as UserDetailsActionTypes } from '@reducers/user-details/ws-message-types';
 import googleDownloadApi from "@reducers/google-download-api"
 import { QueryActionCreatorResult } from "@reduxjs/toolkit/dist/query/core/buildInitiate"

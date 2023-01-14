@@ -1,7 +1,7 @@
 import { Dispatch, useEffect } from "react";
 import { EntityId } from "@reduxjs/toolkit";
 import { useAppSelector } from "@reducers";
-import useFuncWithTimeout from "hooks/counter/function-with-timeout";
+import useFuncWithTimeout from "@hooks/counter/function-with-timeout";
 import { Iaction, IboardView, init } from "../reducer";
 import { taskFieldSelector } from "@components/tasks/reducers/slice";
 import { useTaskMovedInBoardMutation } from "@components/tasks/reducers/api";
@@ -27,7 +27,7 @@ const useStateManager = (
         dispatchTaskMovedInBoard = (taskID:EntityId,newColumnID:EntityId,newIdxInColumn:number) => {
             taskMovedInBoard({taskID,newColumnID,newIdxInColumn,active:true})
         },
-        [updateTaskInBoard] = useFuncWithTimeout(dispatchTaskMovedInBoard,1000),
+        [updateTaskInBoard] = useFuncWithTimeout(dispatchTaskMovedInBoard,500),
         taskJustMoved = () => updateTaskInBoard(
             boardViewState.taskMoving,
             boardViewState.columnIDs[boardViewState.columnIdx],

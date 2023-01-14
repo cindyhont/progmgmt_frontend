@@ -2,8 +2,8 @@ import React, { ChangeEvent, HTMLAttributes, memo, useContext, useState } from "
 import TextField from '@mui/material/TextField';
 import Autocomplete, { AutocompleteRenderGetTagProps } from '@mui/material/Autocomplete';
 import { editStringArrayAction } from "./reducer";
-import { useAppDispatch, useAppSelector } from "@reducers";
-import userDetailsApi from "@reducers/user-details/api";
+import { useAppSelector } from "@reducers";
+import { useSearchUserMutation } from "@reducers/user-details/api";
 import { AutocompleteUserOption } from "@components/common-components";
 import { userDetailsSelector } from "@reducers/user-details/slice";
 import Avatar from "@mui/material/Avatar";
@@ -33,7 +33,6 @@ const
     )=>{
         const 
             [options,setOptions] = useState<string[]>([]),
-            dispatch = useAppDispatch(),
             {addEditTaskDispatch} = useContext(Context),
             onChange = (
                 e:ChangeEvent<HTMLInputElement>,
@@ -42,6 +41,7 @@ const
                 e.preventDefault()
                 addEditTaskDispatch(editStringArrayAction({key:field,value:v}))
             },
+            [searchUser] = useSearchUserMutation(),
             onInputChange = async(_:ChangeEvent<HTMLInputElement>,v:string) => {
                 if (v.trim()==='') {
                     setOptions([])
@@ -49,10 +49,7 @@ const
                 }
 
                 try {
-                    const 
-                        result = await dispatch(
-                            userDetailsApi.endpoints.searchUser.initiate({query:v,exclude:value})
-                        ).unwrap()
+                    const result = await searchUser({query:v,exclude:value}).unwrap()
 
                     setOptions([...result])
                 } catch (error) {

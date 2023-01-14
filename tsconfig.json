@@ -27,7 +27,8 @@
       "@components/*": ["components/*"],
       "@hooks/*": ["hooks/*"],
       "@pages": ["pages/index"],
-      "@pages/*": ["pages/*"]
+      "@pages/*": ["pages/*"],
+      "@websocket/*": ["websocket/*"]
     }
   },
   "include": [

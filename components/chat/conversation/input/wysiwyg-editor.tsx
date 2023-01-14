@@ -10,7 +10,7 @@ import { useStore } from 'react-redux';
 import { useTheme } from '@mui/material/styles';
 import { useRouter } from 'next/router';
 import { fileInputSelector } from '@components/functions';
-import { useSendWsMessageMutation } from 'websocket/api';
+import { useSendWsMessageMutation } from '@websocket/api';
 import { ActionTypes } from '../../reducers/ws-message-types';
 import { useCreateConvoInExistingRoomMutation, useCreateRoomNoConvoMutation, useCreateRoomWithFirstConvoMutation } from '@components/chat/reducers/api';
 import scrollToBottom from '../functions/to-bottom';

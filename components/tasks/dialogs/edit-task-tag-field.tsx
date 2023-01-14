@@ -8,7 +8,7 @@ import { ReduxState, useAppDispatch, useAppSelector } from '@reducers';
 import { createSelector, EntityId } from '@reduxjs/toolkit';
 import { taskEditSingleField, taskFieldSelector, taskSelector } from '../reducers/slice';
 import { useStore } from 'react-redux';
-import taskApi from '../reducers/api';
+import { useTaskUpdateOneFieldMutation } from '../reducers/api';
 import Button from '@mui/material/Button';
 import { useTheme } from '@mui/material';
 import Autocomplete from '@mui/material/Autocomplete';
@@ -61,15 +61,14 @@ const
             onChange = (_:SyntheticEvent,v:Ioption[]) => setValue([...v]),
             dispatch = useAppDispatch(),
             onClose = () => dispatch(taskEditSingleField(false)),
+            [taskUpdateOneField] = useTaskUpdateOneFieldMutation(),
             submitOnClick = () => {
                 const state = store.getState() as ReduxState
-                dispatch(
-                    taskApi.endpoints.taskUpdateOneField.initiate({
-                        id:state.taskMgmt.ctxMenuTaskID,
-                        field:state.taskMgmt.ctxMenuFieldID,
-                        value:value.map(v=>v.id)
-                    })
-                )
+                taskUpdateOneField({
+                    id:state.taskMgmt.ctxMenuTaskID,
+                    field:state.taskMgmt.ctxMenuFieldID,
+                    value:value.map(v=>v.id)
+                })
                 onClose()
             }
 

@@ -17,7 +17,7 @@ import { ReduxState, useAppDispatch, useAppSelector } from '@reducers';
 import { taskFieldSelector } from '../reducers/slice';
 import { Ioption } from '../board';
 import { v4 as uuidv4 } from 'uuid'
-import taskApi from '../reducers/api';
+import { useTaskDeleteBoardColumnMutation } from '../reducers/api';
 import { DialogCtxMenuDispatchContext } from '../contexts';
 
 const 
@@ -57,13 +57,14 @@ const
             submitRef = useRef<HTMLInputElement>(),
             submitOnClick = () => submitRef.current.click(),
             dispatch = useAppDispatch(),
+            [taskDeleteBoardColumn] = useTaskDeleteBoardColumnMutation(),
             onSubmit = (e:FormEvent) => {
                 e.preventDefault()
                 onClose()
-                dispatch(taskApi.endpoints.taskDeleteBoardColumn.initiate({
+                taskDeleteBoardColumn({
                     action,
                     newDefault:nextDefault
-                }))
+                })
             }
 
         useEffect(()=>{

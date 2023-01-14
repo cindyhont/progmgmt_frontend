@@ -10,7 +10,7 @@ import Button from '@mui/material/Button';
 import { ReduxState, useAppDispatch } from '@reducers';
 import { useStore } from 'react-redux';
 import { taskFieldSelector } from '../reducers/slice';
-import taskApi from '../reducers/api';
+import { useTaskEditCustomFieldMutation } from '../reducers/api';
 import { v4 as uuidv4 } from 'uuid'
 import { DialogCtxMenuDispatchContext } from '../contexts';
 
@@ -23,6 +23,7 @@ const AddBoardColumnDialog = memo(({open}:{open:boolean;}) => {
         submitOnClick = () => submitRef.current.click(),
         dispatch = useAppDispatch(),
         store = useStore(),
+        [taskEditCustomField] = useTaskEditCustomFieldMutation(),
         onSubmit = (e:FormEvent) => {
             e.preventDefault()
             onClose()
@@ -31,7 +32,7 @@ const AddBoardColumnDialog = memo(({open}:{open:boolean;}) => {
                 state = store.getState() as ReduxState,
                 boardColumnFieldObj = taskFieldSelector.selectAll(state).find(e=>e.fieldType==='board_column')
 
-            dispatch(taskApi.endpoints.taskEditCustomField.initiate({
+            taskEditCustomField({
                 id:boardColumnFieldObj.id,
                 f:{
                     name:boardColumnFieldObj.fieldName,
@@ -43,7 +44,7 @@ const AddBoardColumnDialog = memo(({open}:{open:boolean;}) => {
                         order:boardColumnFieldObj.details.options.length
                     }]}
                 }
-            }))
+            })
         }
 
     useEffect(()=>{

@@ -6,7 +6,7 @@ import Autocomplete from '@mui/material/Autocomplete';
 import SearchIcon from '@mui/icons-material/Search';
 import Avatar from '@mui/material/Avatar';
 import { Ioption } from '../interfaces';
-import chatApi, { useFetchSpecificRoomsMutation } from '../reducers/api';
+import { useFetchSpecificRoomsMutation, useSearchChatroomsMutation } from '../reducers/api';
 import { ReduxState, useAppDispatch } from '@reducers';
 import { chatRoomAddOne, chatRoomSelector} from '../reducers/slice';
 import { useRouter } from 'next/router';
@@ -18,6 +18,7 @@ const
             dispatch = useAppDispatch(),
             autoCompleteRef = useRef<HTMLDivElement>(),
             [options,setOptions] = useState<Ioption[]>([]),
+            [searchChatRooms] = useSearchChatroomsMutation(),
             onInputChange = async(_:SyntheticEvent,v:string) => {
                 const elem = autoCompleteRef.current.getElementsByTagName('input')[0]
                 if (v !== elem.value) elem.value = ''
@@ -27,7 +28,7 @@ const
                     return
                 }
 
-                const data = await dispatch(chatApi.endpoints.searchChatrooms.initiate(v)).unwrap()
+                const data = await searchChatRooms(v).unwrap()
                 
                 setOptions([...data])
             },
